@@ -1,14 +1,15 @@
-import {Pile, TPileState} from './pile'
+import {Pile} from './pile'
 import {Player, TPlayerId, TPlayerState} from './player'
-import {AllColors, Card, TNum, NumDistribution, HandCard} from './card'
+import {Card, HandCard, TCardState} from './card'
 import {Hand} from './hand'
-// import {Pile} from './pile'
+import {Table, TTableState} from './table'
 
 interface TGameState {
   stockSize: number
-  discardPile: TPileState
+  discardPile: TCardState[]
   hintCount: number
   woundCount: number
+  table: TTableState
   inTurn: number
   players: TPlayerState[]
 }
@@ -19,21 +20,25 @@ export class Game {
   hintCount: number
   woundCount: number
   inTurn: number
+  table: Table
 
-  // numberOfPlayers: number
   players: Player[]
   playersById: {[id: string]: Player}
-  constructor(playerNames: string[], deck?: Card[]) {
+  constructor(
+    playerNames: string[],
+    {deck, discardPile, table}: {deck?: Pile; discardPile?: Pile; table?: Table} = {},
+  ) {
     this.hintCount = 9
     this.woundCount = 0
     this.inTurn = 0
+    this.table = table || new Table()
     if (deck) {
-      this.stock = new Pile(deck)
+      this.stock = deck
     } else {
-      this.stock = new Pile(deck || AllColors.flatMap(c => NumDistribution.map((n: TNum) => new Card(c, n))))
+      this.stock = new Pile(deck || Card.getFullDeck())
       this.stock.shuffle()
     }
-    this.discardPile = new Pile([])
+    this.discardPile = discardPile || new Pile([])
 
     const handSize = {
       2: 5,
@@ -50,6 +55,8 @@ export class Game {
       (name, idx) => new Player(name, idx, new Hand(this.stock.draw(handSize).map(c => HandCard.fromCard(c)))),
     )
     this.playersById = Object.fromEntries(this.players.map(p => [p.id, p]))
+
+    this.checkIntegrity()
   }
 
   // this returns information that is public for a player
@@ -63,7 +70,26 @@ export class Game {
       hintCount: this.hintCount,
       woundCount: this.woundCount,
       inTurn: this.inTurn,
+      table: this.table.getState(),
       players: this.players.map(p => p.getState(playerId === p.id)),
+    }
+  }
+
+  checkIntegrity() {
+    // check that we have the correct set of cards
+    if (
+      [...this.stock.cards, ...this.discardPile.cards, ...this.players.flatMap(p => p.hand.cards)]
+        .map(c => c.toString())
+        .sort()
+        .join(' ') !==
+      Card.getFullDeck()
+        .map(c => c.toString())
+        .sort()
+        .join(' ')
+    ) {
+      console.warn(this)
+
+      throw new Error('INTEGRITY_ERROR')
     }
   }
 }

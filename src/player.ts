@@ -34,4 +34,7 @@ export class Player {
       hand: this.hand.getState(isMe),
     }
   }
+  setHand(hand:Hand) {
+    this.hand = hand
+  }
 }

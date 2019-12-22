@@ -1,6 +1,9 @@
-type TColor = 'A' | 'B' | 'C' | 'D' | 'E' | 'X'
+export type TColor = 'A' | 'B' | 'C' | 'D' | 'E' | 'X'
 export type TNum = 1 | 2 | 3 | 4 | 5
-export type TCardState = string // e.g. 'B3'
+export interface TCardState {
+  color: TColor
+  num: TNum
+}
 export interface THandCardState {
   color?: TColor
   num?: TNum
@@ -21,8 +24,21 @@ export class Card {
     this.color = color
     this.num = num
   }
-  getState(): TCardState {
+  static fromValueString(string) {
+    if (/^([ABCDEX])([1-5])$/.test(string)) {
+      return new Card(RegExp.$1 as TColor, +RegExp.$2 as TNum)
+    } else {
+      throw new Error('INVALID_VALUE_STRING')
+    }
+  }
+  toString() {
     return this.color + this.num
+  }
+  getState(): TCardState {
+    return {color: this.color, num: this.num}
+  }
+  static getFullDeck(): Card[] {
+    return AllColors.flatMap(c => NumDistribution.map((n: TNum) => new Card(c, n)))
   }
 }
 
@@ -35,6 +51,6 @@ export class HandCard extends Card {
     return {}
   }
   getOtherPlayerState(): THandCardState {
-    return {color: this.color, num: this.num}
+    return this.getState()
   }
 }

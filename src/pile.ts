@@ -1,6 +1,6 @@
-import {Card} from './card'
+import {Card, TCardState} from './card'
 
-export type TPileState = string[] // ['A3', 'B1', 'B3', ...]
+// export type TPileState = string[] // ['A3', 'B1', 'B3', ...]
 
 export class Pile {
   cards: Card[]
@@ -20,7 +20,7 @@ export class Pile {
   draw(drawCount: number): Card[] {
     return this.cards.splice(0, drawCount)
   }
-  getState(): TPileState {
+  getState(): TCardState[] {
     return this.cards.map(c => c.getState())
   }
   // - count(Value)
