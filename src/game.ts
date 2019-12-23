@@ -5,7 +5,11 @@ import {Hand} from './hand'
 import {Table, TTableState} from './table'
 import {ParamError} from './errors'
 
+type TGameStatus = 'RUNNING' | 'FAILED' | 'FINISHED'
+
 interface TGameState {
+  status: TGameStatus
+  score: number
   stockSize: number
   discardPile: TCardState[]
   hintCount: number
@@ -22,6 +26,7 @@ export class Game {
   woundCount: number
   inTurn: number
   table: Table
+  status: TGameStatus
 
   players: Player[]
   playersById: {[id: string]: Player}
@@ -32,6 +37,7 @@ export class Game {
     this.hintCount = 9
     this.woundCount = 0
     this.inTurn = 0
+    this.status = 'RUNNING'
     this.table = table || new Table()
     if (deck) {
       this.stock = deck
@@ -60,6 +66,10 @@ export class Game {
     this.checkIntegrity()
   }
 
+  get score() {
+    return this.table.getScore()
+  }
+
   // this returns information that is public for a player
   getState(playerId: TPlayerId): TGameState {
     if (!this.playersById[playerId]) {
@@ -72,6 +82,8 @@ export class Game {
       woundCount: this.woundCount,
       inTurn: this.inTurn,
       table: this.table.getState(),
+      score: this.score,
+      status: this.status,
       players: this.players.map(p => p.getState(playerId === p.id)),
     }
   }

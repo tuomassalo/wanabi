@@ -15,6 +15,8 @@ describe('A three-player game without any moves', () => {
       woundCount: 0,
       table: {A: [], B: [], C: [], D: [], E: [], X: []},
       inTurn: 0,
+      score: 0,
+      status: 'RUNNING',
       players: [
         {
           name: 'Huey',
@@ -51,6 +53,8 @@ describe('A three-player game with a custom deck', () => {
       hintCount: 9,
       woundCount: 0,
       inTurn: 0,
+      score: 0,
+      status: 'RUNNING',
       table: {A: [], B: [], C: [], D: [], E: [], X: []},
       players: [
         {

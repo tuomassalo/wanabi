@@ -14,6 +14,11 @@ export class Table {
     // NB: why does fromEntries need `as`
     this.table = table || (Object.fromEntries(AllColors.map(c => [c, new Pile([])])) as TTable)
   }
+  getScore(): number {
+    return Object.values(this.table)
+      .map(p => p.cards)
+      .flat().length
+  }
   getState(): TTableState {
     // NB: why does fromEntries need `as`
     return Object.fromEntries(Object.entries(this.table).map(([c, pile]) => [c, pile.getState()])) as TTableState
