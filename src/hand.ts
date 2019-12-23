@@ -1,4 +1,6 @@
-import {HandCard, THandCardState} from './card'
+import {Card, HandCard, THandCardState} from './card'
+import {ParamError} from './errors'
+import {Pile} from './pile'
 
 // export type THandState = THandCardState[]
 
@@ -13,6 +15,17 @@ export class Hand {
       const j = Math.floor(Math.random() * (i + 1))
       ;[this.cards[i], this.cards[j]] = [this.cards[j], this.cards[i]]
     }
+  }
+  take(idx: number, stock: Pile): Card {
+    if (!this.cards[idx]) {
+      throw new ParamError('NO_SUCH_CARD', {idx})
+    }
+    const drawnCard = this.cards.splice(idx, 1)[0].toCard()
+    if (stock.size) {
+      const newCard: Card = stock.draw(1)[0]
+      this.cards.push(new HandCard(newCard.color, newCard.num))
+    }
+    return drawnCard
   }
   get size() {
     return this.cards.length

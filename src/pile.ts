@@ -20,6 +20,9 @@ export class Pile {
   draw(drawCount: number): Card[] {
     return this.cards.splice(0, drawCount)
   }
+  add(card: Card) {
+    this.cards.push(card)
+  }
   getState(): TCardState[] {
     return this.cards.map(c => c.getState())
   }

@@ -1,4 +1,4 @@
-import {TCardState, TColor, AllColors} from './card'
+import {TCardState, TColor, AllColors, Card} from './card'
 import {Pile} from './pile'
 
 export type TTable = {[key in TColor]: Pile}
@@ -23,5 +23,14 @@ export class Table {
     // NB: why does fromEntries need `as`
     return Object.fromEntries(Object.entries(this.table).map(([c, pile]) => [c, pile.getState()])) as TTableState
   }
-  // - count(Value)
+  // returns success
+  play(card: Card): boolean {
+    const colorPile = this.table[card.color]
+    if (colorPile.size === card.num - 1) {
+      colorPile.add(card)
+      return true
+    } else {
+      return false
+    }
+  }
 }

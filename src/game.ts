@@ -1,11 +1,26 @@
 import {Pile} from './pile'
 import {Player, TPlayerId, TPlayerState} from './player'
-import {Card, HandCard, TCardState} from './card'
+import {Card, HandCard, TCardState, TColor, TNum} from './card'
 import {Hand} from './hand'
 import {Table, TTableState} from './table'
-import {ParamError} from './errors'
+import {SyntaxError, ParamError} from './errors'
 
-type TGameStatus = 'RUNNING' | 'FAILED' | 'FINISHED'
+type TGameStatus = 'RUNNING' | 'GAMEOVER' | 'FINISHED'
+
+interface TPlayActionParams {
+  type: 'PLAY'
+  cardIdx: number
+}
+interface TDiscardActionParams {
+  type: 'DISCARD'
+  cardIdx: number
+}
+interface THintActionParams {
+  type: 'HINT'
+  toPlayerIdx: number
+  is: TColor | TNum
+}
+type TActionParams = TPlayActionParams | TDiscardActionParams | THintActionParams
 
 interface TGameState {
   status: TGameStatus
@@ -22,11 +37,12 @@ interface TGameState {
 export class Game {
   stock: Pile
   discardPile: Pile
-  hintCount: number
-  woundCount: number
-  inTurn: number
+  hintCount: number = 9
+  woundCount: number = 0
+  inTurn: number = 0
+  turnsLeft: number = Infinity
   table: Table
-  status: TGameStatus
+  status: TGameStatus = 'RUNNING'
 
   players: Player[]
   playersById: {[id: string]: Player}
@@ -34,9 +50,7 @@ export class Game {
     playerNames: string[],
     {deck, discardPile, table}: {deck?: Pile; discardPile?: Pile; table?: Table} = {},
   ) {
-    this.hintCount = 9
-    this.woundCount = 0
-    this.inTurn = 0
+    this.turnsLeft = Infinity
     this.status = 'RUNNING'
     this.table = table || new Table()
     if (deck) {
@@ -73,7 +87,7 @@ export class Game {
   // this returns information that is public for a player
   getState(playerId: TPlayerId): TGameState {
     if (!this.playersById[playerId]) {
-      throw new ParamError('INVALID_PLAYER_ID', playerId)
+      throw new SyntaxError('INVALID_PLAYER_ID', playerId)
     }
     return {
       stockSize: this.stock.size,
@@ -104,5 +118,61 @@ export class Game {
 
       throw new Error('INTEGRITY_ERROR')
     }
+  }
+
+  _getCurrentPlayer(playerId: string): Player {
+    const me = this.players[this.inTurn]
+    if (!me) {
+      throw new ParamError('NO_SUCH_PLAYER', {playerId})
+    }
+    if (playerId !== me.id) {
+      throw new ParamError('NOT_MY_TURN', {playerId})
+    }
+    return me
+  }
+
+  _play(player: Player, card: Card) {}
+
+  // ACTIONS
+  act(playerId, actionParams: TActionParams) {
+    const me = this._getCurrentPlayer(playerId)
+    if (actionParams.type === 'HINT') {
+      // TODO
+    } else {
+      const card = me.hand.take(actionParams.cardIdx, this.stock)
+
+      if (actionParams.type === 'PLAY') {
+        const success: boolean = this.table.play(card)
+        if (success) {
+          // Successful play:
+          if (card.num === 5 && this.hintCount < 9) {
+            this.hintCount++
+          }
+        } else {
+          // fail: add wound
+          this.discardPile.add(card) // TODO: add metadata?
+          this.woundCount++
+          // TODO: log
+          if (this.woundCount === 3) {
+            this.status = 'GAMEOVER'
+          }
+        }
+      } else if (actionParams.type === 'DISCARD') {
+        this.discardPile.add(card)
+      }
+    }
+
+    // change turn
+
+    this.inTurn = (this.inTurn + 1) % this.players.length
+    this.turnsLeft--
+    if (this.turnsLeft === 0) {
+      // TODO: check if off-by-one
+      this.status = 'FINISHED'
+    } else if (!this.stock.size && this.turnsLeft === Infinity) {
+      // countdown should start now
+      this.turnsLeft = this.players.length
+    }
+    // TODO: log
   }
 }
