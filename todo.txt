@@ -1,22 +1,30 @@
-Action
-- by: Player
+TActionState
+- byPlayerIdx
 - turn: number
--
+- timestamp: Date
+- players: TPlayerState[] ??????
 
-> HintAction
+THintActionState extends TActionState
 - is: Color|Num
+- toPlayerIdx: number
 
-> PlayAction
+TPlayActionState extends TActionState
 - cardIdx: number
+- success: boolean
 
 > DiscardAction
 - cardIdx: number
 
+LogEntry
+- actionType: 'hint'|'play'|'discard'
+
+
+game.play(playerId, cardIdx) => {logEntry, state}
 
 Demystifier
 ===========
 
-- new (table, discardPile, stockLength, myHand: Pile, otherHands: Pile[])
+- new (table, discardPile, stockLength, myHand: Hand, otherHands: Hand[])
 
 HandCard extends Card
 

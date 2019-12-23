@@ -3,6 +3,7 @@ import {Player, TPlayerId, TPlayerState} from './player'
 import {Card, HandCard, TCardState} from './card'
 import {Hand} from './hand'
 import {Table, TTableState} from './table'
+import {ParamError} from './errors'
 
 interface TGameState {
   stockSize: number
@@ -62,7 +63,7 @@ export class Game {
   // this returns information that is public for a player
   getState(playerId: TPlayerId): TGameState {
     if (!this.playersById[playerId]) {
-      throw new Error('INVALID_PLAYER_ID')
+      throw new ParamError('INVALID_PLAYER_ID', playerId)
     }
     return {
       stockSize: this.stock.size,

@@ -1,3 +1,5 @@
+import {ParamError} from './errors'
+
 export type TColor = 'A' | 'B' | 'C' | 'D' | 'E' | 'X'
 export type TNum = 1 | 2 | 3 | 4 | 5
 export interface TCardState {
@@ -28,7 +30,7 @@ export class Card {
     if (/^([ABCDEX])([1-5])$/.test(string)) {
       return new Card(RegExp.$1 as TColor, +RegExp.$2 as TNum)
     } else {
-      throw new Error('INVALID_VALUE_STRING')
+      throw new ParamError('INVALID_VALUE_STRING', string)
     }
   }
   toString() {
