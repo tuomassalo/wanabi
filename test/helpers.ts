@@ -1,6 +1,7 @@
 import {Card, TColor, TNum} from '../src/card'
 import {Pile} from '../src/pile'
 import * as stringify from 'json-stable-stringify'
+import {Game} from '../src/game'
 
 export const c = {
   A1: {color: 'A' as TColor, num: 1 as TNum},
@@ -83,5 +84,19 @@ export function knownCard(): any {
     jasmineToString: function() {
       return '<knownCard>'
     },
+  }
+}
+
+export function dbg(g: Game) {
+  for (const [key, cards] of Object.entries({
+    // stock: g.stock.cards,
+    hand0: g.players[0].hand.cards,
+    hand1: g.players[1].hand.cards,
+  })) {
+    console.warn(
+      'DBG',
+      key,
+      cards.map(c => c.toString()),
+    )
   }
 }

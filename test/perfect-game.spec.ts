@@ -1,22 +1,6 @@
 import {Game} from '../src/game'
-import {GameError} from '../src/errors'
 
-import {c, createDeck, knownCard} from './helpers'
-import {Card} from '../src/card'
-
-function dbg(g: Game) {
-  for (const [key, cards] of Object.entries({
-    // stock: g.stock.cards,
-    hand0: g.players[0].hand.cards,
-    hand1: g.players[1].hand.cards,
-  })) {
-    console.warn(
-      'DBG',
-      key,
-      cards.map(c => c.toString()),
-    )
-  }
-}
+import {c, createDeck} from './helpers'
 
 describe('A perfect two-player game without any hints or discards', () => {
   const g = new Game(['Bonnie', 'Clyde'], {
