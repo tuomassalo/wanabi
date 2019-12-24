@@ -1,4 +1,5 @@
 import {Game} from '../src/game'
+import {GameError} from '../src/errors'
 
 import {c, createDeck, knownCard} from './helpers'
 import {Card} from '../src/card'
@@ -153,5 +154,9 @@ describe('A perfect two-player game without any hints or discards', () => {
         },
       ],
     })
+  })
+  it('should throw if trying to play a finished game', () => {
+    expect(() => g.act(g.players[0].id, {type: 'PLAY', cardIdx: 0})).toThrowError('GAME_ENDED')
+    // expect(() => g.act(g.players[0].id, {type: 'PLAY', cardIdx: 0})).toThrowError(GameError)
   })
 })
