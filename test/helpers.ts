@@ -67,7 +67,8 @@ export function createDeck(topValues: string): Pile {
   }
 
   shuffle(deckCards)
-  const deck = new Pile([...topCards, ...deckCards])
+  // NB! We give `createDeck()` a list of cards with the top card first, but pile has top card last!
+  const deck = new Pile([...topCards, ...deckCards].reverse())
   return deck
 }
 

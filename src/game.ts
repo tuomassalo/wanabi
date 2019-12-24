@@ -72,9 +72,13 @@ export class Game {
       throw new Error('INVALID_NUMBER_OF_PLAYERS')
     }
 
-    this.players = playerNames.map(
-      (name, idx) => new Player(name, idx, new Hand(this.stock.draw(handSize).map(c => HandCard.fromCard(c)))),
-    )
+    this.players = playerNames.map((name, idx) => new Player(name, idx, new Hand([])))
+    for (let i = 0; i < handSize; i++) {
+      for (let p = 0; p < playerNames.length; p++) {
+        this.players[p].hand.dealOne(this.stock.drawOne())
+      }
+    }
+
     this.playersById = Object.fromEntries(this.players.map(p => [p.id, p]))
 
     this.checkIntegrity()

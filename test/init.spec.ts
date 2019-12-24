@@ -67,13 +67,13 @@ describe('A three-player game with a custom deck', () => {
           name: 'Dewey',
           idx: 1,
           isMe: false,
-          hand: [c.B5, c.B4, c.B3, c.B2, c.B1],
+          hand: [c.A2, c.A5, c.B3, c.C1, c.D5],
         },
         {
           name: 'Louie',
           idx: 2,
           isMe: false,
-          hand: [c.C1, c.C1, c.C5, c.D5, c.E3],
+          hand: [c.A3, c.B5, c.B2, c.C1, c.E3],
         },
       ],
     })

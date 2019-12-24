@@ -17,8 +17,12 @@ export class Pile {
   get size() {
     return this.cards.length
   }
-  draw(drawCount: number): Card[] {
-    return this.cards.splice(0, drawCount)
+  drawOne(): Card {
+    const card = this.cards.pop()
+    if (!card) {
+      throw new Error('NO_CARDS_LEFT')
+    }
+    return card
   }
   add(card: Card) {
     this.cards.push(card)
