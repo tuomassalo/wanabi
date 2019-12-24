@@ -15,6 +15,7 @@
   },
   "devDependencies": {
     "@types/jasmine": "3.5.0",
+    "@types/json-stable-stringify": "1.0.32",
     "@types/node": "12.12.21",
     "coveralls": "3.0.9",
     "jasmine": "3.4.0",
