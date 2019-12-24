@@ -1,5 +1,5 @@
 import {Card, HandCard, THandCardState} from './card'
-import {ParamError} from './errors'
+import {GameError} from './errors'
 import {Pile} from './pile'
 
 // export type THandState = THandCardState[]
@@ -18,7 +18,7 @@ export class Hand {
   }
   take(idx: number, stock: Pile): Card {
     if (!this.cards[idx]) {
-      throw new ParamError('NO_SUCH_CARD', {idx})
+      throw new GameError('NO_SUCH_CARD', {idx})
     }
     const drawnCard = this.cards.splice(idx, 1)[0].toCard()
     if (stock.size) {
@@ -33,5 +33,4 @@ export class Hand {
   getState(isMe: boolean): THandCardState[] {
     return this.cards.map(c => (isMe ? c.getMePlayerState() : c.getOtherPlayerState()))
   }
-  // - count(Value)
 }

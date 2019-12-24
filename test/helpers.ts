@@ -45,11 +45,18 @@ export function shuffle(arr: any[]) {
 // create a deck where the top cards are specified
 export function createDeck(topValues: string): Pile {
   const deckCards = Card.getFullDeck()
+
   const topCards: Card[] = []
   for (const c of topValues
     .split(/\s+/)
     .filter(v => /\w/.test(v))
     .map(Card.fromValueString)) {
+    const idx = deckCards.findIndex(f => f.color === c.color && f.num === c.num)
+    if (idx === -1) {
+      console.warn('ERROR', c)
+      throw new Error('too many cards of type')
+    }
+
     topCards.push(
       deckCards.splice(
         deckCards.findIndex(f => f.color === c.color && f.num === c.num),
@@ -57,6 +64,7 @@ export function createDeck(topValues: string): Pile {
       )[0],
     )
   }
+
   shuffle(deckCards)
   const deck = new Pile([...topCards, ...deckCards])
   return deck

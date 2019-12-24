@@ -16,6 +16,7 @@ export interface THandCardState {
 }
 
 export const AllColors: TColor[] = ['A', 'B', 'C', 'D', 'E', 'X']
+export const AllNums: TNum[] = [1, 2, 3, 4, 5]
 
 export const NumDistribution: TNum[] = [1, 1, 1, 2, 2, 3, 3, 4, 4, 5]
 

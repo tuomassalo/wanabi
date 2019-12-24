@@ -1,9 +1,9 @@
 import {Pile} from './pile'
 import {Player, TPlayerId, TPlayerState} from './player'
-import {Card, HandCard, TCardState, TColor, TNum} from './card'
+import {Card, HandCard, TCardState, TColor, TNum, AllColors, AllNums} from './card'
 import {Hand} from './hand'
 import {Table, TTableState} from './table'
-import {SyntaxError, ParamError} from './errors'
+import {SyntaxError, GameError} from './errors'
 
 type TGameStatus = 'RUNNING' | 'GAMEOVER' | 'FINISHED'
 
@@ -39,7 +39,7 @@ export class Game {
   discardPile: Pile
   hintCount: number = 9
   woundCount: number = 0
-  inTurn: number = 0
+  turn: number = 0
   turnsLeft: number = Infinity
   table: Table
   status: TGameStatus = 'RUNNING'
@@ -80,6 +80,10 @@ export class Game {
     this.checkIntegrity()
   }
 
+  get inTurn() {
+    return this.turn % this.players.length
+  }
+
   get score() {
     return this.table.getScore()
   }
@@ -104,17 +108,25 @@ export class Game {
 
   checkIntegrity() {
     // check that we have the correct set of cards
-    if (
-      [...this.stock.cards, ...this.discardPile.cards, ...this.players.flatMap(p => p.hand.cards)]
-        .map(c => c.toString())
-        .sort()
-        .join(' ') !==
-      Card.getFullDeck()
-        .map(c => c.toString())
-        .sort()
-        .join(' ')
-    ) {
-      console.warn(this)
+    const currentCards = [
+      ...this.stock.cards,
+      ...this.discardPile.cards,
+      ...this.players.flatMap(p => p.hand.cards),
+      ...Object.values(this.table.table)
+        .map(p => p.cards)
+        .flat(),
+    ]
+      .map(c => c.toString())
+      .sort()
+      .join(' ')
+
+    const expectedCards = Card.getFullDeck()
+      .map(c => c.toString())
+      .sort()
+      .join(' ')
+
+    if (currentCards !== expectedCards) {
+      console.warn(444, currentCards)
 
       throw new Error('INTEGRITY_ERROR')
     }
@@ -123,23 +135,27 @@ export class Game {
   _getCurrentPlayer(playerId: string): Player {
     const me = this.players[this.inTurn]
     if (!me) {
-      throw new ParamError('NO_SUCH_PLAYER', {playerId})
+      throw new GameError('NO_SUCH_PLAYER', {playerId})
     }
     if (playerId !== me.id) {
-      throw new ParamError('NOT_MY_TURN', {playerId})
+      throw new GameError('NOT_MY_TURN', {playerId})
     }
     return me
   }
 
-  _play(player: Player, card: Card) {}
-
   // ACTIONS
-  act(playerId, actionParams: TActionParams) {
+  act(playerId: string, actionParams: TActionParams) {
+    // console.warn('ACT', this.turn, actionParams)
+    if (this.status !== 'RUNNING') {
+      throw new GameError('GAME_ENDED')
+    }
+
     const me = this._getCurrentPlayer(playerId)
     if (actionParams.type === 'HINT') {
       // TODO
     } else {
       const card = me.hand.take(actionParams.cardIdx, this.stock)
+      // console.warn(222, card)
 
       if (actionParams.type === 'PLAY') {
         const success: boolean = this.table.play(card)
@@ -147,6 +163,9 @@ export class Game {
           // Successful play:
           if (card.num === 5 && this.hintCount < 9) {
             this.hintCount++
+          }
+          if (this.score === AllColors.length * AllNums.length) {
+            this.status = 'FINISHED'
           }
         } else {
           // fail: add wound
@@ -164,7 +183,7 @@ export class Game {
 
     // change turn
 
-    this.inTurn = (this.inTurn + 1) % this.players.length
+    this.turn++
     this.turnsLeft--
     if (this.turnsLeft === 0) {
       // TODO: check if off-by-one
@@ -173,6 +192,9 @@ export class Game {
       // countdown should start now
       this.turnsLeft = this.players.length
     }
+
+    this.checkIntegrity()
+
     // TODO: log
   }
 }

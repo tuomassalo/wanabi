@@ -1,12 +1,12 @@
-class GameError extends Error {
+class WanabiError extends Error {
   constructor(message?: string, log?: any) {
     console.warn(log)
     super(message)
-    this.name = 'GameError: ' + JSON.stringify(log)
+    this.name = 'WanabiError: ' + JSON.stringify(log)
   }
 }
 
-export class SyntaxError extends GameError {}
+export class SyntaxError extends WanabiError {}
 
 // wrong turn, no such card, etc.
-export class ParamError extends GameError {}
+export class GameError extends WanabiError {}
