@@ -2,6 +2,7 @@ import {Card, TColor, TNum} from '../src/card'
 import {Pile} from '../src/pile'
 import * as stringify from 'json-stable-stringify'
 import {Game} from '../src/game'
+import {zip} from 'lodash'
 
 export const c = {
   A1: {color: 'A' as TColor, num: 1 as TNum},
@@ -100,4 +101,25 @@ export function dbg(g: Game) {
       cards.map(c => c.toString()),
     )
   }
+}
+
+export function createTightGame() {
+  // First player always plays their first card, second player discards.
+  // After 2*25 turns we have:
+  // * 25 points
+  // * all p0 cards are playable, but no time to play them all
+  // * no p1 cards are playable.
+
+  return new Game(['Jekyll', 'Hyde'], {
+    deck: createDeck(
+      zip(
+        // playable cards
+        ['A', 'B', 'C', 'D', 'E', 'X'].flatMap(c => [1, 2, 3, 4, 5].map(n => c + n)),
+        // discardable cards (reverse order to make sure they are not playable)
+        ['A', 'B', 'C', 'D', 'E', 'X'].flatMap(c => [4, 3, 2, 1, 1].map(n => c + n)),
+      )
+        .flat()
+        .join(' '),
+    ),
+  })
 }

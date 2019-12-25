@@ -196,7 +196,6 @@ export class Game {
       // countdown should start now
       this.turnsLeft = this.players.length
     }
-    console.warn('ACTED', this.turnsLeft, this.stock.size)
 
     this.checkIntegrity()
 

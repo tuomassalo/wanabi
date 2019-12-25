@@ -1,30 +1,4 @@
-import {Game} from '../src/game'
-
-import {c, createDeck, knownCard} from './helpers'
-import {Card} from '../src/card'
-
-import {zip} from 'lodash'
-
-function createTightGame() {
-  // First player always plays their first card, second player discards.
-  // After 2*25 turns we have:
-  // * 25 points
-  // * all p0 cards are playable, but no time to play them all
-  // * no p1 cards are playable.
-
-  return new Game(['Jekyll', 'Hyde'], {
-    deck: createDeck(
-      zip(
-        // playable cards
-        ['A', 'B', 'C', 'D', 'E', 'X'].flatMap(c => [1, 2, 3, 4, 5].map(n => c + n)),
-        // discardable cards (reverse order to make sure they are not playable)
-        ['A', 'B', 'C', 'D', 'E', 'X'].flatMap(c => [4, 3, 2, 1, 1].map(n => c + n)),
-      )
-        .flat()
-        .join(' '),
-    ),
-  })
-}
+import {c, createTightGame, knownCard} from './helpers'
 
 describe('A tight three-player game', () => {
   const g = createTightGame()
