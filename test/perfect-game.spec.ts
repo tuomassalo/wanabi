@@ -17,6 +17,7 @@ describe('A perfect two-player game without any hints or discards', () => {
       woundCount: 0,
       table: {A: [], B: [], C: [], D: [], E: [], X: []},
       inTurn: 0,
+      turnsLeft: Infinity,
       score: 0,
       status: 'RUNNING',
       players: [
@@ -44,6 +45,7 @@ describe('A perfect two-player game without any hints or discards', () => {
       woundCount: 0,
       table: {A: [c.A1], B: [], C: [], D: [], E: [], X: []},
       inTurn: 1,
+      turnsLeft: Infinity,
       score: 1,
       status: 'RUNNING',
       players: [
@@ -81,6 +83,7 @@ describe('A perfect two-player game without any hints or discards', () => {
         X: [c.X1, c.X2, c.X3, c.X4],
       },
       inTurn: 1,
+      turnsLeft: Infinity,
       score: 29,
       status: 'RUNNING',
       players: [
@@ -115,6 +118,7 @@ describe('A perfect two-player game without any hints or discards', () => {
         X: [c.X1, c.X2, c.X3, c.X4, c.X5],
       },
       inTurn: 0,
+      turnsLeft: Infinity,
       score: 30,
       status: 'FINISHED',
       players: [

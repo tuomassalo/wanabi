@@ -31,6 +31,7 @@ interface TGameState {
   woundCount: number
   table: TTableState
   inTurn: number
+  turnsLeft: number // NB: can be Infinity, which turns to null in JSON
   players: TPlayerState[]
 }
 
@@ -50,8 +51,6 @@ export class Game {
     playerNames: string[],
     {deck, discardPile, table}: {deck?: Pile; discardPile?: Pile; table?: Table} = {},
   ) {
-    this.turnsLeft = Infinity
-    this.status = 'RUNNING'
     this.table = table || new Table()
     if (deck) {
       this.stock = deck
@@ -103,6 +102,7 @@ export class Game {
       hintCount: this.hintCount,
       woundCount: this.woundCount,
       inTurn: this.inTurn,
+      turnsLeft: this.turnsLeft,
       table: this.table.getState(),
       score: this.score,
       status: this.status,
@@ -196,6 +196,7 @@ export class Game {
       // countdown should start now
       this.turnsLeft = this.players.length
     }
+    console.warn('ACTED', this.turnsLeft, this.stock.size)
 
     this.checkIntegrity()
 
