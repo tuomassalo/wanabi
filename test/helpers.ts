@@ -53,7 +53,7 @@ export function createDeck(topValues: string): Pile {
     .split(/\s+/)
     .filter(v => /\w/.test(v))
     .map(Card.fromValueString)) {
-    const idx = deckCards.findIndex(f => f.color === c.color && f.num === c.num)
+    const idx = deckCards.findIndex(f => f.is(c))
     if (idx === -1) {
       console.warn('ERROR', c)
       throw new Error('too many cards of type')

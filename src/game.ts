@@ -1,9 +1,10 @@
 import {Pile} from './pile'
 import {Player, TPlayerId, TPlayerState} from './player'
-import {Card, HandCard, TCardState, TColor, TNum, AllColors, AllNums} from './card'
+import {Card, TCardState, TColor, TNum, AllColors, AllNums} from './card'
 import {Hand} from './hand'
 import {Table, TTableState} from './table'
 import {SyntaxError, GameError} from './errors'
+import {demystify} from './demystifier'
 
 type TGameStatus = 'RUNNING' | 'GAMEOVER' | 'FINISHED'
 
@@ -96,7 +97,7 @@ export class Game {
     if (!this.playersById[playerId]) {
       throw new SyntaxError('INVALID_PLAYER_ID', playerId)
     }
-    return {
+    const state = {
       stockSize: this.stock.size,
       discardPile: this.discardPile.getState(),
       hintCount: this.hintCount,
@@ -108,6 +109,11 @@ export class Game {
       status: this.status,
       players: this.players.map(p => p.getState(playerId === p.id)),
     }
+    demystify(
+      state.players.find(p => p.isMe) as TPlayerState, // yes yes, it's never undefined
+      [this.discardPile.cards, Object.values(this.table.table).map(p => p.cards)].flat(),
+    )
+    return state
   }
 
   checkIntegrity() {

@@ -69,17 +69,35 @@ describe('An ongoing game', () => {
           {turn: 12, is: 5, result: false},
           {turn: 14, is: 'B', result: true},
         ],
-      },
-      {
-        hints: [
-          {turn: 12, is: 5, result: false},
-          {turn: 14, is: 'B', result: true},
+        possibleCards: [
+          {color: 'B', num: 1, weight: 1},
+          {color: 'B', num: 2, weight: 2},
+          {color: 'B', num: 3, weight: 2},
+          {color: 'B', num: 4, weight: 2},
         ],
       },
       {
         hints: [
           {turn: 12, is: 5, result: false},
           {turn: 14, is: 'B', result: true},
+        ],
+        possibleCards: [
+          {color: 'B', num: 1, weight: 1},
+          {color: 'B', num: 2, weight: 2},
+          {color: 'B', num: 3, weight: 2},
+          {color: 'B', num: 4, weight: 2},
+        ],
+      },
+      {
+        hints: [
+          {turn: 12, is: 5, result: false},
+          {turn: 14, is: 'B', result: true},
+        ],
+        possibleCards: [
+          {color: 'B', num: 1, weight: 1},
+          {color: 'B', num: 2, weight: 2},
+          {color: 'B', num: 3, weight: 2},
+          {color: 'B', num: 4, weight: 2},
         ],
       },
       {

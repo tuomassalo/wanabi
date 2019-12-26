@@ -6,14 +6,19 @@ export interface TCardState {
   color: TColor
   num: TNum
 }
+export interface TPossibleCardState extends TCardState {
+  weight: number // 0 .. 1, but in practice something like 0.2 .. 0.8
+}
 export interface THandCardState {
   color?: TColor
   num?: TNum
   hints: THintResultState[]
+  possibleCards?: TPossibleCardState[]
   // isKnown: boolean
   // isPlayable: boolean
   // isDiscardable: boolean
 }
+
 export interface THintState {
   turn: number // allows finding more information from the log
   is: TNum | TColor
@@ -49,6 +54,15 @@ export class Card {
   }
   static getFullDeck(): Card[] {
     return AllColors.flatMap(c => NumDistribution.map((n: TNum) => new Card(c, n)))
+  }
+  is(subject: Card | TCardState | TNum | TColor): boolean {
+    if (typeof subject === 'number') {
+      return subject === this.num
+    } else if (typeof subject === 'string') {
+      return subject === this.color
+    } else {
+      return this.color === subject.color && this.num === subject.num
+    }
   }
 }
 
