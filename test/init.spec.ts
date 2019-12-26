@@ -1,6 +1,6 @@
 import {Game} from '../src/game'
 
-import {c, createDeck, knownCard} from './helpers'
+import {c, createDeck, knownCard, cards} from './helpers'
 
 describe('A three-player game without any moves', () => {
   const g = new Game(['Huey', 'Dewey', 'Louie'])
@@ -23,7 +23,7 @@ describe('A three-player game without any moves', () => {
           name: 'Huey',
           idx: 0,
           isMe: true,
-          hand: [{}, {}, {}, {}, {}],
+          hand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
         },
         {
           name: 'Dewey',
@@ -63,19 +63,19 @@ describe('A three-player game with a custom deck', () => {
           name: 'Huey',
           idx: 0,
           isMe: true,
-          hand: [{}, {}, {}, {}, {}],
+          hand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
         },
         {
           name: 'Dewey',
           idx: 1,
           isMe: false,
-          hand: [c.A2, c.A5, c.B3, c.C1, c.D5],
+          hand: cards('A2,A5,B3,C1,D5'),
         },
         {
           name: 'Louie',
           idx: 2,
           isMe: false,
-          hand: [c.A3, c.B5, c.B2, c.C1, c.E3],
+          hand: cards('A3,B5,B2,C1,E3'),
         },
       ],
     })

@@ -1,6 +1,6 @@
 import {Game} from '../src/game'
 
-import {c, createDeck, knownCard} from './helpers'
+import {c, createDeck, knownCard, cards} from './helpers'
 
 describe('A perfect two-player game without any hints or discards', () => {
   const g = new Game(['Bonnie', 'Clyde'], {
@@ -25,13 +25,13 @@ describe('A perfect two-player game without any hints or discards', () => {
           name: 'Bonnie',
           idx: 0,
           isMe: true,
-          hand: [{}, {}, {}, {}, {}],
+          hand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
         },
         {
           name: 'Clyde',
           idx: 1,
           isMe: false,
-          hand: [c.A2, c.A4, c.B1, c.B3, c.B5],
+          hand: cards('A2,A4,B1,B3,B5'),
         },
       ],
     })
@@ -53,13 +53,13 @@ describe('A perfect two-player game without any hints or discards', () => {
           name: 'Bonnie',
           idx: 0,
           isMe: false,
-          hand: [c.A3, c.A5, c.B2, c.B4, c.C1],
+          hand: cards('A3,A5,B2,B4,C1'),
         },
         {
           name: 'Clyde',
           idx: 1,
           isMe: true,
-          hand: [{}, {}, {}, {}, {}],
+          hand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
         },
       ],
     })
@@ -97,7 +97,7 @@ describe('A perfect two-player game without any hints or discards', () => {
           name: 'Clyde',
           idx: 1,
           isMe: true,
-          hand: [{}, {}, {}, {}, {}],
+          hand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
         },
       ],
     })
@@ -132,7 +132,7 @@ describe('A perfect two-player game without any hints or discards', () => {
           name: 'Clyde',
           idx: 1,
           isMe: true,
-          hand: [{}, {}, {}, {}, {}],
+          hand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
         },
       ],
     })

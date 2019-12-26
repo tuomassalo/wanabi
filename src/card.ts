@@ -9,10 +9,17 @@ export interface TCardState {
 export interface THandCardState {
   color?: TColor
   num?: TNum
-  // hints: THintState[]
+  hints: THintResultState[]
   // isKnown: boolean
   // isPlayable: boolean
   // isDiscardable: boolean
+}
+export interface THintState {
+  turn: number // allows finding more information from the log
+  is: TNum | TColor
+}
+export interface THintResultState extends THintState {
+  result: boolean
 }
 
 export const AllColors: TColor[] = ['A', 'B', 'C', 'D', 'E', 'X']
@@ -46,17 +53,24 @@ export class Card {
 }
 
 export class HandCard extends Card {
+  hints: THintResultState[] = []
   static fromCard(c: Card) {
     return new HandCard(c.color, c.num)
   }
   // hints: Hint[]
   getMePlayerState(): THandCardState {
-    return {}
+    return {hints: this.hints}
   }
   getOtherPlayerState(): THandCardState {
-    return this.getState()
+    return {color: this.color, num: this.num, hints: this.hints}
+  }
+  toString() {
+    return this.color + this.num
   }
   toCard() {
     return new Card(this.color, this.num)
+  }
+  addHint(hint: THintState) {
+    this.hints.push({...hint, result: this.color === hint.is || this.num === hint.is})
   }
 }

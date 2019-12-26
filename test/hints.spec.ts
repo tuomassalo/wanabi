@@ -1,7 +1,7 @@
 import {c, knownCard, createDeck} from './helpers'
 import {Game} from '../src/game'
 
-describe('An ongoing game', () => {
+function createTestGame() {
   const g = new Game(['Thelma', 'Louise'], {
     deck: createDeck(
       // p0 p1 p0 p1 p0 p1 (p0 plays and p1 discards)
@@ -16,12 +16,17 @@ describe('An ongoing game', () => {
            X1 X2`,
     ),
   })
+  // p0 always plays the oldest card from hand, p1 always discards
+  for (let i = 1; i <= 6; i++) {
+    g.act(g.players[0].id, {type: 'PLAY', cardIdx: 0})
+    g.act(g.players[1].id, {type: 'DISCARD', cardIdx: 0})
+  }
+  return g
+}
+
+describe('An ongoing game', () => {
   it('should have proper state after 2*6 turns, before hinting', () => {
-    // p0 always plays the oldest card from hand, p1 always discards
-    for (let i = 1; i <= 6; i++) {
-      g.act(g.players[0].id, {type: 'PLAY', cardIdx: 0})
-      g.act(g.players[1].id, {type: 'DISCARD', cardIdx: 0})
-    }
+    const g = createTestGame()
     expect(g.getState(g.players[1].id)).toEqual({
       stockSize: 60 - 2 * 5 - 2 * 6, // === 16
       discardPile: [c.B1, c.A1, c.B1, c.C1, c.A4, c.B5, c.X1],
@@ -39,20 +44,56 @@ describe('An ongoing game', () => {
       turnsLeft: Infinity,
       score: 5,
       status: 'RUNNING',
-      players: [
-        {
-          name: 'Thelma',
-          idx: 0,
-          isMe: false,
-          hand: [c.A1, c.C1, c.B3, c.D4, c.X1],
-        },
-        {
-          name: 'Louise',
-          idx: 1,
-          isMe: true,
-          hand: [{}, {}, {}, {}, {}],
-        },
-      ],
+      players: jasmine.any(Array),
     })
+    expect(g.players.map(p => '' + p.hand.cards)).toEqual(['A1,C1,B3,D4,X1', 'B1,B2,B2,D4,X2'])
+  })
+  it('should show hints for p1', () => {
+    const g = createTestGame()
+    g.act(g.players[0].id, {type: 'HINT', toPlayerIdx: 1, is: 5})
+    expect(g.getState(g.players[1].id).players[1].hand).toEqual([
+      {hints: [{turn: 12, is: 5, result: false}]},
+      {hints: [{turn: 12, is: 5, result: false}]},
+      {hints: [{turn: 12, is: 5, result: false}]},
+      {hints: [{turn: 12, is: 5, result: false}]},
+      {hints: [{turn: 12, is: 5, result: false}]},
+    ])
+    // we are not interested in the results here
+    g.act(g.players[1].id, {type: 'HINT', toPlayerIdx: 0, is: 1})
+
+    // give another hint
+    g.act(g.players[0].id, {type: 'HINT', toPlayerIdx: 1, is: 'B'})
+    expect(g.getState(g.players[1].id).players[1].hand).toEqual([
+      {
+        hints: [
+          {turn: 12, is: 5, result: false},
+          {turn: 14, is: 'B', result: true},
+        ],
+      },
+      {
+        hints: [
+          {turn: 12, is: 5, result: false},
+          {turn: 14, is: 'B', result: true},
+        ],
+      },
+      {
+        hints: [
+          {turn: 12, is: 5, result: false},
+          {turn: 14, is: 'B', result: true},
+        ],
+      },
+      {
+        hints: [
+          {turn: 12, is: 5, result: false},
+          {turn: 14, is: 'B', result: false},
+        ],
+      },
+      {
+        hints: [
+          {turn: 12, is: 5, result: false},
+          {turn: 14, is: 'B', result: false},
+        ],
+      },
+    ])
   })
 })

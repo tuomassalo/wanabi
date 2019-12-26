@@ -156,7 +156,15 @@ export class Game {
 
     const me = this._getCurrentPlayer(playerId)
     if (actionParams.type === 'HINT') {
-      // TODO
+      const hintee = this.players[actionParams.toPlayerIdx]
+      if (!hintee) {
+        throw new GameError('NO_SUCH_PLAYER', actionParams.toPlayerIdx)
+      }
+      if (hintee === me) {
+        throw new GameError('CANNOT_HINT_SELF')
+      }
+
+      hintee.hand.addHint({turn: this.turn, is: actionParams.is})
     } else {
       const card = me.hand.take(actionParams.cardIdx, this.stock)
       // console.warn(222, card)

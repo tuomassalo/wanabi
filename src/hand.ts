@@ -1,4 +1,4 @@
-import {Card, HandCard, THandCardState} from './card'
+import {Card, HandCard, THandCardState, THintState} from './card'
 import {GameError} from './errors'
 import {Pile} from './pile'
 
@@ -35,5 +35,10 @@ export class Hand {
   }
   getState(isMe: boolean): THandCardState[] {
     return this.cards.map(c => (isMe ? c.getMePlayerState() : c.getOtherPlayerState()))
+  }
+  addHint(hint: THintState) {
+    for (const c of this.cards) {
+      c.addHint(hint)
+    }
   }
 }

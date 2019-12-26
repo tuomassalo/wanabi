@@ -1,4 +1,4 @@
-import {Card, TColor, TNum} from '../src/card'
+import {Card, TColor, TNum, TCardState} from '../src/card'
 import {Pile} from '../src/pile'
 import * as stringify from 'json-stable-stringify'
 import {Game} from '../src/game'
@@ -73,10 +73,28 @@ export function createDeck(topValues: string): Pile {
   return deck
 }
 
+export function cards(cardsString: string): any {
+  return {
+    asymmetricMatch: function(compareTo: any[]) {
+      return cardsString === '' + compareTo.map(c => c.color + c.num).join(',')
+    },
+
+    /*
+     * The jasmineToString method is used in the Jasmine pretty printer, and will
+     * be seen by the user in the message when a test fails.
+     */
+    jasmineToString: function() {
+      return `<cards[${cardsString}]>`
+    },
+  }
+}
+
 export function knownCard(): any {
   return {
     asymmetricMatch: function(compareTo) {
-      return /^\{"color":"[ABCDEX]","num":[12345]\}$/.test(stringify(compareTo))
+      const c = {...compareTo}
+      delete c.hints
+      return /^\{"color":"[ABCDEX]","num":[12345]\}$/.test(stringify(c))
     },
 
     /*
