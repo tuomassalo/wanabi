@@ -1,7 +1,6 @@
-import {TPlayerState} from './player'
-import {TCardState, THandCardState, Card, TPossibleCardState} from './card'
+import {TCardState, THandCardState, Card} from './card'
 
-export function demystify(me: TPlayerState, revealedCards: TCardState[]) {
+export function demystify(myHand: THandCardState[], revealedCards: TCardState[]) {
   const unrevealedCards = Card.getFullDeck()
   for (const r of revealedCards) {
     unrevealedCards.splice(
@@ -10,7 +9,7 @@ export function demystify(me: TPlayerState, revealedCards: TCardState[]) {
     )
   }
 
-  for (const handCard of me.hand) {
+  for (const handCard of myHand) {
     const possibleCards: Card[] = unrevealedCards.filter(u => u.matchesHints(handCard.hints))
 
     if (possibleCards.length <= 10) {

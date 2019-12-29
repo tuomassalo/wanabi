@@ -112,7 +112,7 @@ export class Game {
       players: this.players.map(p => p.getState(playerId === p.id)),
     }
     demystify(
-      state.players.find(p => p.isMe) as TPlayerState, // yes yes, it's never undefined
+      (state.players.find(p => p.isMe) as TPlayerState).hand, // yes yes, it's never undefined
       [this.discardPile.cards, Object.values(this.table.table).flatMap(p => p.cards)].flat(),
     )
     return state
