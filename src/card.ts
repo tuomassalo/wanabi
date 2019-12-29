@@ -55,11 +55,14 @@ export class Card {
   static getFullDeck(): Card[] {
     return AllColors.flatMap(c => NumDistribution.map((n: TNum) => new Card(c, n)))
   }
-  is(subject: Card | TCardState | TNum | TColor): boolean {
+  matchesHints(hints: THintResultState[]) {
+    return hints.every(h => (h.result ? this.is(h.is) : !this.is(h.is)))
+  }
+  is(subject: Card | TCardState | TColor | TNum): boolean {
     if (typeof subject === 'number') {
-      return subject === this.num
+      return this.num === subject
     } else if (typeof subject === 'string') {
-      return subject === this.color
+      return this.color === subject || this.color === 'X'
     } else {
       return this.color === subject.color && this.num === subject.num
     }

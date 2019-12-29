@@ -21,6 +21,7 @@ describe('A tight three-player game', () => {
         E: [c.E1, c.E2, c.E3, c.E4],
         X: [],
       },
+      turn: 48,
       inTurn: 0,
       turnsLeft: Infinity,
       score: 24,
@@ -65,6 +66,7 @@ describe('A tight three-player game', () => {
         E: [c.E1, c.E2, c.E3, c.E4, c.E5],
         X: [],
       },
+      turn: 50,
       inTurn: 0,
       turnsLeft: 2, // === number of players
       score: 25,
@@ -80,7 +82,58 @@ describe('A tight three-player game', () => {
           name: 'Hyde',
           idx: 1,
           isMe: true,
-          hand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
+          hand: [
+            {
+              hints: [],
+              possibleCards: [
+                {color: 'X', num: 1, weight: 3},
+                {color: 'X', num: 2, weight: 2},
+                {color: 'X', num: 3, weight: 2},
+                {color: 'X', num: 4, weight: 2},
+                {color: 'X', num: 5, weight: 1},
+              ],
+            },
+            {
+              hints: [],
+              possibleCards: [
+                {color: 'X', num: 1, weight: 3},
+                {color: 'X', num: 2, weight: 2},
+                {color: 'X', num: 3, weight: 2},
+                {color: 'X', num: 4, weight: 2},
+                {color: 'X', num: 5, weight: 1},
+              ],
+            },
+            {
+              hints: [],
+              possibleCards: [
+                {color: 'X', num: 1, weight: 3},
+                {color: 'X', num: 2, weight: 2},
+                {color: 'X', num: 3, weight: 2},
+                {color: 'X', num: 4, weight: 2},
+                {color: 'X', num: 5, weight: 1},
+              ],
+            },
+            {
+              hints: [],
+              possibleCards: [
+                {color: 'X', num: 1, weight: 3},
+                {color: 'X', num: 2, weight: 2},
+                {color: 'X', num: 3, weight: 2},
+                {color: 'X', num: 4, weight: 2},
+                {color: 'X', num: 5, weight: 1},
+              ],
+            },
+            {
+              hints: [],
+              possibleCards: [
+                {color: 'X', num: 1, weight: 3},
+                {color: 'X', num: 2, weight: 2},
+                {color: 'X', num: 3, weight: 2},
+                {color: 'X', num: 4, weight: 2},
+                {color: 'X', num: 5, weight: 1},
+              ],
+            },
+          ],
         },
       ],
     })

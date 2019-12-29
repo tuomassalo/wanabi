@@ -40,6 +40,7 @@ describe('An ongoing game', () => {
         E: [],
         X: [],
       },
+      turn: 2 * 6,
       inTurn: 0,
       turnsLeft: Infinity,
       score: 5,
@@ -51,6 +52,7 @@ describe('An ongoing game', () => {
   it('should show hints for p1', () => {
     const g = createTestGame()
     g.act(g.players[0].id, {type: 'HINT', toPlayerIdx: 1, is: 5})
+    expect(g.getState(g.players[1].id).hintCount).toEqual(8)
     expect(g.getState(g.players[1].id).players[1].hand).toEqual([
       {hints: [{turn: 12, is: 5, result: false}]},
       {hints: [{turn: 12, is: 5, result: false}]},
@@ -63,41 +65,26 @@ describe('An ongoing game', () => {
 
     // give another hint
     g.act(g.players[0].id, {type: 'HINT', toPlayerIdx: 1, is: 'B'})
+    expect(g.getState(g.players[1].id).hintCount).toEqual(6)
+
+    // still not enough hints
     expect(g.getState(g.players[1].id).players[1].hand).toEqual([
       {
         hints: [
           {turn: 12, is: 5, result: false},
           {turn: 14, is: 'B', result: true},
         ],
-        possibleCards: [
-          {color: 'B', num: 1, weight: 1},
-          {color: 'B', num: 2, weight: 2},
-          {color: 'B', num: 3, weight: 2},
-          {color: 'B', num: 4, weight: 2},
-        ],
       },
       {
         hints: [
           {turn: 12, is: 5, result: false},
           {turn: 14, is: 'B', result: true},
         ],
-        possibleCards: [
-          {color: 'B', num: 1, weight: 1},
-          {color: 'B', num: 2, weight: 2},
-          {color: 'B', num: 3, weight: 2},
-          {color: 'B', num: 4, weight: 2},
-        ],
       },
       {
         hints: [
           {turn: 12, is: 5, result: false},
           {turn: 14, is: 'B', result: true},
-        ],
-        possibleCards: [
-          {color: 'B', num: 1, weight: 1},
-          {color: 'B', num: 2, weight: 2},
-          {color: 'B', num: 3, weight: 2},
-          {color: 'B', num: 4, weight: 2},
         ],
       },
       {
@@ -110,6 +97,64 @@ describe('An ongoing game', () => {
         hints: [
           {turn: 12, is: 5, result: false},
           {turn: 14, is: 'B', result: false},
+        ],
+      },
+    ])
+
+    g.act(g.players[1].id, {type: 'HINT', toPlayerIdx: 0, is: 1})
+
+    g.act(g.players[0].id, {type: 'HINT', toPlayerIdx: 1, is: 2})
+    expect(g.getState(g.players[1].id).hintCount).toEqual(4)
+
+    // now we have enough hints to possibly identify some cards
+    expect(g.getState(g.players[1].id).players[1].hand).toEqual([
+      {
+        hints: [
+          {turn: 12, is: 5, result: false},
+          {turn: 14, is: 'B', result: true},
+          {turn: 16, is: 2, result: false},
+        ],
+      },
+      {
+        hints: [
+          {turn: 12, is: 5, result: false},
+          {turn: 14, is: 'B', result: true},
+          {turn: 16, is: 2, result: true},
+        ],
+        possibleCards: [
+          {color: 'B', num: 2, weight: 2},
+          {color: 'X', num: 2, weight: 2},
+        ],
+      },
+      {
+        hints: [
+          {turn: 12, is: 5, result: false},
+          {turn: 14, is: 'B', result: true},
+          {turn: 16, is: 2, result: true},
+        ],
+        possibleCards: [
+          {color: 'B', num: 2, weight: 2},
+          {color: 'X', num: 2, weight: 2},
+        ],
+      },
+      {
+        hints: [
+          {turn: 12, is: 5, result: false},
+          {turn: 14, is: 'B', result: false},
+          {turn: 16, is: 2, result: false},
+        ],
+      },
+      {
+        hints: [
+          {turn: 12, is: 5, result: false},
+          {turn: 14, is: 'B', result: false},
+          {turn: 16, is: 2, result: true},
+        ],
+        possibleCards: [
+          {color: 'A', num: 2, weight: 1},
+          {color: 'C', num: 2, weight: 2},
+          {color: 'D', num: 2, weight: 2},
+          {color: 'E', num: 2, weight: 2},
         ],
       },
     ])

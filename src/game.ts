@@ -31,6 +31,7 @@ interface TGameState {
   hintCount: number
   woundCount: number
   table: TTableState
+  turn: number
   inTurn: number
   turnsLeft: number // NB: can be Infinity, which turns to null in JSON
   players: TPlayerState[]
@@ -102,6 +103,7 @@ export class Game {
       discardPile: this.discardPile.getState(),
       hintCount: this.hintCount,
       woundCount: this.woundCount,
+      turn: this.turn,
       inTurn: this.inTurn,
       turnsLeft: this.turnsLeft,
       table: this.table.getState(),
@@ -111,7 +113,7 @@ export class Game {
     }
     demystify(
       state.players.find(p => p.isMe) as TPlayerState, // yes yes, it's never undefined
-      [this.discardPile.cards, Object.values(this.table.table).map(p => p.cards)].flat(),
+      [this.discardPile.cards, Object.values(this.table.table).flatMap(p => p.cards)].flat(),
     )
     return state
   }
@@ -162,6 +164,10 @@ export class Game {
 
     const me = this._getCurrentPlayer(playerId)
     if (actionParams.type === 'HINT') {
+      if (!this.hintCount) {
+        throw new GameError('NO_HINTS_LEFT')
+      }
+      this.hintCount--
       const hintee = this.players[actionParams.toPlayerIdx]
       if (!hintee) {
         throw new GameError('NO_SUCH_PLAYER', actionParams.toPlayerIdx)

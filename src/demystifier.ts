@@ -1,13 +1,7 @@
 import {TPlayerState} from './player'
 import {TCardState, THandCardState, Card, TPossibleCardState} from './card'
 
-function hintsMatch(handCard: THandCardState, card: Card) {
-  return !handCard.hints.some(h => (h.result ? !card.is(h.is) : card.is(h.is)))
-}
-
 export function demystify(me: TPlayerState, revealedCards: TCardState[]) {
-  if (me.name !== 'Louise') return
-
   const unrevealedCards = Card.getFullDeck()
   for (const r of revealedCards) {
     unrevealedCards.splice(
@@ -16,11 +10,8 @@ export function demystify(me: TPlayerState, revealedCards: TCardState[]) {
     )
   }
 
-  console.warn(111, revealedCards.length, unrevealedCards.length)
-
   for (const handCard of me.hand) {
-    const possibleCards: Card[] = unrevealedCards.filter(u => hintsMatch(handCard, u))
-    console.warn(222, possibleCards)
+    const possibleCards: Card[] = unrevealedCards.filter(u => u.matchesHints(handCard.hints))
 
     if (possibleCards.length <= 10) {
       // aggregate
@@ -36,8 +27,9 @@ export function demystify(me: TPlayerState, revealedCards: TCardState[]) {
       handCard.possibleCards = possibleCardCounts.map(pcc => ({
         color: pcc.card.color,
         num: pcc.card.num,
-        weight: pcc.count, // / possibleCards.length,
+        weight: pcc.count,
       }))
     }
+    // return
   }
 }
