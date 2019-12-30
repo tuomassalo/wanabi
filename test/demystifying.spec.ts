@@ -116,3 +116,52 @@ describe('with some revealed cards', () => {
     ])
   })
 })
+describe('information inferred from a hit', () => {
+  it('if we identify a B2, we can infer a C2/X2', () => {
+    expect(
+      demystify(
+        hand({hints: [{is: 2}, {is: 'C', result: false}]}, {hints: [{is: 2}]}),
+        revealedCards('A2 A2 B2 D2 D2 E2 E2 X2'),
+      ),
+    ).toEqual([
+      {
+        color: 'B',
+        num: 2,
+        hints: [
+          {is: 2, result: true, turn: 0},
+          {is: 'C', result: false, turn: 0},
+        ],
+      },
+      {
+        num: 2,
+        hints: [{is: 2, result: true, turn: 0}],
+        possibleCards: [
+          {color: 'C', num: 2, weight: 2},
+          {color: 'X', num: 2, weight: 1},
+        ],
+      },
+    ])
+  })
+  it('if we identify a B2, we can infer a C2', () => {
+    expect(
+      demystify(
+        hand({hints: [{is: 2}, {is: 'C', result: false}]}, {hints: [{is: 2}]}),
+        revealedCards('A2 A2 B2 D2 D2 E2 E2 X2 X2'),
+      ),
+    ).toEqual([
+      {
+        color: 'B',
+        num: 2,
+        hints: [
+          {is: 2, result: true, turn: 0},
+          {is: 'C', result: false, turn: 0},
+        ],
+      },
+      {
+        color: 'C',
+        num: 2,
+        hints: [{is: 2, result: true, turn: 0}],
+      },
+    ])
+  })
+})
