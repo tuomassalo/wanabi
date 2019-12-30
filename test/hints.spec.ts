@@ -116,6 +116,7 @@ describe('An ongoing game', () => {
         ],
       },
       {
+        num: 2,
         hints: [
           {turn: 12, is: 5, result: false},
           {turn: 14, is: 'B', result: true},
@@ -127,6 +128,7 @@ describe('An ongoing game', () => {
         ],
       },
       {
+        num: 2,
         hints: [
           {turn: 12, is: 5, result: false},
           {turn: 14, is: 'B', result: true},
@@ -150,6 +152,7 @@ describe('An ongoing game', () => {
           {turn: 14, is: 'B', result: false},
           {turn: 16, is: 2, result: true},
         ],
+        num: 2,
         possibleCards: [
           {color: 'A', num: 2, weight: 1},
           {color: 'C', num: 2, weight: 2},

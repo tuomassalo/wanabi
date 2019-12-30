@@ -84,6 +84,7 @@ describe('A tight three-player game', () => {
           isMe: true,
           hand: [
             {
+              color: 'X',
               hints: [],
               possibleCards: [
                 {color: 'X', num: 1, weight: 3},
@@ -94,6 +95,7 @@ describe('A tight three-player game', () => {
               ],
             },
             {
+              color: 'X',
               hints: [],
               possibleCards: [
                 {color: 'X', num: 1, weight: 3},
@@ -104,6 +106,7 @@ describe('A tight three-player game', () => {
               ],
             },
             {
+              color: 'X',
               hints: [],
               possibleCards: [
                 {color: 'X', num: 1, weight: 3},
@@ -114,6 +117,7 @@ describe('A tight three-player game', () => {
               ],
             },
             {
+              color: 'X',
               hints: [],
               possibleCards: [
                 {color: 'X', num: 1, weight: 3},
@@ -124,6 +128,7 @@ describe('A tight three-player game', () => {
               ],
             },
             {
+              color: 'X',
               hints: [],
               possibleCards: [
                 {color: 'X', num: 1, weight: 3},
