@@ -21,10 +21,30 @@ interface THintActionParams {
   toPlayerIdx: number
   is: TColor | TNum
 }
-type TActionParams = TPlayActionParams | TDiscardActionParams | THintActionParams
 
-interface TGameState {
+// added by the constructor
+interface TStartActionParams {
+  type: 'START'
+}
+
+type TActionParams = TPlayActionParams | TDiscardActionParams | THintActionParams | TStartActionParams
+type TPlayableActionParams = TPlayActionParams | TDiscardActionParams | THintActionParams
+
+// added by the constructor
+interface TResolvedStartAction extends TStartActionParams {}
+interface TResolvedPlayAction extends TPlayActionParams {
+  card: TCardState
+}
+interface TResolvedDiscardAction extends TDiscardActionParams {
+  card: TCardState
+}
+interface TResolvedHintAction extends THintActionParams {}
+
+type TResolvedAction = TResolvedPlayAction | TResolvedDiscardAction | TResolvedHintAction | TResolvedStartAction
+
+interface TTurnState {
   status: TGameStatus
+  action: TResolvedAction
   score: number
   stockSize: number
   discardPile: TCardState[]
@@ -33,8 +53,9 @@ interface TGameState {
   table: TTableState
   turn: number
   inTurn: number
-  turnsLeft: number // NB: can be Infinity, which turns to null in JSON
+  turnsLeft: number | null // NB: can be Infinity, which turns to null in JSON
   players: TPlayerState[]
+  timestamp: string // ISO string
 }
 
 export class Game {
@@ -42,13 +63,14 @@ export class Game {
   discardPile: Pile
   hintCount: number = 9
   woundCount: number = 0
-  turn: number = 0
+  turn: number = -1
   turnsLeft: number = Infinity
   table: Table
+  log: TTurnState[] = []
   status: TGameStatus = 'RUNNING'
-
   players: Player[]
   playersById: {[id: string]: Player}
+
   constructor(
     playerNames: string[],
     {deck, discardPile, table}: {deck?: Pile; discardPile?: Pile; table?: Table} = {},
@@ -82,6 +104,8 @@ export class Game {
 
     this.playersById = Object.fromEntries(this.players.map(p => [p.id, p]))
 
+    this.addTurn({type: 'START'})
+
     this.checkIntegrity()
   }
 
@@ -94,28 +118,30 @@ export class Game {
   }
 
   // this returns information that is public for a player
-  getState(playerId: TPlayerId): TGameState {
+  getState(playerId: TPlayerId): TTurnState {
+    return this.getCompleteState(playerId).slice(-1)[0]
+  }
+  // this returns information that is public for a player
+  getCompleteState(playerId: TPlayerId): TTurnState[] {
     if (!this.playersById[playerId]) {
       throw new SyntaxError('INVALID_PLAYER_ID', playerId)
     }
-    const state = {
-      stockSize: this.stock.size,
-      discardPile: this.discardPile.getState(),
-      hintCount: this.hintCount,
-      woundCount: this.woundCount,
-      turn: this.turn,
-      inTurn: this.inTurn,
-      turnsLeft: this.turnsLeft,
-      table: this.table.getState(),
-      score: this.score,
-      status: this.status,
-      players: this.players.map(p => p.getState(playerId === p.id)),
-    }
-    demystify(
-      (state.players.find(p => p.isMe) as TPlayerState).hand, // yes yes, it's never undefined
-      [this.discardPile.cards, Object.values(this.table.table).flatMap(p => p.cards)].flat(),
-    )
-    return state
+
+    // // copy the latest turn from the log
+    // const turn: TTurnState = JSON.parse(JSON.stringify(this.log[this.log.length - 1]))
+
+    return this.log.map(turn => ({
+      ...turn,
+      players: turn.players.map(p =>
+        p.idx === this.playersById[playerId].idx ? {...p, isMe: true, completeHand: []} : p,
+      ),
+    }))
+
+    // demystify(
+    //   (state.players.find(p => p.isMe) as TPlayerState).hand, // yes yes, it's never undefined
+    //   [this.discardPile.cards, Object.values(this.table.table).flatMap(p => p.cards)].flat(),
+    // )
+    // return state
   }
 
   checkIntegrity() {
@@ -156,7 +182,7 @@ export class Game {
   }
 
   // ACTIONS
-  act(playerId: string, actionParams: TActionParams) {
+  act(playerId: string, actionParams: TPlayableActionParams) {
     // console.warn('ACT', this.turn, actionParams)
     if (this.status !== 'RUNNING') {
       throw new GameError('GAME_ENDED')
@@ -177,6 +203,8 @@ export class Game {
       }
 
       hintee.hand.addHint({turn: this.turn, is: actionParams.is})
+
+      this.addTurn(actionParams)
     } else {
       const card = me.hand.take(actionParams.cardIdx, this.stock)
       // console.warn(222, card)
@@ -200,13 +228,14 @@ export class Game {
             this.status = 'GAMEOVER'
           }
         }
+        this.addTurn({...actionParams, card: card.getState()})
       } else if (actionParams.type === 'DISCARD') {
         this.discardPile.add(card)
+        this.addTurn({...actionParams, card: card.getState()})
       }
     }
-
-    // change turn
-
+  }
+  addTurn(action: TResolvedAction) {
     this.turn++
     this.turnsLeft--
     if (this.turnsLeft === 0) {
@@ -217,8 +246,28 @@ export class Game {
       this.turnsLeft = this.players.length
     }
 
-    this.checkIntegrity()
+    const players = this.players.map(p => p.getState())
 
-    // TODO: log
+    for (const p of players) {
+      demystify(p.mysteryHand, [this.discardPile.cards, Object.values(this.table.table).flatMap(p => p.cards)].flat())
+    }
+
+    this.log.push({
+      action,
+      timestamp: new Date().toISOString(),
+      stockSize: this.stock.size,
+      discardPile: this.discardPile.getState(),
+      hintCount: this.hintCount,
+      woundCount: this.woundCount,
+      turn: this.turn,
+      inTurn: this.inTurn,
+      turnsLeft: this.turnsLeft === Infinity ? null : this.turnsLeft,
+      table: this.table.getState(),
+      score: this.score,
+      status: this.status,
+      players,
+    })
+
+    this.checkIntegrity()
   }
 }

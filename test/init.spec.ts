@@ -9,6 +9,8 @@ describe('A three-player game without any moves', () => {
   })
   it('should have correct setup', () => {
     expect(g.getState(g.players[0].id)).toEqual({
+      timestamp: jasmine.any(String),
+      action: {type: 'START'},
       stockSize: 45,
       discardPile: [],
       hintCount: 9,
@@ -16,7 +18,7 @@ describe('A three-player game without any moves', () => {
       table: {A: [], B: [], C: [], D: [], E: [], X: []},
       turn: 0,
       inTurn: 0,
-      turnsLeft: Infinity,
+      turnsLeft: null,
       score: 0,
       status: 'RUNNING',
       players: [
@@ -24,19 +26,22 @@ describe('A three-player game without any moves', () => {
           name: 'Huey',
           idx: 0,
           isMe: true,
-          hand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
+          mysteryHand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
+          completeHand: [],
         },
         {
           name: 'Dewey',
           idx: 1,
           isMe: false,
-          hand: [knownCard(), knownCard(), knownCard(), knownCard(), knownCard()],
+          mysteryHand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
+          completeHand: [knownCard(), knownCard(), knownCard(), knownCard(), knownCard()],
         },
         {
           name: 'Louie',
           idx: 2,
           isMe: false,
-          hand: [knownCard(), knownCard(), knownCard(), knownCard(), knownCard()],
+          mysteryHand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
+          completeHand: [knownCard(), knownCard(), knownCard(), knownCard(), knownCard()],
         },
       ],
     })
@@ -50,13 +55,15 @@ describe('A three-player game with a custom deck', () => {
   })
   it('should have correct setup', () => {
     expect(g.getState(g.players[0].id)).toEqual({
+      timestamp: jasmine.any(String),
+      action: {type: 'START'},
       stockSize: 45,
       discardPile: [],
       hintCount: 9,
       woundCount: 0,
       turn: 0,
       inTurn: 0,
-      turnsLeft: Infinity,
+      turnsLeft: null,
       score: 0,
       status: 'RUNNING',
       table: {A: [], B: [], C: [], D: [], E: [], X: []},
@@ -65,19 +72,22 @@ describe('A three-player game with a custom deck', () => {
           name: 'Huey',
           idx: 0,
           isMe: true,
-          hand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
+          mysteryHand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
+          completeHand: [],
         },
         {
           name: 'Dewey',
           idx: 1,
           isMe: false,
-          hand: cards('A2,A5,B3,C1,D5'),
+          mysteryHand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
+          completeHand: cards('A2,A5,B3,C1,D5'),
         },
         {
           name: 'Louie',
           idx: 2,
           isMe: false,
-          hand: cards('A3,B5,B2,C1,E3'),
+          mysteryHand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
+          completeHand: cards('A3,B5,B2,C1,E3'),
         },
       ],
     })

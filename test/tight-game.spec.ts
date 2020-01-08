@@ -9,6 +9,8 @@ describe('A tight three-player game', () => {
       g.act(g.players[1].id, {type: 'DISCARD', cardIdx: 0})
     }
     expect(g.getState(g.players[1].id)).toEqual({
+      timestamp: jasmine.any(String),
+      action: jasmine.any(Object),
       stockSize: 60 - 2 * 5 - 2 * 24, // === 2
       discardPile: Array(24).fill(knownCard()),
       hintCount: 9,
@@ -23,7 +25,7 @@ describe('A tight three-player game', () => {
       },
       turn: 48,
       inTurn: 0,
-      turnsLeft: Infinity,
+      turnsLeft: null,
       score: 24,
       status: 'RUNNING',
       players: [
@@ -31,13 +33,15 @@ describe('A tight three-player game', () => {
           name: 'Jekyll',
           idx: 0,
           isMe: false,
-          hand: cards('E5,X1,X2,X3,X4'),
+          completeHand: cards('E5,X1,X2,X3,X4'),
+          mysteryHand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
         },
         {
           name: 'Hyde',
           idx: 1,
           isMe: true,
-          hand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
+          completeHand: [],
+          mysteryHand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
         },
       ],
     })
@@ -47,13 +51,15 @@ describe('A tight three-player game', () => {
     expect(g.getState(g.players[1].id)).toEqual(
       jasmine.objectContaining({
         stockSize: 1,
-        turnsLeft: Infinity,
+        turnsLeft: null,
       }),
     )
   })
   it('should start countdown when the stock is emptied', () => {
     g.act(g.players[1].id, {type: 'DISCARD', cardIdx: 0})
     expect(g.getState(g.players[1].id)).toEqual({
+      timestamp: jasmine.any(String),
+      action: jasmine.any(Object),
       stockSize: 0,
       discardPile: Array(25).fill(knownCard()),
       hintCount: 9,
@@ -76,13 +82,71 @@ describe('A tight three-player game', () => {
           name: 'Jekyll',
           idx: 0,
           isMe: false,
-          hand: cards('X1,X2,X3,X4,X5'),
+          completeHand: cards('X1,X2,X3,X4,X5'),
+          mysteryHand: [
+            {
+              hints: [],
+              color: 'X',
+              possibleCards: [
+                {color: 'X', num: 1, weight: 3},
+                {color: 'X', num: 2, weight: 2},
+                {color: 'X', num: 3, weight: 2},
+                {color: 'X', num: 4, weight: 2},
+                {color: 'X', num: 5, weight: 1},
+              ],
+            },
+            {
+              hints: [],
+              color: 'X',
+              possibleCards: [
+                {color: 'X', num: 1, weight: 3},
+                {color: 'X', num: 2, weight: 2},
+                {color: 'X', num: 3, weight: 2},
+                {color: 'X', num: 4, weight: 2},
+                {color: 'X', num: 5, weight: 1},
+              ],
+            },
+            {
+              hints: [],
+              color: 'X',
+              possibleCards: [
+                {color: 'X', num: 1, weight: 3},
+                {color: 'X', num: 2, weight: 2},
+                {color: 'X', num: 3, weight: 2},
+                {color: 'X', num: 4, weight: 2},
+                {color: 'X', num: 5, weight: 1},
+              ],
+            },
+            {
+              hints: [],
+              color: 'X',
+              possibleCards: [
+                {color: 'X', num: 1, weight: 3},
+                {color: 'X', num: 2, weight: 2},
+                {color: 'X', num: 3, weight: 2},
+                {color: 'X', num: 4, weight: 2},
+                {color: 'X', num: 5, weight: 1},
+              ],
+            },
+            {
+              hints: [],
+              color: 'X',
+              possibleCards: [
+                {color: 'X', num: 1, weight: 3},
+                {color: 'X', num: 2, weight: 2},
+                {color: 'X', num: 3, weight: 2},
+                {color: 'X', num: 4, weight: 2},
+                {color: 'X', num: 5, weight: 1},
+              ],
+            },
+          ],
         },
         {
           name: 'Hyde',
           idx: 1,
           isMe: true,
-          hand: [
+          completeHand: [],
+          mysteryHand: [
             {
               color: 'X',
               hints: [],

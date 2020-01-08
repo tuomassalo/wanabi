@@ -8,7 +8,8 @@ export interface TPlayerState {
   name: string
   idx: number
   isMe: boolean
-  hand: THandCardState[]
+  completeHand: THandCardState[]
+  mysteryHand: THandCardState[]
 }
 
 export class Player {
@@ -26,12 +27,13 @@ export class Player {
     this.name = name
     this.hand = hand
   }
-  getState(isMe: boolean): TPlayerState {
+  getState(): TPlayerState {
     return {
       name: this.name,
       idx: this.idx,
-      isMe,
-      hand: this.hand.getState(isMe),
+      isMe: false,
+      completeHand: this.hand.getState(false),
+      mysteryHand: this.hand.getState(true),
     }
   }
   setHand(hand: Hand) {

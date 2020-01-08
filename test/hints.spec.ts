@@ -28,6 +28,8 @@ describe('An ongoing game', () => {
   it('should have proper state after 2*6 turns, before hinting', () => {
     const g = createTestGame()
     expect(g.getState(g.players[1].id)).toEqual({
+      timestamp: jasmine.any(String),
+      action: jasmine.any(Object),
       stockSize: 60 - 2 * 5 - 2 * 6, // === 16
       discardPile: [c.B1, c.A1, c.B1, c.C1, c.A4, c.B5, c.X1],
       hintCount: 9,
@@ -42,7 +44,7 @@ describe('An ongoing game', () => {
       },
       turn: 2 * 6,
       inTurn: 0,
-      turnsLeft: Infinity,
+      turnsLeft: null,
       score: 5,
       status: 'RUNNING',
       players: jasmine.any(Array),
@@ -53,7 +55,7 @@ describe('An ongoing game', () => {
     const g = createTestGame()
     g.act(g.players[0].id, {type: 'HINT', toPlayerIdx: 1, is: 5})
     expect(g.getState(g.players[1].id).hintCount).toEqual(8)
-    expect(g.getState(g.players[1].id).players[1].hand).toEqual([
+    expect(g.getState(g.players[1].id).players[1].mysteryHand).toEqual([
       {hints: [{turn: 12, is: 5, result: false}]},
       {hints: [{turn: 12, is: 5, result: false}]},
       {hints: [{turn: 12, is: 5, result: false}]},
@@ -68,7 +70,7 @@ describe('An ongoing game', () => {
     expect(g.getState(g.players[1].id).hintCount).toEqual(6)
 
     // still not enough hints
-    expect(g.getState(g.players[1].id).players[1].hand).toEqual([
+    expect(g.getState(g.players[1].id).players[1].mysteryHand).toEqual([
       {
         hints: [
           {turn: 12, is: 5, result: false},
@@ -107,7 +109,7 @@ describe('An ongoing game', () => {
     expect(g.getState(g.players[1].id).hintCount).toEqual(4)
 
     // now we have enough hints to possibly identify some cards
-    expect(g.getState(g.players[1].id).players[1].hand).toEqual([
+    expect(g.getState(g.players[1].id).players[1].mysteryHand).toEqual([
       {
         hints: [
           {turn: 12, is: 5, result: false},

@@ -11,6 +11,8 @@ describe('A perfect two-player game without any hints or discards', () => {
   })
   it('should have correct setup', () => {
     expect(g.getState(g.players[0].id)).toEqual({
+      timestamp: jasmine.any(String),
+      action: {type: 'START'},
       stockSize: 50,
       discardPile: [],
       hintCount: 9,
@@ -18,7 +20,7 @@ describe('A perfect two-player game without any hints or discards', () => {
       table: {A: [], B: [], C: [], D: [], E: [], X: []},
       turn: 0,
       inTurn: 0,
-      turnsLeft: Infinity,
+      turnsLeft: null,
       score: 0,
       status: 'RUNNING',
       players: [
@@ -26,13 +28,15 @@ describe('A perfect two-player game without any hints or discards', () => {
           name: 'Bonnie',
           idx: 0,
           isMe: true,
-          hand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
+          completeHand: [],
+          mysteryHand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
         },
         {
           name: 'Clyde',
           idx: 1,
           isMe: false,
-          hand: cards('A2,A4,B1,B3,B5'),
+          completeHand: cards('A2,A4,B1,B3,B5'),
+          mysteryHand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
         },
       ],
     })
@@ -40,6 +44,8 @@ describe('A perfect two-player game without any hints or discards', () => {
   it('should properly alter state after playing a card', () => {
     g.act(g.players[0].id, {type: 'PLAY', cardIdx: 0})
     expect(g.getState(g.players[1].id)).toEqual({
+      timestamp: jasmine.any(String),
+      action: {type: 'PLAY', cardIdx: 0, card: {color: 'A', num: 1}},
       stockSize: 49,
       discardPile: [],
       hintCount: 9,
@@ -47,7 +53,7 @@ describe('A perfect two-player game without any hints or discards', () => {
       table: {A: [c.A1], B: [], C: [], D: [], E: [], X: []},
       turn: 1,
       inTurn: 1,
-      turnsLeft: Infinity,
+      turnsLeft: null,
       score: 1,
       status: 'RUNNING',
       players: [
@@ -55,23 +61,27 @@ describe('A perfect two-player game without any hints or discards', () => {
           name: 'Bonnie',
           idx: 0,
           isMe: false,
-          hand: cards('A3,A5,B2,B4,C1'),
+          completeHand: cards('A3,A5,B2,B4,C1'),
+          mysteryHand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
         },
         {
           name: 'Clyde',
           idx: 1,
           isMe: true,
-          hand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
+          completeHand: [],
+          mysteryHand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
         },
       ],
     })
   })
   it('should have proper state before the final action', () => {
-    // always play the newest card from hand
+    // always play the newest card from hand_
     for (let i = 1; i <= 28; i++) {
       g.act(g.players[i % 2].id, {type: 'PLAY', cardIdx: 0})
     }
     expect(g.getState(g.players[1].id)).toEqual({
+      timestamp: jasmine.any(String),
+      action: jasmine.any(Object),
       stockSize: 21,
       discardPile: [],
       hintCount: 9,
@@ -86,7 +96,7 @@ describe('A perfect two-player game without any hints or discards', () => {
       },
       turn: 29,
       inTurn: 1,
-      turnsLeft: Infinity,
+      turnsLeft: null,
       score: 29,
       status: 'RUNNING',
       players: [
@@ -94,13 +104,15 @@ describe('A perfect two-player game without any hints or discards', () => {
           name: 'Bonnie',
           idx: 0,
           isMe: false,
-          hand: [knownCard(), knownCard(), knownCard(), knownCard(), knownCard()],
+          completeHand: [knownCard(), knownCard(), knownCard(), knownCard(), knownCard()],
+          mysteryHand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
         },
         {
           name: 'Clyde',
           idx: 1,
           isMe: true,
-          hand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
+          completeHand: [],
+          mysteryHand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
         },
       ],
     })
@@ -108,6 +120,8 @@ describe('A perfect two-player game without any hints or discards', () => {
   it('should finish after the last card has been played', () => {
     g.act(g.players[1].id, {type: 'PLAY', cardIdx: 0})
     expect(g.getState(g.players[1].id)).toEqual({
+      timestamp: jasmine.any(String),
+      action: jasmine.any(Object),
       stockSize: 20,
       discardPile: [],
       hintCount: 9,
@@ -122,7 +136,7 @@ describe('A perfect two-player game without any hints or discards', () => {
       },
       turn: 30,
       inTurn: 0,
-      turnsLeft: Infinity,
+      turnsLeft: null,
       score: 30,
       status: 'FINISHED',
       players: [
@@ -130,13 +144,15 @@ describe('A perfect two-player game without any hints or discards', () => {
           name: 'Bonnie',
           idx: 0,
           isMe: false,
-          hand: [knownCard(), knownCard(), knownCard(), knownCard(), knownCard()],
+          completeHand: [knownCard(), knownCard(), knownCard(), knownCard(), knownCard()],
+          mysteryHand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
         },
         {
           name: 'Clyde',
           idx: 1,
           isMe: true,
-          hand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
+          completeHand: [],
+          mysteryHand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
         },
       ],
     })
