@@ -1,5 +1,5 @@
 import {c, knownCard, createDeck} from './helpers'
-import {Game} from '../src/game'
+import {Game} from '../src/game/game'
 
 function createTestGame() {
   const g = new Game(['Thelma', 'Louise'], {

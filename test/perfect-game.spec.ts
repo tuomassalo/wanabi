@@ -1,4 +1,4 @@
-import {Game} from '../src/game'
+import {Game} from '../src/game/game'
 
 import {c, createDeck, knownCard, cards} from './helpers'
 

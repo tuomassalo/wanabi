@@ -1,5 +1,5 @@
-import {THintResultState, Card, TColor, TNum, THandCardState} from '../src/card'
-import {demystify} from '../src/demystifier'
+import {THintResultState, Card, TColor, TNum, THandCardState} from '../src/game/card'
+import {demystify} from '../src/game/demystifier'
 
 interface CreateHint {
   is: TColor | TNum

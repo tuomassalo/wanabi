@@ -1,7 +1,7 @@
-import {Card, TColor, TNum, TCardState} from '../src/card'
-import {Pile} from '../src/pile'
+import {Card, TColor, TNum, TCardState} from '../src/game/card'
+import {Pile} from '../src/game/pile'
 import * as stringify from 'json-stable-stringify'
-import {Game} from '../src/game'
+import {Game} from '../src/game/game'
 import {zip} from 'lodash'
 
 export const c = {
