@@ -123,8 +123,8 @@ describe('An ongoing game', () => {
           {turn: 16, is: 2, result: true},
         ],
         possibleCards: [
-          {color: 'B', num: 2, weight: 2},
-          {color: 'X', num: 2, weight: 2},
+          {color: 'B', num: 2, weight: 1},
+          {color: 'X', num: 2, weight: 1},
         ],
       },
       {
@@ -135,8 +135,8 @@ describe('An ongoing game', () => {
           {turn: 16, is: 2, result: true},
         ],
         possibleCards: [
-          {color: 'B', num: 2, weight: 2},
-          {color: 'X', num: 2, weight: 2},
+          {color: 'B', num: 2, weight: 1},
+          {color: 'X', num: 2, weight: 1},
         ],
       },
       {

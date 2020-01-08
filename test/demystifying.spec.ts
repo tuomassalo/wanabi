@@ -27,6 +27,21 @@ function revealedCards(r: string) {
     .map(c => c.getState())
 }
 
+function fullDeckMinus(r: string) {
+  const left = Card.getFullDeck()
+
+  for (const c of r
+    .split(/\s+/)
+    .filter(v => /\w/.test(v))
+    .map(Card.fromValueString)) {
+    left.splice(
+      left.findIndex(f => f.is(c)),
+      1,
+    )
+  }
+  return left.map(c => c.getState())
+}
+
 describe('with no revealed cards', () => {
   it('first we should have nothing', () => {
     expect(demystify([{hints: []}], [])).toEqual([{hints: []}])
@@ -66,8 +81,8 @@ describe('with no revealed cards', () => {
           {is: 4, result: true, turn: 0},
         ],
         possibleCards: [
-          {color: 'D', num: 4, weight: 2},
-          {color: 'X', num: 4, weight: 2},
+          {color: 'D', num: 4, weight: 1},
+          {color: 'X', num: 4, weight: 1},
         ],
       },
     ])
@@ -97,7 +112,7 @@ describe('with some revealed cards', () => {
           {is: 4, result: true, turn: 0},
         ],
         possibleCards: [
-          {color: 'D', num: 4, weight: 2},
+          {color: 'D', num: 4, weight: 2}, //?
           {color: 'X', num: 4, weight: 1},
         ],
       },
@@ -116,7 +131,8 @@ describe('with some revealed cards', () => {
     ])
   })
 })
-describe('information inferred from a hit', () => {
+describe('information inferred from a complete hit', () => {
+  // these are found with iteration (`didRevealMore`)
   it('if we identify a B2, we can infer a C2/X2', () => {
     expect(
       demystify(
@@ -161,6 +177,140 @@ describe('information inferred from a hit', () => {
         color: 'C',
         num: 2,
         hints: [{is: 2, result: true, turn: 0}],
+      },
+    ])
+  })
+})
+
+describe('information inferred from a partial hit', () => {
+  it('infers C3 from a B2/C2/C3 when we know that two other cards are B2+C2 or C2+B2', () => {
+    expect(
+      demystify(
+        hand({hints: [{is: 2}]}, {hints: [{is: 2}]}, {hints: []}),
+        // no stock left: all the cards are visible except the three in hand
+        fullDeckMinus('B2 C2 C3'),
+      ),
+    ).toEqual([
+      {
+        num: 2,
+        hints: [{is: 2, result: true, turn: 0}],
+        possibleCards: [
+          {color: 'B', num: 2, weight: 1},
+          {color: 'C', num: 2, weight: 1},
+        ],
+      },
+      {
+        num: 2,
+        hints: [{is: 2, result: true, turn: 0}],
+        possibleCards: [
+          {color: 'B', num: 2, weight: 1},
+          {color: 'C', num: 2, weight: 1},
+        ],
+      },
+      {
+        color: 'C',
+        num: 3,
+        hints: [],
+      },
+    ])
+  })
+  it('infers C3/D3 from a B2/C2/C3/D3 when we know that two other cards are B2+C2 or C2+B2', () => {
+    expect(
+      demystify(
+        hand({hints: [{is: 2}]}, {hints: [{is: 2}]}, {hints: []}),
+        // stock only has a C3/D3.
+        fullDeckMinus('B2 C2 C3 D3'),
+      ),
+    ).toEqual([
+      {
+        num: 2,
+        hints: [{is: 2, result: true, turn: 0}],
+        possibleCards: [
+          {color: 'B', num: 2, weight: 1},
+          {color: 'C', num: 2, weight: 1},
+        ],
+      },
+      {
+        num: 2,
+        hints: [{is: 2, result: true, turn: 0}],
+        possibleCards: [
+          {color: 'B', num: 2, weight: 1},
+          {color: 'C', num: 2, weight: 1},
+        ],
+      },
+      {
+        num: 3,
+        hints: [],
+        possibleCards: [
+          {color: 'C', num: 3, weight: 1},
+          {color: 'D', num: 3, weight: 1},
+        ],
+      },
+    ])
+  })
+  it('infers C3/D4 from a B2/C2/C3/D4 when we know that two other cards are B2+C2 or C2+B2', () => {
+    expect(
+      demystify(
+        hand({hints: [{is: 2}]}, {hints: [{is: 2}]}, {hints: []}),
+        // stock only has a C3/D4.
+        fullDeckMinus('B2 C2 C3 D4'),
+      ),
+    ).toEqual([
+      {
+        num: 2,
+        hints: [{is: 2, result: true, turn: 0}],
+        possibleCards: [
+          {color: 'B', num: 2, weight: 1},
+          {color: 'C', num: 2, weight: 1},
+        ],
+      },
+      {
+        num: 2,
+        hints: [{is: 2, result: true, turn: 0}],
+        possibleCards: [
+          {color: 'B', num: 2, weight: 1},
+          {color: 'C', num: 2, weight: 1},
+        ],
+      },
+      {
+        hints: [],
+        possibleCards: [
+          {color: 'C', num: 3, weight: 1},
+          {color: 'D', num: 4, weight: 1},
+        ],
+      },
+    ])
+  })
+  it('infers weighted C3/D4 from a B2/C2/C3/D4 when we know that two other cards are B2+C2 or C2+B2', () => {
+    expect(
+      demystify(
+        hand({hints: [{is: 2}]}, {hints: [{is: 2}]}, {hints: []}),
+        // stock only has two of these: C3 D4 D4
+        fullDeckMinus('B2 C2 C3 D4 D4'),
+      ),
+    ).toEqual([
+      {
+        num: 2,
+        hints: [{is: 2, result: true, turn: 0}],
+        possibleCards: [
+          {color: 'B', num: 2, weight: 1},
+          {color: 'C', num: 2, weight: 1},
+        ],
+      },
+      {
+        num: 2,
+        hints: [{is: 2, result: true, turn: 0}],
+        possibleCards: [
+          {color: 'B', num: 2, weight: 1},
+          {color: 'C', num: 2, weight: 1},
+        ],
+      },
+      {
+        hints: [],
+        possibleCards: [
+          {color: 'C', num: 3, weight: 1},
+          {color: 'D', num: 4, weight: 2},
+        ],
       },
     ])
   })
