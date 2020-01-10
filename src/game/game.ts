@@ -164,7 +164,7 @@ export class Game {
       .join(' ')
 
     if (currentCards !== expectedCards) {
-      console.warn(444, currentCards)
+      console.warn('INTEGRITY_ERROR:', currentCards)
 
       throw new Error('INTEGRITY_ERROR')
     }
