@@ -1,22 +1,26 @@
 {
   "compilerOptions": {
-    // don't actually produce any javascript code.
-    // see https://github.com/Microsoft/TypeScript/issues/14538#issuecomment-427979741
-    "noEmit": true,
-
-    "target": "es2017",
-    // this enables stricter inference for data properties on `this`
-    "strict": true,
-    "noImplicitAny": false,
-    // if using webpack 2+ or rollup, to leverage tree shaking:
-    // "module": "es2015",
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "sourceMap": true,
     "allowJs": true,
-    "lib": ["es2019", "dom"],
-    "rootDir": "./src"
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
+    "jsx": "react",
+    "lib": ["es2019", "dom", "dom.iterable", "esnext"],
+    "module": "esnext",
+    "moduleResolution": "node",
+    "noEmit": true,
+    "noImplicitAny": false,
+    "resolveJsonModule": true,
+    "rootDir": "./src",
+    "skipLibCheck": true,
+    "sourceMap": true,
+    "strict": true,
+    "target": "es2017"
   },
-  "include": ["./src/**/*.ts"],
-  "exclude": ["./test/*.test.ts", "./test/*/*.test.ts"]
+  // "exclude": [
+  //   "./test/*.test.ts",
+  //   "./test/*/*.test.ts"
+  // ],
+  "include": ["src"]
 }

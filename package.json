@@ -15,7 +15,11 @@
     "broadcast": "sls invoke --function broadcast --data '{ \"body\": \"Hello from server\" }'",
     "localbroadcast": "sls invoke local --function broadcast --data '{ \"body\": \"Hello from server\" }'",
     "localbackend": "sls offline start --inMemory --stage dev",
-    "localfrontend": "http-server src/client"
+    "localfrontend": "http-server src/client",
+    "webstart": "PORT=3002 react-scripts start",
+    "webbuild": "react-scripts build",
+    "webtest": "react-scripts test",
+    "webeject": "react-scripts eject"
   },
   "devDependencies": {
     "@anttiviljami/serverless-stack-output": "0.3.1",
@@ -23,6 +27,8 @@
     "@types/json-stable-stringify": "1.0.32",
     "@types/lodash": "4.14.149",
     "@types/node": "12.12.21",
+    "@types/react": "16.9.17",
+    "@types/react-dom": "16.9.4",
     "coveralls": "3.0.9",
     "http-server": "0.11.1",
     "jasmine": "3.4.0",
@@ -40,9 +46,24 @@
     "typescript": "3.7.3"
   },
   "dependencies": {
+    "react": "16.12.0",
+    "react-dom": "16.12.0",
+    "react-scripts": "3.3.0",
     "serverless-dynamodb-client": "0.0.2",
     "serverless-dynamodb-local": "0.2.38",
     "serverless-offline": "5.12.1",
     "serverless-plugin-typescript": "1.1.9"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
   }
 }

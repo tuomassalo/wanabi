@@ -84,12 +84,12 @@ export class Game {
     }
     this.discardPile = discardPile || new Pile([])
 
-    const handSize = {
-      2: 5,
-      3: 5,
-      4: 4,
-      5: 4,
-    }[playerNames.length]
+    const handSize: number = {
+      '2': 5,
+      '3': 5,
+      '4': 4,
+      '5': 4,
+    }['' + playerNames.length]
 
     if (!handSize) {
       throw new Error('INVALID_NUMBER_OF_PLAYERS')
