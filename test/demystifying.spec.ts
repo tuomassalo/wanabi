@@ -103,7 +103,7 @@ describe('with no revealed cards', () => {
 })
 
 describe('with some revealed cards', () => {
-  it('if we say D and 4, and one X4 is revelead, we get a weighted guess', () => {
+  it('if we say D and 4, and one X4 is revealed, we get a weighted guess', () => {
     expect(demystify(hand({hints: [{is: 'D'}, {is: 4}]}), revealedCards('X4'))).toEqual([
       {
         num: 4,
@@ -112,7 +112,7 @@ describe('with some revealed cards', () => {
           {is: 4, result: true, turn: 0},
         ],
         possibleCards: [
-          {color: 'D', num: 4, weight: 2}, //?
+          {color: 'D', num: 4, weight: 2},
           {color: 'X', num: 4, weight: 1},
         ],
       },
