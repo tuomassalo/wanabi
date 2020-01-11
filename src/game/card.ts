@@ -102,7 +102,7 @@ export class PossibleCard extends Card {
 
 export class MyHandCard {
   hints: THintResultState[] = []
-  possibleCards: PossibleCard[] = []
+  possibleCards?: PossibleCard[]
   color?: TColor
   num?: TNum
   // static fromHandCard(hc: HandCard) {
@@ -113,7 +113,7 @@ export class MyHandCard {
       this.hints = hc.hints
     } else {
       this.hints = hc.hints
-      this.possibleCards = (hc.possibleCards || []).map(pc => PossibleCard.deserialize(pc))
+      this.possibleCards = hc.possibleCards ? hc.possibleCards.map(pc => PossibleCard.deserialize(pc)) : undefined
       this.color = hc.color
       this.num = hc.num
     }
@@ -122,6 +122,11 @@ export class MyHandCard {
     return new this(hcs)
   }
   toJSON(): any {
-    return {color: this.color, num: this.num, possibleCards: this.possibleCards, hints: this.hints}
+    return {
+      color: this.color,
+      num: this.num,
+      possibleCards: this.possibleCards?.length ? this.possibleCards : undefined,
+      hints: this.hints,
+    }
   }
 }

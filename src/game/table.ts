@@ -19,9 +19,9 @@ export class Table {
       .map(p => p.cards)
       .flat().length
   }
-  getState(): TTableState {
+  toJSON(): TTableState {
     // NB: why does fromEntries need `as`
-    return Object.fromEntries(Object.entries(this.table).map(([c, pile]) => [c, pile.getState()])) as TTableState
+    return Object.fromEntries(Object.entries(this.table).map(([c, pile]) => [c, pile.toJSON()])) as TTableState
   }
   // returns success
   play(card: Card): boolean {

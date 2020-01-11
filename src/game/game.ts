@@ -1,6 +1,6 @@
 import {Pile} from './pile'
 import {Player, TPlayerId, TPlayerState} from './player'
-import {Card, TColor, TNum, AllColors, AllNums, TCardState} from './card'
+import {Card, TColor, TNum, AllColors, AllNums, TCardState, MyHandCard} from './card'
 import {Hand} from './hand'
 import {Table, TTableState} from './table'
 import {SyntaxError, GameError} from './errors'
@@ -114,7 +114,7 @@ export class Game {
   hintCount: number = 9
   woundCount: number = 0
   turnNumber: number = -1
-  turnsLeft: number = Infinity
+  turnsLeft: number | null = null
   table: Table
   turns: Turn[] = []
   status: TGameStatus = 'RUNNING'
@@ -177,11 +177,19 @@ export class Game {
       throw new SyntaxError('INVALID_PLAYER_ID', playerId)
     }
 
+    const ret = JSON.parse(
+      JSON.stringify(
+        this.turns.map(t => ({
+          ...t,
+          players: t.players.map((p, idx) => p.toObject(idx === this.playersById[playerId].idx)),
+        })),
+      ),
+    ) as TTurnState[]
+
     // hide my cards
-    const ret = JSON.parse(JSON.stringify(this.turns)) as TTurnState[]
-    for (const t of ret) {
-      t.players[this.playersById[playerId].idx].mysteryHandCards = []
-    }
+    // for (const t of ret) {
+    //   t.players[this.playersById[playerId].idx].mysteryHandCards = []
+    // }
 
     return ret
   }
@@ -279,7 +287,7 @@ export class Game {
   }
   addTurn(action: TResolvedActionState) {
     this.turnNumber++
-    this.turnsLeft--
+    if (this.turnsLeft !== null) this.turnsLeft--
     if (this.turnsLeft === 0) {
       // TODO: check if off-by-one
       this.status = 'FINISHED'
@@ -288,12 +296,13 @@ export class Game {
       this.turnsLeft = this.players.length
     }
 
-    //const players = this.players.map(p => p.getState())
-
     for (const p of this.players) {
-      demystify(
-        p.mysteryHandCards,
-        [this.discardPile.cards, Object.values(this.table.table).flatMap(p => p.cards)].flat(),
+      p.clearMysteryHandCards()
+      p.setMysteryHandCards(
+        demystify(
+          p.getMysteryHandCards(),
+          [this.discardPile.cards, Object.values(this.table.table).flatMap(p => p.cards)].flat(),
+        ),
       )
     }
 

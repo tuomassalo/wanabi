@@ -1,4 +1,4 @@
-import {c, createTightGame, knownCard, cards} from './helpers'
+import {createTightGame, knownCard, cards} from './helpers'
 
 describe('A tight three-player game', () => {
   const g = createTightGame()
@@ -82,7 +82,7 @@ describe('A tight three-player game', () => {
           name: 'Jekyll',
           idx: 0,
           isMe: false,
-          completeHandCards: cards('X1,X2,X3,X4,X5'),
+          completeHandCards: 'X1,X2,X3,X4,X5'.split(','),
           mysteryHandCards: [
             {
               hints: [],

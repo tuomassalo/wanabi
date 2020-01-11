@@ -1,4 +1,4 @@
-import {c, knownCard, createDeck} from './helpers'
+import {createDeck} from './helpers'
 import {Game} from '../src/game/game'
 
 function createTestGame() {

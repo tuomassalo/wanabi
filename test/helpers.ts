@@ -92,9 +92,11 @@ export function cards(cardsString: string): any {
 export function knownCard(): any {
   return {
     asymmetricMatch: function(compareTo) {
-      const c = {...compareTo}
-      delete c.hints
-      return /^[ABCDEX][12345]$/.test(c.value)
+      // console.warn({compareTo})
+
+      // const c = {...compareTo}
+      // delete c.hints
+      return /^[ABCDEX][12345]$/.test(compareTo)
       // return /^\{"color":"[ABCDEX]","num":[12345]\}$/.test(stringify(c))
     },
 

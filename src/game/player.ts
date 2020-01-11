@@ -13,16 +13,22 @@ export interface TPlayerState {
 }
 
 export class Player {
-  // pos: number
   name: string
   hand: Hand
+  mysteryHandCards?: MyHandCard[]
   id: TPlayerId
   idx: number
-  // hint(Color|Num)
-  // receivedHints: Hint[]
 
-  get mysteryHandCards() {
-    return this.hand.cards.map(c => new MyHandCard(c))
+  getMysteryHandCards(): MyHandCard[] {
+    return this.mysteryHandCards || this.hand.cards.map(c => new MyHandCard(c))
+  }
+
+  setMysteryHandCards(cards: MyHandCard[]) {
+    this.mysteryHandCards = cards
+  }
+
+  clearMysteryHandCards() {
+    this.mysteryHandCards = undefined
   }
 
   constructor(name: string, idx: number, hand: Hand) {
@@ -38,7 +44,7 @@ export class Player {
       idx: this.idx,
       isMe,
       completeHandCards: isMe ? [] : this.hand.cards.map(c => c.toJSON()),
-      mysteryHandCards: this.mysteryHandCards.map(c => c.toJSON()),
+      mysteryHandCards: this.getMysteryHandCards().map(c => c.toJSON()),
     }
   }
   setHand(hand: Hand) {

@@ -1,5 +1,10 @@
-import {Card, MyHandCard, PossibleCard} from './card'
+import {Card, MyHandCard, PossibleCard, HandCard} from './card'
 import {sum, range} from 'lodash'
+
+interface CardWithFewSolutions {
+  possibleCards: PossibleCard[]
+  handIdx: number
+}
 
 // from https://codereview.stackexchange.com/a/212678
 function gcd(arr) {
@@ -55,6 +60,12 @@ function countPossibleCards(possibleCards: Card[]): PossibleCard[] {
 
 // NB: modifies myHand entries: adds `possibleCards` and fills out `color` and `num`
 export function demystify(myHand: MyHandCard[], revealedCards: Card[]): MyHandCard[] {
+  // console.warn(
+  //   'DEM',
+  //   myHand.map(c => c.hints),
+  //   revealedCards.length,
+  // )
+
   const unrevealedCards = Card.getFullDeck()
   for (const r of revealedCards) {
     unrevealedCards.splice(
@@ -70,9 +81,13 @@ export function demystify(myHand: MyHandCard[], revealedCards: Card[]): MyHandCa
 
   function addKnownBits(handCard: MyHandCard, possibleCards: Card[]): boolean {
     let didRevealMore = false
+    // console.warn('aKB', possibleCards, handCard)
+
     for (const k of ['color', 'num']) {
       if (possibleCards.every(c => c[k] === possibleCards[0][k])) {
         if (!handCard[k]) {
+          // console.warn('2222', k)
+
           handCard[k] = possibleCards[0][k]
           didRevealMore = true
           // if the card has now been fully revealed, move it to `revealedCards`.
@@ -139,7 +154,9 @@ export function demystify(myHand: MyHandCard[], revealedCards: Card[]): MyHandCa
       // NB! `myHand.length + 4` is based on a wild guess. It might be incorrect for some setups.
       const cardsWithFewSolutions = myHand
         .map((c, handIdx) => ({possibleCards: c.possibleCards, handIdx}))
-        .filter(c => c.possibleCards && sum(c.possibleCards.map(pc => pc.weight)) <= myHand.length + 4)
+        .filter(
+          c => c.possibleCards && sum(c.possibleCards.map(pc => pc.weight)) <= myHand.length + 4,
+        ) as CardWithFewSolutions[]
       if (cardsWithFewSolutions.length < 2) {
         // nothing to guess
         return false
@@ -225,6 +242,8 @@ export function demystify(myHand: MyHandCard[], revealedCards: Card[]): MyHandCa
     if (!didRevealMore) break
     // console.warn('ANOTHER GO...', {revealedCards, unrevealedCards})
   }
+
+  // console.warn('RET', myHand)
 
   return myHand
 }

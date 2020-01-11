@@ -1,6 +1,6 @@
 import {Game} from '../src/game/game'
 
-import {c, createDeck, knownCard, cards} from './helpers'
+import {createDeck, knownCard} from './helpers'
 
 describe('A perfect two-player game without any hints or discards', () => {
   const g = new Game(['Bonnie', 'Clyde'], {
@@ -35,7 +35,7 @@ describe('A perfect two-player game without any hints or discards', () => {
           name: 'Clyde',
           idx: 1,
           isMe: false,
-          completeHandCards: cards('A2,A4,B1,B3,B5'),
+          completeHandCards: 'A2,A4,B1,B3,B5'.split(','),
           mysteryHandCards: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
         },
       ],
