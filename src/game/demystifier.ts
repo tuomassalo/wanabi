@@ -1,4 +1,4 @@
-import {TCardState, THandCardState, Card, TPossibleCardState, TColor, TNum} from './card'
+import {Card, MyHandCard, PossibleCard} from './card'
 import {sum, range} from 'lodash'
 
 // from https://codereview.stackexchange.com/a/212678
@@ -26,12 +26,7 @@ function gcd(arr) {
 
 const l = (cards: Card[]) => cards.map(c => c.toString()).join(',')
 
-interface THandCardStateWithPossibleCards extends THandCardState {
-  possibleCards: TPossibleCardState[] // same but mandatory
-  handIdx: number // since we want to sort the hand when guessing
-}
-
-function countPossibleCards(possibleCards: Card[]) {
+function countPossibleCards(possibleCards: Card[]): PossibleCard[] {
   // console.warn('cPC', possibleCards.length)
 
   const possibleCardCounts: {card: Card; count: number}[] = []
@@ -55,11 +50,11 @@ function countPossibleCards(possibleCards: Card[]) {
     }))
     .sort((a, b) => a.color.localeCompare(b.color) || a.num - b.num)
 
-  return ret
+  return ret.map(pc => new PossibleCard(pc.color, pc.num, pc.weight))
 }
 
 // NB: modifies myHand entries: adds `possibleCards` and fills out `color` and `num`
-export function demystify(myHand: THandCardState[], revealedCards: TCardState[]) {
+export function demystify(myHand: MyHandCard[], revealedCards: Card[]): MyHandCard[] {
   const unrevealedCards = Card.getFullDeck()
   for (const r of revealedCards) {
     unrevealedCards.splice(
@@ -73,7 +68,7 @@ export function demystify(myHand: THandCardState[], revealedCards: TCardState[])
   //   console.warn(c)
   // }
 
-  function addKnownBits(handCard: THandCardState, possibleCards: Card[]): boolean {
+  function addKnownBits(handCard: MyHandCard, possibleCards: Card[]): boolean {
     let didRevealMore = false
     for (const k of ['color', 'num']) {
       if (possibleCards.every(c => c[k] === possibleCards[0][k])) {
@@ -82,7 +77,7 @@ export function demystify(myHand: THandCardState[], revealedCards: TCardState[])
           didRevealMore = true
           // if the card has now been fully revealed, move it to `revealedCards`.
           if (handCard.color && handCard.num) {
-            revealedCards.push({color: handCard[k].color, num: handCard[k].num})
+            revealedCards.push(new Card(handCard[k].color, handCard[k].num))
             unrevealedCards.splice(
               unrevealedCards.findIndex(u => u.is(handCard[k])),
               1,
@@ -138,15 +133,13 @@ export function demystify(myHand: THandCardState[], revealedCards: TCardState[])
     // - only try one instance of each value, e.g. the hands starting with C4,C4 should only be tried once
     //   - HOW?
 
-    function guess(myHand: THandCardState[], unrevealedCards: Card[]): boolean {
+    function guess(myHand: MyHandCard[], unrevealedCards: Card[]): boolean {
       let didRevealMore = false
 
       // NB! `myHand.length + 4` is based on a wild guess. It might be incorrect for some setups.
       const cardsWithFewSolutions = myHand
-        .map((c, handIdx) => ({...c, handIdx}))
-        .filter(
-          c => c.possibleCards && sum(c.possibleCards.map(pc => pc.weight)) <= myHand.length + 4,
-        ) as THandCardStateWithPossibleCards[]
+        .map((c, handIdx) => ({possibleCards: c.possibleCards, handIdx}))
+        .filter(c => c.possibleCards && sum(c.possibleCards.map(pc => pc.weight)) <= myHand.length + 4)
       if (cardsWithFewSolutions.length < 2) {
         // nothing to guess
         return false
@@ -181,7 +174,7 @@ export function demystify(myHand: THandCardState[], revealedCards: TCardState[])
       }
 
       // turn possibleCards to a list, repeat those with weight>1
-      function expandPossibleCards(possibleCards: TPossibleCardState[]): Card[] {
+      function expandPossibleCards(possibleCards: PossibleCard[]): Card[] {
         const ret: Card[] = []
         for (const pc of possibleCards) {
           for (let w = 0; w < pc.weight; w++) {

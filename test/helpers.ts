@@ -1,41 +1,41 @@
-import {Card, TColor, TNum, TCardState} from '../src/game/card'
+import {Card} from '../src/game/card'
 import {Pile} from '../src/game/pile'
-import * as stringify from 'json-stable-stringify'
+// import * as stringify from 'json-stable-stringify'
 import {Game} from '../src/game/game'
 import {zip} from 'lodash'
 
-export const c = {
-  A1: {color: 'A' as TColor, num: 1 as TNum},
-  A2: {color: 'A' as TColor, num: 2 as TNum},
-  A3: {color: 'A' as TColor, num: 3 as TNum},
-  A4: {color: 'A' as TColor, num: 4 as TNum},
-  A5: {color: 'A' as TColor, num: 5 as TNum},
-  B1: {color: 'B' as TColor, num: 1 as TNum},
-  B2: {color: 'B' as TColor, num: 2 as TNum},
-  B3: {color: 'B' as TColor, num: 3 as TNum},
-  B4: {color: 'B' as TColor, num: 4 as TNum},
-  B5: {color: 'B' as TColor, num: 5 as TNum},
-  C1: {color: 'C' as TColor, num: 1 as TNum},
-  C2: {color: 'C' as TColor, num: 2 as TNum},
-  C3: {color: 'C' as TColor, num: 3 as TNum},
-  C4: {color: 'C' as TColor, num: 4 as TNum},
-  C5: {color: 'C' as TColor, num: 5 as TNum},
-  D1: {color: 'D' as TColor, num: 1 as TNum},
-  D2: {color: 'D' as TColor, num: 2 as TNum},
-  D3: {color: 'D' as TColor, num: 3 as TNum},
-  D4: {color: 'D' as TColor, num: 4 as TNum},
-  D5: {color: 'D' as TColor, num: 5 as TNum},
-  E1: {color: 'E' as TColor, num: 1 as TNum},
-  E2: {color: 'E' as TColor, num: 2 as TNum},
-  E3: {color: 'E' as TColor, num: 3 as TNum},
-  E4: {color: 'E' as TColor, num: 4 as TNum},
-  E5: {color: 'E' as TColor, num: 5 as TNum},
-  X1: {color: 'X' as TColor, num: 1 as TNum},
-  X2: {color: 'X' as TColor, num: 2 as TNum},
-  X3: {color: 'X' as TColor, num: 3 as TNum},
-  X4: {color: 'X' as TColor, num: 4 as TNum},
-  X5: {color: 'X' as TColor, num: 5 as TNum},
-}
+// export const c = {
+//   A1: {color: 'A' as TColor, num: 1 as TNum},
+//   A2: {color: 'A' as TColor, num: 2 as TNum},
+//   A3: {color: 'A' as TColor, num: 3 as TNum},
+//   A4: {color: 'A' as TColor, num: 4 as TNum},
+//   A5: {color: 'A' as TColor, num: 5 as TNum},
+//   B1: {color: 'B' as TColor, num: 1 as TNum},
+//   B2: {color: 'B' as TColor, num: 2 as TNum},
+//   B3: {color: 'B' as TColor, num: 3 as TNum},
+//   B4: {color: 'B' as TColor, num: 4 as TNum},
+//   B5: {color: 'B' as TColor, num: 5 as TNum},
+//   C1: {color: 'C' as TColor, num: 1 as TNum},
+//   C2: {color: 'C' as TColor, num: 2 as TNum},
+//   C3: {color: 'C' as TColor, num: 3 as TNum},
+//   C4: {color: 'C' as TColor, num: 4 as TNum},
+//   C5: {color: 'C' as TColor, num: 5 as TNum},
+//   D1: {color: 'D' as TColor, num: 1 as TNum},
+//   D2: {color: 'D' as TColor, num: 2 as TNum},
+//   D3: {color: 'D' as TColor, num: 3 as TNum},
+//   D4: {color: 'D' as TColor, num: 4 as TNum},
+//   D5: {color: 'D' as TColor, num: 5 as TNum},
+//   E1: {color: 'E' as TColor, num: 1 as TNum},
+//   E2: {color: 'E' as TColor, num: 2 as TNum},
+//   E3: {color: 'E' as TColor, num: 3 as TNum},
+//   E4: {color: 'E' as TColor, num: 4 as TNum},
+//   E5: {color: 'E' as TColor, num: 5 as TNum},
+//   X1: {color: 'X' as TColor, num: 1 as TNum},
+//   X2: {color: 'X' as TColor, num: 2 as TNum},
+//   X3: {color: 'X' as TColor, num: 3 as TNum},
+//   X4: {color: 'X' as TColor, num: 4 as TNum},
+//   X5: {color: 'X' as TColor, num: 5 as TNum},
+// }
 
 export function shuffle(arr: any[]) {
   for (let i = arr.length - 1; i > 0; i--) {
@@ -94,7 +94,8 @@ export function knownCard(): any {
     asymmetricMatch: function(compareTo) {
       const c = {...compareTo}
       delete c.hints
-      return /^\{"color":"[ABCDEX]","num":[12345]\}$/.test(stringify(c))
+      return /^[ABCDEX][12345]$/.test(c.value)
+      // return /^\{"color":"[ABCDEX]","num":[12345]\}$/.test(stringify(c))
     },
 
     /*

@@ -27,8 +27,8 @@ export class Pile {
   add(card: Card) {
     this.cards.push(card)
   }
-  getState(): TCardState[] {
-    return this.cards.map(c => c.getState())
+  toJSON(): any {
+    return this.cards
   }
   // - count(Value)
 }

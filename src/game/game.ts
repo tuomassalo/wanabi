@@ -1,6 +1,6 @@
 import {Pile} from './pile'
 import {Player, TPlayerId, TPlayerState} from './player'
-import {Card, TCardState, TColor, TNum, AllColors, AllNums} from './card'
+import {Card, TColor, TNum, AllColors, AllNums, TCardState} from './card'
 import {Hand} from './hand'
 import {Table, TTableState} from './table'
 import {SyntaxError, GameError} from './errors'
@@ -30,43 +30,93 @@ interface TStartActionParams {
 type TActionParams = TPlayActionParams | TDiscardActionParams | THintActionParams | TStartActionParams
 type TPlayableActionParams = TPlayActionParams | TDiscardActionParams | THintActionParams
 
-// added by the constructor
-interface TResolvedStartAction extends TStartActionParams {}
-interface TResolvedPlayAction extends TPlayActionParams {
+interface TResolvedStartActionState extends TStartActionParams {} // added by the constructor
+interface TResolvedPlayActionState extends TPlayActionParams {
   card: TCardState
 }
-interface TResolvedDiscardAction extends TDiscardActionParams {
+interface TResolvedDiscardActionState extends TDiscardActionParams {
   card: TCardState
 }
-interface TResolvedHintAction extends THintActionParams {}
+interface TResolvedHintActionState extends THintActionParams {}
 
-type TResolvedAction = TResolvedPlayAction | TResolvedDiscardAction | TResolvedHintAction | TResolvedStartAction
+type TResolvedActionState =
+  | TResolvedPlayActionState
+  | TResolvedDiscardActionState
+  | TResolvedHintActionState
+  | TResolvedStartActionState
 
 interface TTurnState {
   status: TGameStatus
-  action: TResolvedAction
+  action: TResolvedActionState
   score: number
   stockSize: number
   discardPile: TCardState[]
   hintCount: number
   woundCount: number
   table: TTableState
-  turn: number
+  turnNumber: number
   inTurn: number
-  turnsLeft: number | null // NB: can be Infinity, which turns to null in JSON
+  turnsLeft: number | null // `null` means that the countdown has not started yet.
   players: TPlayerState[]
   timestamp: string // ISO string
 }
+interface TTurn {
+  status: TGameStatus
+  action: TResolvedActionState
+  score: number
+  stockSize: number
+  discardPile: Pile
+  hintCount: number
+  woundCount: number
+  table: Table
+  turnNumber: number
+  inTurn: number
+  turnsLeft: number | null // `null` means that the countdown has not started yet.
+  players: Player[]
+  timestamp: string // ISO string
+}
+class Turn {
+  status: TGameStatus
+  action: TResolvedActionState
+  score: number
+  stockSize: number
+  discardPile: Pile
+  hintCount: number
+  woundCount: number
+  table: Table
+  turnNumber: number
+  inTurn: number
+  turnsLeft: number | null // `null` means that the countdown has not started yet.
+  players: Player[]
+  timestamp: string // ISO string
+
+  constructor(t: TTurn) {
+    this.status = t.status
+    this.action = t.action
+    this.score = t.score
+    this.stockSize = t.stockSize
+    this.discardPile = t.discardPile
+    this.hintCount = t.hintCount
+    this.woundCount = t.woundCount
+    this.table = t.table
+    this.turnNumber = t.turnNumber
+    this.inTurn = t.inTurn
+    this.turnsLeft = t.turnsLeft
+    this.players = t.players
+    this.timestamp = t.timestamp
+  }
+}
+//   constructor({status,action,score,stockSize,hintCount,woundCount,table,turn,inTurn,turnsLeft,players,timestamp}) {
 
 export class Game {
   stock: Pile
   discardPile: Pile
   hintCount: number = 9
   woundCount: number = 0
-  turn: number = -1
+  turnNumber: number = -1
   turnsLeft: number = Infinity
   table: Table
-  log: TTurnState[] = []
+  turns: Turn[] = []
   status: TGameStatus = 'RUNNING'
   players: Player[]
   playersById: {[id: string]: Player}
@@ -110,7 +160,7 @@ export class Game {
   }
 
   get inTurn() {
-    return this.turn % this.players.length
+    return this.turnNumber % this.players.length
   }
 
   get score() {
@@ -127,21 +177,13 @@ export class Game {
       throw new SyntaxError('INVALID_PLAYER_ID', playerId)
     }
 
-    // // copy the latest turn from the log
-    // const turn: TTurnState = JSON.parse(JSON.stringify(this.log[this.log.length - 1]))
+    // hide my cards
+    const ret = JSON.parse(JSON.stringify(this.turns)) as TTurnState[]
+    for (const t of ret) {
+      t.players[this.playersById[playerId].idx].mysteryHandCards = []
+    }
 
-    return this.log.map(turn => ({
-      ...turn,
-      players: turn.players.map(p =>
-        p.idx === this.playersById[playerId].idx ? {...p, isMe: true, completeHand: []} : p,
-      ),
-    }))
-
-    // demystify(
-    //   (state.players.find(p => p.isMe) as TPlayerState).hand, // yes yes, it's never undefined
-    //   [this.discardPile.cards, Object.values(this.table.table).flatMap(p => p.cards)].flat(),
-    // )
-    // return state
+    return ret
   }
 
   checkIntegrity() {
@@ -202,7 +244,7 @@ export class Game {
         throw new GameError('CANNOT_HINT_SELF')
       }
 
-      hintee.hand.addHint({turn: this.turn, is: actionParams.is})
+      hintee.hand.addHint({turnNumber: this.turnNumber, is: actionParams.is})
 
       this.addTurn(actionParams)
     } else {
@@ -228,45 +270,50 @@ export class Game {
             this.status = 'GAMEOVER'
           }
         }
-        this.addTurn({...actionParams, card: card.getState()})
+        this.addTurn({...actionParams, card: card.toJSON()})
       } else if (actionParams.type === 'DISCARD') {
         this.discardPile.add(card)
-        this.addTurn({...actionParams, card: card.getState()})
+        this.addTurn({...actionParams, card: card.toJSON()})
       }
     }
   }
-  addTurn(action: TResolvedAction) {
-    this.turn++
+  addTurn(action: TResolvedActionState) {
+    this.turnNumber++
     this.turnsLeft--
     if (this.turnsLeft === 0) {
       // TODO: check if off-by-one
       this.status = 'FINISHED'
-    } else if (!this.stock.size && this.turnsLeft === Infinity) {
+    } else if (!this.stock.size && this.turnsLeft === null) {
       // countdown should start now
       this.turnsLeft = this.players.length
     }
 
-    const players = this.players.map(p => p.getState())
+    //const players = this.players.map(p => p.getState())
 
-    for (const p of players) {
-      demystify(p.mysteryHand, [this.discardPile.cards, Object.values(this.table.table).flatMap(p => p.cards)].flat())
+    for (const p of this.players) {
+      demystify(
+        p.mysteryHandCards,
+        [this.discardPile.cards, Object.values(this.table.table).flatMap(p => p.cards)].flat(),
+      )
     }
 
-    this.log.push({
-      action,
-      timestamp: new Date().toISOString(),
-      stockSize: this.stock.size,
-      discardPile: this.discardPile.getState(),
-      hintCount: this.hintCount,
-      woundCount: this.woundCount,
-      turn: this.turn,
-      inTurn: this.inTurn,
-      turnsLeft: this.turnsLeft === Infinity ? null : this.turnsLeft,
-      table: this.table.getState(),
-      score: this.score,
-      status: this.status,
-      players,
-    })
+    this.turns.push(
+      new Turn({
+        action,
+        timestamp: new Date().toISOString(),
+        stockSize: this.stock.size,
+        discardPile: this.discardPile,
+        hintCount: this.hintCount,
+        woundCount: this.woundCount,
+        turnNumber: this.turnNumber,
+        inTurn: this.inTurn,
+        turnsLeft: this.turnsLeft,
+        table: this.table,
+        score: this.score,
+        status: this.status,
+        players: this.players,
+      }),
+    )
 
     this.checkIntegrity()
   }

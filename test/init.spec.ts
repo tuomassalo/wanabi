@@ -1,6 +1,6 @@
 import {Game} from '../src/game/game'
 
-import {c, createDeck, knownCard, cards} from './helpers'
+import {createDeck, knownCard, cards} from './helpers'
 
 describe('A three-player game without any moves', () => {
   const g = new Game(['Huey', 'Dewey', 'Louie'])
@@ -16,7 +16,7 @@ describe('A three-player game without any moves', () => {
       hintCount: 9,
       woundCount: 0,
       table: {A: [], B: [], C: [], D: [], E: [], X: []},
-      turn: 0,
+      turnNumber: 0,
       inTurn: 0,
       turnsLeft: null,
       score: 0,
@@ -26,22 +26,22 @@ describe('A three-player game without any moves', () => {
           name: 'Huey',
           idx: 0,
           isMe: true,
-          mysteryHand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
-          completeHand: [],
+          mysteryHandCards: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
+          completeHandCards: [],
         },
         {
           name: 'Dewey',
           idx: 1,
           isMe: false,
-          mysteryHand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
-          completeHand: [knownCard(), knownCard(), knownCard(), knownCard(), knownCard()],
+          mysteryHandCards: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
+          completeHandCards: [knownCard(), knownCard(), knownCard(), knownCard(), knownCard()],
         },
         {
           name: 'Louie',
           idx: 2,
           isMe: false,
-          mysteryHand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
-          completeHand: [knownCard(), knownCard(), knownCard(), knownCard(), knownCard()],
+          mysteryHandCards: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
+          completeHandCards: [knownCard(), knownCard(), knownCard(), knownCard(), knownCard()],
         },
       ],
     })
@@ -61,7 +61,7 @@ describe('A three-player game with a custom deck', () => {
       discardPile: [],
       hintCount: 9,
       woundCount: 0,
-      turn: 0,
+      turnNumber: 0,
       inTurn: 0,
       turnsLeft: null,
       score: 0,
@@ -72,22 +72,22 @@ describe('A three-player game with a custom deck', () => {
           name: 'Huey',
           idx: 0,
           isMe: true,
-          mysteryHand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
-          completeHand: [],
+          mysteryHandCards: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
+          completeHandCards: [],
         },
         {
           name: 'Dewey',
           idx: 1,
           isMe: false,
-          mysteryHand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
-          completeHand: cards('A2,A5,B3,C1,D5'),
+          mysteryHandCards: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
+          completeHandCards: cards('A2,A5,B3,C1,D5'),
         },
         {
           name: 'Louie',
           idx: 2,
           isMe: false,
-          mysteryHand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
-          completeHand: cards('A3,B5,B2,C1,E3'),
+          mysteryHandCards: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
+          completeHandCards: cards('A3,B5,B2,C1,E3'),
         },
       ],
     })

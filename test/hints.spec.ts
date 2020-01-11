@@ -31,18 +31,18 @@ describe('An ongoing game', () => {
       timestamp: jasmine.any(String),
       action: jasmine.any(Object),
       stockSize: 60 - 2 * 5 - 2 * 6, // === 16
-      discardPile: [c.B1, c.A1, c.B1, c.C1, c.A4, c.B5, c.X1],
+      discardPile: 'B1,A1,B1,C1,A4,B5,X1'.split(','),
       hintCount: 9,
       woundCount: 1, // one wound
       table: {
-        A: [c.A1, c.A2, c.A3, c.A4],
+        A: 'A1,A2,A3,A4'.split(','),
         B: [],
         C: [],
-        D: [c.D1],
+        D: ['D1'],
         E: [],
         X: [],
       },
-      turn: 2 * 6,
+      turnNumber: 2 * 6,
       inTurn: 0,
       turnsLeft: null,
       score: 5,
@@ -55,12 +55,12 @@ describe('An ongoing game', () => {
     const g = createTestGame()
     g.act(g.players[0].id, {type: 'HINT', toPlayerIdx: 1, is: 5})
     expect(g.getState(g.players[1].id).hintCount).toEqual(8)
-    expect(g.getState(g.players[1].id).players[1].mysteryHand).toEqual([
-      {hints: [{turn: 12, is: 5, result: false}]},
-      {hints: [{turn: 12, is: 5, result: false}]},
-      {hints: [{turn: 12, is: 5, result: false}]},
-      {hints: [{turn: 12, is: 5, result: false}]},
-      {hints: [{turn: 12, is: 5, result: false}]},
+    expect(g.getState(g.players[1].id).players[1].mysteryHandCards).toEqual([
+      {hints: [{turnNumber: 12, is: 5, result: false}]},
+      {hints: [{turnNumber: 12, is: 5, result: false}]},
+      {hints: [{turnNumber: 12, is: 5, result: false}]},
+      {hints: [{turnNumber: 12, is: 5, result: false}]},
+      {hints: [{turnNumber: 12, is: 5, result: false}]},
     ])
     // we are not interested in the results here
     g.act(g.players[1].id, {type: 'HINT', toPlayerIdx: 0, is: 1})
@@ -70,35 +70,35 @@ describe('An ongoing game', () => {
     expect(g.getState(g.players[1].id).hintCount).toEqual(6)
 
     // still not enough hints
-    expect(g.getState(g.players[1].id).players[1].mysteryHand).toEqual([
+    expect(g.getState(g.players[1].id).players[1].mysteryHandCards).toEqual([
       {
         hints: [
-          {turn: 12, is: 5, result: false},
-          {turn: 14, is: 'B', result: true},
+          {turnNumber: 12, is: 5, result: false},
+          {turnNumber: 14, is: 'B', result: true},
         ],
       },
       {
         hints: [
-          {turn: 12, is: 5, result: false},
-          {turn: 14, is: 'B', result: true},
+          {turnNumber: 12, is: 5, result: false},
+          {turnNumber: 14, is: 'B', result: true},
         ],
       },
       {
         hints: [
-          {turn: 12, is: 5, result: false},
-          {turn: 14, is: 'B', result: true},
+          {turnNumber: 12, is: 5, result: false},
+          {turnNumber: 14, is: 'B', result: true},
         ],
       },
       {
         hints: [
-          {turn: 12, is: 5, result: false},
-          {turn: 14, is: 'B', result: false},
+          {turnNumber: 12, is: 5, result: false},
+          {turnNumber: 14, is: 'B', result: false},
         ],
       },
       {
         hints: [
-          {turn: 12, is: 5, result: false},
-          {turn: 14, is: 'B', result: false},
+          {turnNumber: 12, is: 5, result: false},
+          {turnNumber: 14, is: 'B', result: false},
         ],
       },
     ])
@@ -109,57 +109,57 @@ describe('An ongoing game', () => {
     expect(g.getState(g.players[1].id).hintCount).toEqual(4)
 
     // now we have enough hints to possibly identify some cards
-    expect(g.getState(g.players[1].id).players[1].mysteryHand).toEqual([
+    expect(g.getState(g.players[1].id).players[1].mysteryHandCards).toEqual([
       {
         hints: [
-          {turn: 12, is: 5, result: false},
-          {turn: 14, is: 'B', result: true},
-          {turn: 16, is: 2, result: false},
+          {turnNumber: 12, is: 5, result: false},
+          {turnNumber: 14, is: 'B', result: true},
+          {turnNumber: 16, is: 2, result: false},
         ],
       },
       {
         num: 2,
         hints: [
-          {turn: 12, is: 5, result: false},
-          {turn: 14, is: 'B', result: true},
-          {turn: 16, is: 2, result: true},
+          {turnNumber: 12, is: 5, result: false},
+          {turnNumber: 14, is: 'B', result: true},
+          {turnNumber: 16, is: 2, result: true},
         ],
         possibleCards: [
-          {color: 'B', num: 2, weight: 1},
-          {color: 'X', num: 2, weight: 1},
+          {value: 'B2', weight: 1},
+          {value: 'X2', weight: 1},
         ],
       },
       {
         num: 2,
         hints: [
-          {turn: 12, is: 5, result: false},
-          {turn: 14, is: 'B', result: true},
-          {turn: 16, is: 2, result: true},
+          {turnNumber: 12, is: 5, result: false},
+          {turnNumber: 14, is: 'B', result: true},
+          {turnNumber: 16, is: 2, result: true},
         ],
         possibleCards: [
-          {color: 'B', num: 2, weight: 1},
-          {color: 'X', num: 2, weight: 1},
+          {value: 'B2', weight: 1},
+          {value: 'X2', weight: 1},
         ],
       },
       {
         hints: [
-          {turn: 12, is: 5, result: false},
-          {turn: 14, is: 'B', result: false},
-          {turn: 16, is: 2, result: false},
+          {turnNumber: 12, is: 5, result: false},
+          {turnNumber: 14, is: 'B', result: false},
+          {turnNumber: 16, is: 2, result: false},
         ],
       },
       {
         hints: [
-          {turn: 12, is: 5, result: false},
-          {turn: 14, is: 'B', result: false},
-          {turn: 16, is: 2, result: true},
+          {turnNumber: 12, is: 5, result: false},
+          {turnNumber: 14, is: 'B', result: false},
+          {turnNumber: 16, is: 2, result: true},
         ],
         num: 2,
         possibleCards: [
-          {color: 'A', num: 2, weight: 1},
-          {color: 'C', num: 2, weight: 2},
-          {color: 'D', num: 2, weight: 2},
-          {color: 'E', num: 2, weight: 2},
+          {value: 'A2', weight: 1},
+          {value: 'C2', weight: 2},
+          {value: 'D2', weight: 2},
+          {value: 'E2', weight: 2},
         ],
       },
     ])
