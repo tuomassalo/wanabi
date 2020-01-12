@@ -45,6 +45,7 @@ type TResolvedActionState =
   | TResolvedHintActionState
   | TResolvedStartActionState
 
+//  json object
 interface TTurnState {
   status: TGameStatus
   action: TResolvedActionState
@@ -63,76 +64,80 @@ interface TTurnState {
 interface TTurn {
   status: TGameStatus
   action: TResolvedActionState
-  score: number
-  stockSize: number
   discardPile: Pile
   hintCount: number
   woundCount: number
   table: Table
   turnNumber: number
-  inTurn: number
   turnsLeft: number | null // `null` means that the countdown has not started yet.
   players: Player[]
-  timestamp: string // ISO string
+  timestamp?: string // ISO string
+  // not in TTurnState:
+  stock: Pile
+  // not needed, as these are calculated from above:
+  // score: number
+  // stockSize: number
+  // inTurn: number
 }
 class Turn {
   status: TGameStatus
   action: TResolvedActionState
-  score: number
-  stockSize: number
   discardPile: Pile
   hintCount: number
   woundCount: number
   table: Table
   turnNumber: number
-  inTurn: number
   turnsLeft: number | null // `null` means that the countdown has not started yet.
   players: Player[]
   timestamp: string // ISO string
+  stock: Pile
 
   constructor(t: TTurn) {
     this.status = t.status
     this.action = t.action
-    this.score = t.score
-    this.stockSize = t.stockSize
     this.discardPile = t.discardPile
     this.hintCount = t.hintCount
     this.woundCount = t.woundCount
     this.table = t.table
     this.turnNumber = t.turnNumber
-    this.inTurn = t.inTurn
     this.turnsLeft = t.turnsLeft
     this.players = t.players
-    this.timestamp = t.timestamp
+    this.timestamp = t.timestamp || new Date().toISOString()
+    this.stock = t.stock
+  }
+
+  get score() {
+    return this.table.getScore()
+  }
+  get stockSize() {
+    return this.stock.cards.length
+  }
+  get inTurn() {
+    return this.turnNumber % this.players.length
+  }
+  serialize() {
+    return {
+      ...JSON.parse(JSON.stringify(this)),
+      stock: undefined,
+      score: this.score,
+      stockSize: this.stockSize,
+      inTurn: this.inTurn,
+    }
   }
 }
-//   constructor({status,action,score,stockSize,hintCount,woundCount,table,turn,inTurn,turnsLeft,players,timestamp}) {
 
 export class Game {
-  stock: Pile
-  discardPile: Pile
-  hintCount: number = 9
-  woundCount: number = 0
-  turnNumber: number = -1
-  turnsLeft: number | null = null
-  table: Table
   turns: Turn[] = []
-  status: TGameStatus = 'RUNNING'
-  players: Player[]
   playersById: {[id: string]: Player}
 
   constructor(
     playerNames: string[],
     {deck, discardPile, table}: {deck?: Pile; discardPile?: Pile; table?: Table} = {},
   ) {
-    this.table = table || new Table()
-    if (deck) {
-      this.stock = deck
-    } else {
-      this.stock = new Pile(deck || Card.getFullDeck())
-      this.stock.shuffle()
+    if (!deck) {
+      deck = new Pile(deck || Card.getFullDeck())
+      deck.shuffle()
     }
-    this.discardPile = discardPile || new Pile([])
 
     const handSize: number = {
       '2': 5,
@@ -145,27 +150,43 @@ export class Game {
       throw new Error('INVALID_NUMBER_OF_PLAYERS')
     }
 
-    this.players = playerNames.map((name, idx) => new Player(name, idx, new Hand([])))
+    this.turns.push(
+      new Turn({
+        table: table || new Table(),
+        stock: deck,
+        discardPile: discardPile || new Pile([]),
+        players: playerNames.map((name, idx) => new Player(name, idx, new Hand([]))),
+        hintCount: 9,
+        woundCount: 0,
+        turnNumber: -1,
+        turnsLeft: null,
+        status: 'RUNNING',
+        action: {type: 'START'},
+      }),
+    )
+
     for (let i = 0; i < handSize; i++) {
       for (let p = 0; p < playerNames.length; p++) {
-        this.players[p].hand.dealOne(this.stock.drawOne())
+        this.currentTurn.players[p].hand.dealOne(this.currentTurn.stock.drawOne())
       }
     }
 
-    this.playersById = Object.fromEntries(this.players.map(p => [p.id, p]))
+    this.playersById = Object.fromEntries(this.currentTurn.players.map(p => [p.id, p]))
 
     this.addTurn({type: 'START'})
 
     this.checkIntegrity()
   }
 
-  get inTurn() {
-    return this.turnNumber % this.players.length
+  get currentTurn(): Turn {
+    return this.turns[this.turns.length - 1]
+  }
+  get players(): Player[] {
+    return this.currentTurn.players
   }
 
-  get score() {
-    return this.table.getScore()
-  }
+  // TODO:
+  // static deserialize(turns: TTurnState[]) {}
 
   // this returns information that is public for a player
   getState(playerId: TPlayerId): TTurnState {
@@ -180,16 +201,11 @@ export class Game {
     const ret = JSON.parse(
       JSON.stringify(
         this.turns.map(t => ({
-          ...t,
-          players: t.players.map((p, idx) => p.toObject(idx === this.playersById[playerId].idx)),
+          ...t.serialize(),
+          players: t.players.map((p, idx) => p.serialize(idx === this.playersById[playerId].idx)),
         })),
       ),
     ) as TTurnState[]
-
-    // hide my cards
-    // for (const t of ret) {
-    //   t.players[this.playersById[playerId].idx].mysteryHandCards = []
-    // }
 
     return ret
   }
@@ -197,10 +213,10 @@ export class Game {
   checkIntegrity() {
     // check that we have the correct set of cards
     const currentCards = [
-      ...this.stock.cards,
-      ...this.discardPile.cards,
-      ...this.players.flatMap(p => p.hand.cards),
-      ...Object.values(this.table.table)
+      ...this.currentTurn.stock.cards,
+      ...this.currentTurn.discardPile.cards,
+      ...this.currentTurn.players.flatMap(p => p.hand.cards),
+      ...Object.values(this.currentTurn.table.table)
         .map(p => p.cards)
         .flat(),
     ]
@@ -221,7 +237,7 @@ export class Game {
   }
 
   _getCurrentPlayer(playerId: string): Player {
-    const me = this.players[this.inTurn]
+    const me = this.currentTurn.players[this.currentTurn.inTurn]
     if (!me) {
       throw new GameError('NO_SUCH_PLAYER', {playerId})
     }
@@ -234,17 +250,17 @@ export class Game {
   // ACTIONS
   act(playerId: string, actionParams: TPlayableActionParams) {
     // console.warn('ACT', this.turn, actionParams)
-    if (this.status !== 'RUNNING') {
+    if (this.currentTurn.status !== 'RUNNING') {
       throw new GameError('GAME_ENDED')
     }
 
     const me = this._getCurrentPlayer(playerId)
     if (actionParams.type === 'HINT') {
-      if (!this.hintCount) {
+      if (!this.currentTurn.hintCount) {
         throw new GameError('NO_HINTS_LEFT')
       }
-      this.hintCount--
-      const hintee = this.players[actionParams.toPlayerIdx]
+      this.currentTurn.hintCount--
+      const hintee = this.currentTurn.players[actionParams.toPlayerIdx]
       if (!hintee) {
         throw new GameError('NO_SUCH_PLAYER', actionParams.toPlayerIdx)
       }
@@ -252,56 +268,59 @@ export class Game {
         throw new GameError('CANNOT_HINT_SELF')
       }
 
-      hintee.hand.addHint({turnNumber: this.turnNumber, is: actionParams.is})
+      hintee.hand.addHint({turnNumber: this.currentTurn.turnNumber, is: actionParams.is})
 
       this.addTurn(actionParams)
     } else {
-      const card = me.hand.take(actionParams.cardIdx, this.stock)
+      const card = me.hand.take(actionParams.cardIdx, this.currentTurn.stock)
       // console.warn(222, card)
 
       if (actionParams.type === 'PLAY') {
-        const success: boolean = this.table.play(card)
+        const success: boolean = this.currentTurn.table.play(card)
         if (success) {
           // Successful play:
-          if (card.num === 5 && this.hintCount < 9) {
-            this.hintCount++
+          if (card.num === 5 && this.currentTurn.hintCount < 9) {
+            this.currentTurn.hintCount++
           }
-          if (this.score === AllColors.length * AllNums.length) {
-            this.status = 'FINISHED'
+          if (this.currentTurn.score === AllColors.length * AllNums.length) {
+            this.currentTurn.status = 'FINISHED'
           }
         } else {
           // fail: add wound
-          this.discardPile.add(card) // TODO: add metadata?
-          this.woundCount++
+          this.currentTurn.discardPile.add(card) // TODO: add metadata?
+          this.currentTurn.woundCount++
           // TODO: log
-          if (this.woundCount === 3) {
-            this.status = 'GAMEOVER'
+          if (this.currentTurn.woundCount === 3) {
+            this.currentTurn.status = 'GAMEOVER'
           }
         }
         this.addTurn({...actionParams, card: card.toJSON()})
       } else if (actionParams.type === 'DISCARD') {
-        this.discardPile.add(card)
+        this.currentTurn.discardPile.add(card)
         this.addTurn({...actionParams, card: card.toJSON()})
       }
     }
   }
   addTurn(action: TResolvedActionState) {
-    this.turnNumber++
-    if (this.turnsLeft !== null) this.turnsLeft--
-    if (this.turnsLeft === 0) {
+    this.currentTurn.turnNumber++
+    if (this.currentTurn.turnsLeft !== null) this.currentTurn.turnsLeft--
+    if (this.currentTurn.turnsLeft === 0) {
       // TODO: check if off-by-one
-      this.status = 'FINISHED'
-    } else if (!this.stock.size && this.turnsLeft === null) {
+      this.currentTurn.status = 'FINISHED'
+    } else if (!this.currentTurn.stock.size && this.currentTurn.turnsLeft === null) {
       // countdown should start now
-      this.turnsLeft = this.players.length
+      this.currentTurn.turnsLeft = this.currentTurn.players.length
     }
 
-    for (const p of this.players) {
+    for (const p of this.currentTurn.players) {
       p.clearMysteryHandCards()
       p.setMysteryHandCards(
         demystify(
           p.getMysteryHandCards(),
-          [this.discardPile.cards, Object.values(this.table.table).flatMap(p => p.cards)].flat(),
+          [
+            this.currentTurn.discardPile.cards,
+            Object.values(this.currentTurn.table.table).flatMap(p => p.cards),
+          ].flat(),
         ),
       )
     }
@@ -310,17 +329,15 @@ export class Game {
       new Turn({
         action,
         timestamp: new Date().toISOString(),
-        stockSize: this.stock.size,
-        discardPile: this.discardPile,
-        hintCount: this.hintCount,
-        woundCount: this.woundCount,
-        turnNumber: this.turnNumber,
-        inTurn: this.inTurn,
-        turnsLeft: this.turnsLeft,
-        table: this.table,
-        score: this.score,
-        status: this.status,
-        players: this.players,
+        discardPile: this.currentTurn.discardPile,
+        hintCount: this.currentTurn.hintCount,
+        woundCount: this.currentTurn.woundCount,
+        turnNumber: this.currentTurn.turnNumber,
+        turnsLeft: this.currentTurn.turnsLeft,
+        table: this.currentTurn.table,
+        status: this.currentTurn.status,
+        players: this.currentTurn.players,
+        stock: this.currentTurn.stock,
       }),
     )
 

@@ -38,7 +38,7 @@ export class Player {
     this.hand = hand
   }
   // like toJSON, but manually, since we need to pass `isMe`
-  toObject(isMe: boolean): TPlayerState {
+  serialize(isMe: boolean): TPlayerState {
     return {
       name: this.name,
       idx: this.idx,
