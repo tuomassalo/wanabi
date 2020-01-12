@@ -3,7 +3,8 @@ import {Game} from '../src/game/game'
 import {createDeck, knownCard} from './helpers'
 
 describe('A perfect two-player game without any hints or discards', () => {
-  const g = new Game(['Bonnie', 'Clyde'], {
+  const g = new Game({
+    playerNames: ['Bonnie', 'Clyde'],
     deck: createDeck(
       ['A', 'B', 'C', 'D', 'E', 'X'].flatMap(c => [1, 2, 3, 4, 5].map(n => c + n)).join(' '),
       // NB: No idea why vscode claims that flatMap does not exist  on type 'string[]'

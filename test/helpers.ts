@@ -131,7 +131,8 @@ export function createTightGame() {
   // * all p0 cards are playable, but no time to play them all
   // * no p1 cards are playable.
 
-  return new Game(['Jekyll', 'Hyde'], {
+  return new Game({
+    playerNames: ['Jekyll', 'Hyde'],
     deck: createDeck(
       zip(
         // playable cards

@@ -1,9 +1,9 @@
 import {Game} from '../src/game/game'
 
-import {createDeck, knownCard, cards} from './helpers'
+import {createDeck, knownCard} from './helpers'
 
 describe('A three-player game without any moves', () => {
-  const g = new Game(['Huey', 'Dewey', 'Louie'])
+  const g = new Game({playerNames: ['Huey', 'Dewey', 'Louie']})
   it('should have full stock', () => {
     expect(g.currentTurn.stock.size).toEqual((3 + 2 + 2 + 2 + 1) * 6 - 3 * 5)
   })
@@ -49,7 +49,10 @@ describe('A three-player game without any moves', () => {
 })
 
 describe('A three-player game with a custom deck', () => {
-  const g = new Game(['Huey', 'Dewey', 'Louie'], {deck: createDeck('A1 A2 A3 A4 A5 B5 B4 B3 B2 B1 C1 C1 C5 D5 E3')})
+  const g = new Game({
+    playerNames: ['Huey', 'Dewey', 'Louie'],
+    deck: createDeck('A1 A2 A3 A4 A5 B5 B4 B3 B2 B1 C1 C1 C5 D5 E3'),
+  })
   it('should have full stock', () => {
     expect(g.currentTurn.stock.size).toEqual((3 + 2 + 2 + 2 + 1) * 6 - 3 * 5)
   })

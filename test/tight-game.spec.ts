@@ -1,4 +1,4 @@
-import {createTightGame, knownCard, cards} from './helpers'
+import {createTightGame, knownCard} from './helpers'
 
 describe('A tight three-player game', () => {
   const g = createTightGame()

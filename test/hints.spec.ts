@@ -2,7 +2,8 @@ import {createDeck} from './helpers'
 import {Game} from '../src/game/game'
 
 function createTestGame() {
-  const g = new Game(['Thelma', 'Louise'], {
+  const g = new Game({
+    playerNames: ['Thelma', 'Louise'],
     deck: createDeck(
       // p0 p1 p0 p1 p0 p1 (p0 plays and p1 discards)
       `  A1 B1 A1 B1 A2 C1

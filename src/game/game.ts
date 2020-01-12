@@ -241,48 +241,59 @@ class Turn {
   }
 }
 
+export interface TNewGameParams {
+  playerNames: string[]
+  deck?: Pile
+  discardPile?: Pile
+  table?: Table
+}
+
 export class Game {
   turns: Turn[] = []
   playersById: {[id: string]: Player}
 
-  constructor(
-    playerNames: string[],
-    {deck, discardPile, table}: {deck?: Pile; discardPile?: Pile; table?: Table} = {},
-  ) {
-    if (!deck) {
-      deck = new Pile(deck || Card.getFullDeck())
-      deck.shuffle()
-    }
+  constructor(params: TNewGameParams | TTurn[]) {
+    if (Array.isArray(params)) {
+      // deserialize a game
+      this.turns = params.map(p => new Turn(p))
+    } else {
+      // start a new game
+      let {playerNames, deck, discardPile, table} = params
+      if (!deck) {
+        deck = new Pile(deck || Card.getFullDeck())
+        deck.shuffle()
+      }
 
-    const handSize: number = {
-      '2': 5,
-      '3': 5,
-      '4': 4,
-      '5': 4,
-    }['' + playerNames.length]
+      const handSize: number = {
+        '2': 5,
+        '3': 5,
+        '4': 4,
+        '5': 4,
+      }['' + playerNames.length]
 
-    if (!handSize) {
-      throw new Error('INVALID_NUMBER_OF_PLAYERS')
-    }
+      if (!handSize) {
+        throw new Error('INVALID_NUMBER_OF_PLAYERS')
+      }
 
-    this.turns.push(
-      new Turn({
-        table: table || new Table(),
-        stock: deck,
-        discardPile: discardPile || new Pile([]),
-        players: playerNames.map((name, idx) => new Player(name, idx, new Hand([]))),
-        hintCount: 9,
-        woundCount: 0,
-        turnNumber: 0,
-        turnsLeft: null,
-        status: 'RUNNING',
-        action: {type: 'START'},
-      }),
-    )
+      this.turns.push(
+        new Turn({
+          table: table || new Table(),
+          stock: deck,
+          discardPile: discardPile || new Pile([]),
+          players: playerNames.map((name, idx) => new Player(name, idx, new Hand([]))),
+          hintCount: 9,
+          woundCount: 0,
+          turnNumber: 0,
+          turnsLeft: null,
+          status: 'RUNNING',
+          action: {type: 'START'},
+        }),
+      )
 
-    for (let i = 0; i < handSize; i++) {
-      for (let p = 0; p < playerNames.length; p++) {
-        this.currentTurn.players[p].hand.dealOne(this.currentTurn.stock.drawOne())
+      for (let i = 0; i < handSize; i++) {
+        for (let p = 0; p < playerNames.length; p++) {
+          this.currentTurn.players[p].hand.dealOne(this.currentTurn.stock.drawOne())
+        }
       }
     }
 
