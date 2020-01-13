@@ -1,6 +1,6 @@
 class WanabiError extends Error {
   constructor(message?: string, log?: any) {
-    console.warn(log)
+    // console.warn(log)
     super(message)
     this.name = 'WanabiError' + (typeof log !== 'undefined' ? ': ' + JSON.stringify(log) : '')
   }

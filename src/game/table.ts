@@ -8,11 +8,15 @@ export class Table {
   table: TTable
 
   constructor(table?: TTable) {
-    // this.table = {
-    //   A: new Pile([])
-    // }
     // NB: why does fromEntries need `as`
-    this.table = table || (Object.fromEntries(AllColors.map(c => [c, new Pile([])])) as TTable)
+    this.table = table || (Object.fromEntries(AllColors.map(color => [color, new Pile([])])) as TTable)
+  }
+  static deserialize(state: TTableState): Table {
+    return new Table(
+      Object.fromEntries(
+        AllColors.map(color => [color, new Pile(state[color].map(c => Card.fromValueString(c)))]),
+      ) as TTable,
+    )
   }
   getScore(): number {
     return Object.values(this.table)
@@ -23,7 +27,7 @@ export class Table {
     // NB: why does fromEntries need `as`
     return Object.fromEntries(Object.entries(this.table).map(([c, pile]) => [c, pile.toJSON()])) as TTableState
   }
-  // returns success
+  // returns whether the card was successfully played
   play(card: Card): boolean {
     const colorPile = this.table[card.color]
     if (colorPile.size === card.num - 1) {

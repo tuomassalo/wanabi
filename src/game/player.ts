@@ -1,6 +1,6 @@
 import {randomBytes} from 'crypto'
 import {Hand} from './hand'
-import {MyHandCard, TMyHandCardState, TCardState} from './card'
+import {Card, MyHandCard, TMyHandCardState, TCardState, HandCard} from './card'
 
 export type TPlayerId = string
 
@@ -8,8 +8,12 @@ export interface TPlayerState {
   name: string
   idx: number
   isMe: boolean
-  completeHandCards: TCardState[]
+  completeHandCards: TCardState[] // TODO: to THandCardState
   mysteryHandCards: TMyHandCardState[]
+}
+
+export interface TCompletePlayerState extends TPlayerState {
+  id: TPlayerId
 }
 
 export class Player {
@@ -31,11 +35,11 @@ export class Player {
     this.mysteryHandCards = undefined
   }
 
-  constructor(name: string, idx: number, hand: Hand) {
-    this.id = randomBytes(20).toString('hex')
+  constructor(name: string, idx: number, hand: Hand, id?: TPlayerId) {
     this.idx = idx
     this.name = name
     this.hand = hand
+    this.id = id || randomBytes(20).toString('hex')
   }
   // like toJSON, but manually, since we need to pass `isMe`
   serialize(isMe: boolean): TPlayerState {
@@ -46,6 +50,17 @@ export class Player {
       completeHandCards: isMe ? [] : this.hand.cards.map(c => c.toJSON()),
       mysteryHandCards: this.getMysteryHandCards().map(c => c.toJSON()),
     }
+  }
+  toJSON(): TCompletePlayerState {
+    return {...this.serialize(false), id: this.id}
+  }
+  static deserialize(state: TCompletePlayerState): Player {
+    return new Player(
+      state.name,
+      state.idx,
+      new Hand(state.completeHandCards.map(c => HandCard.fromCard(Card.fromValueString(c)))),
+      state.id,
+    )
   }
   setHand(hand: Hand) {
     this.hand = hand

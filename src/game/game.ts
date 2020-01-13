@@ -1,6 +1,6 @@
 import {Pile} from './pile'
-import {Player, TPlayerId, TPlayerState} from './player'
-import {Card, TColor, TNum, AllColors, AllNums, TCardState, MyHandCard} from './card'
+import {Player, TPlayerId, TPlayerState, TCompletePlayerState} from './player'
+import {Card, TColor, TNum, AllColors, AllNums, TCardState} from './card'
 import {Hand} from './hand'
 import {Table, TTableState} from './table'
 import {SyntaxError, GameError} from './errors'
@@ -46,7 +46,7 @@ type TResolvedActionState =
   | TResolvedStartActionState
 
 //  json object
-interface TTurnState {
+interface TMaskedTurnState {
   status: TGameStatus
   action: TResolvedActionState
   score: number
@@ -61,6 +61,10 @@ interface TTurnState {
   players: TPlayerState[]
   timestamp: string // ISO string
 }
+interface TCompleteTurnState extends TMaskedTurnState {
+  stock: TCardState[]
+  players: TCompletePlayerState[]
+}
 interface TTurn {
   status: TGameStatus
   action: TResolvedActionState
@@ -72,7 +76,7 @@ interface TTurn {
   turnsLeft: number | null // `null` means that the countdown has not started yet.
   players: Player[]
   timestamp?: string // ISO string
-  // not in TTurnState:
+  // not in TMaskedTurnState:
   stock: Pile
   // not needed, as these are calculated from above:
   // score: number
@@ -104,6 +108,15 @@ class Turn {
     this.players = t.players
     this.timestamp = t.timestamp || new Date().toISOString()
     this.stock = t.stock
+  }
+  static deserialize(state: TCompleteTurnState): Turn {
+    return new this({
+      ...state,
+      stock: new Pile(state.stock.map(v => Card.fromValueString(v))),
+      discardPile: new Pile(state.discardPile.map(v => Card.fromValueString(v))),
+      table: Table.deserialize(state.table),
+      players: state.players.map(p => Player.deserialize(p)),
+    })
   }
   clone() {
     // TODO: use JSON to make a deep copy
@@ -252,10 +265,10 @@ export class Game {
   turns: Turn[] = []
   playersById: {[id: string]: Player}
 
-  constructor(params: TNewGameParams | TTurn[]) {
+  constructor(params: TNewGameParams | TCompleteTurnState[]) {
     if (Array.isArray(params)) {
       // deserialize a game
-      this.turns = params.map(p => new Turn(p))
+      this.turns = params.map(p => Turn.deserialize(p))
     } else {
       // start a new game
       let {playerNames, deck, discardPile, table} = params
@@ -309,25 +322,29 @@ export class Game {
     return this.currentTurn.players
   }
 
+  toJSON() {
+    return this.turns
+  }
+
   act(playerId: TPlayerId, actionParams: TPlayableActionParams) {
     this.turns.push(this.currentTurn.playNext(playerId, actionParams))
     this.checkIntegrity()
   }
 
   // TODO:
-  // static deserialize(turns: TTurnState[]) {}
+  // static deserialize(turns: TMaskedTurnState[]) {}
 
   // this returns information that is public for a player
-  getState(playerId: TPlayerId): TTurnState {
+  getState(playerId: TPlayerId): TMaskedTurnState {
     return this.getCompleteState(playerId).slice(-1)[0]
   }
   // this returns information that is public for a player
-  getCompleteState(playerId: TPlayerId): TTurnState[] {
+  getCompleteState(playerId: TPlayerId): TMaskedTurnState[] {
     if (!this.playersById[playerId]) {
       throw new SyntaxError('INVALID_PLAYER_ID', playerId)
     }
 
-    const ret = JSON.parse(JSON.stringify(this.turns.map(t => t.getState(playerId)))) as TTurnState[]
+    const ret = JSON.parse(JSON.stringify(this.turns.map(t => t.getState(playerId)))) as TMaskedTurnState[]
 
     return ret
   }
