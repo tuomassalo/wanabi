@@ -26,7 +26,7 @@ export class Hand {
     const drawnCard = this.cards.splice(idx, 1)[0].toCard()
     if (stock.size) {
       const newCard: Card = stock.drawOne()
-      this.cards.push(new HandCard(newCard.color, newCard.num))
+      this.cards.push(new HandCard({color: newCard.color, num: newCard.num, hints: []}))
     }
     return drawnCard
   }

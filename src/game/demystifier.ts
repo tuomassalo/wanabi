@@ -55,7 +55,7 @@ function countPossibleCards(possibleCards: Card[]): PossibleCard[] {
     }))
     .sort((a, b) => a.color.localeCompare(b.color) || a.num - b.num)
 
-  return ret.map(pc => new PossibleCard(pc.color, pc.num, pc.weight))
+  return ret.map(pc => new PossibleCard({weight: pc.weight, value: pc.color + pc.num}))
 }
 
 // NB: modifies myHand entries: adds `possibleCards` and fills out `color` and `num`

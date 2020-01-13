@@ -33,7 +33,13 @@ describe('A tight three-player game', () => {
           name: 'Jekyll',
           idx: 0,
           isMe: false,
-          completeHandCards: 'E5,X1,X2,X3,X4'.split(','),
+          completeHandCards: [
+            {color: 'E', num: 5, hints: []},
+            {color: 'X', num: 1, hints: []},
+            {color: 'X', num: 2, hints: []},
+            {color: 'X', num: 3, hints: []},
+            {color: 'X', num: 4, hints: []},
+          ],
           mysteryHandCards: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
         },
         {
@@ -82,7 +88,13 @@ describe('A tight three-player game', () => {
           name: 'Jekyll',
           idx: 0,
           isMe: false,
-          completeHandCards: 'X1,X2,X3,X4,X5'.split(','),
+          completeHandCards: [
+            {color: 'X', num: 1, hints: []},
+            {color: 'X', num: 2, hints: []},
+            {color: 'X', num: 3, hints: []},
+            {color: 'X', num: 4, hints: []},
+            {color: 'X', num: 5, hints: []},
+          ],
           mysteryHandCards: [
             {
               hints: [],

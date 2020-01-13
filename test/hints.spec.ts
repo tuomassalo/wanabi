@@ -50,7 +50,10 @@ describe('An ongoing game', () => {
       status: 'RUNNING',
       players: jasmine.any(Array),
     })
-    expect(g.players.map(p => '' + p.hand.cards)).toEqual(['A1,C1,B3,D4,X1', 'B1,B2,B2,D4,X2'])
+    expect(g.players.map(p => '' + p.hand.cards.map(hc => hc.color + hc.num))).toEqual([
+      'A1,C1,B3,D4,X1',
+      'B1,B2,B2,D4,X2',
+    ])
   })
   it('should show hints for p1', () => {
     const g = createTestGame()

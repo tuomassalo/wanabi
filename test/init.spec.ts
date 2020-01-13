@@ -83,14 +83,26 @@ describe('A three-player game with a custom deck', () => {
           idx: 1,
           isMe: false,
           mysteryHandCards: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
-          completeHandCards: 'A2,A5,B3,C1,D5'.split(','),
+          completeHandCards: [
+            {color: 'A', num: 2, hints: []},
+            {color: 'A', num: 5, hints: []},
+            {color: 'B', num: 3, hints: []},
+            {color: 'C', num: 1, hints: []},
+            {color: 'D', num: 5, hints: []},
+          ],
         },
         {
           name: 'Louie',
           idx: 2,
           isMe: false,
           mysteryHandCards: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
-          completeHandCards: 'A3,B5,B2,C1,E3'.split(','),
+          completeHandCards: [
+            {color: 'A', num: 3, hints: []},
+            {color: 'B', num: 5, hints: []},
+            {color: 'B', num: 2, hints: []},
+            {color: 'C', num: 1, hints: []},
+            {color: 'E', num: 3, hints: []},
+          ],
         },
       ],
     })

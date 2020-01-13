@@ -1,4 +1,4 @@
-import {createTightGame, knownCard} from './helpers'
+import {createTightGame} from './helpers'
 import {Game} from '../src/game/game'
 
 describe('A game', () => {
@@ -15,7 +15,7 @@ describe('A game', () => {
 
     const serialized = JSON.stringify(g)
 
-    expect(serialized.length).toBeLessThan(50000)
+    expect(serialized.length).toBeLessThan(70000)
 
     const g2 = new Game(JSON.parse(serialized))
 

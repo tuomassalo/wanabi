@@ -354,7 +354,7 @@ export class Game {
     const currentCards = [
       ...this.currentTurn.stock.cards,
       ...this.currentTurn.discardPile.cards,
-      ...this.currentTurn.players.flatMap(p => p.hand.cards),
+      ...this.currentTurn.players.flatMap(p => p.hand.cards.map(hc => new Card(hc.color, hc.num))),
       ...Object.values(this.currentTurn.table.table)
         .map(p => p.cards)
         .flat(),

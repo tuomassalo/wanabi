@@ -1,6 +1,6 @@
 import {randomBytes} from 'crypto'
 import {Hand} from './hand'
-import {Card, MyHandCard, TMyHandCardState, TCardState, HandCard} from './card'
+import {Card, MyHandCard, TMyHandCardState, THandCardState, HandCard} from './card'
 
 export type TPlayerId = string
 
@@ -8,7 +8,7 @@ export interface TPlayerState {
   name: string
   idx: number
   isMe: boolean
-  completeHandCards: TCardState[] // TODO: to THandCardState
+  completeHandCards: THandCardState[]
   mysteryHandCards: TMyHandCardState[]
 }
 
@@ -58,7 +58,7 @@ export class Player {
     return new Player(
       state.name,
       state.idx,
-      new Hand(state.completeHandCards.map(c => HandCard.fromCard(Card.fromValueString(c)))),
+      new Hand(state.completeHandCards.map(c => HandCard.deserialize(c))),
       state.id,
     )
   }

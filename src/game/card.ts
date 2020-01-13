@@ -13,9 +13,17 @@ export interface TMyHandCardState {
   num?: TNum
   hints: THintResultState[]
   possibleCards?: TPossibleCardState[]
+  // TODO: (or maybe as getters)
   // isKnown: boolean
   // isPlayable: boolean
   // isDiscardable: boolean
+}
+
+// Same, but we always know the card
+export interface THandCardState extends TMyHandCardState {
+  color: TColor
+  num: TNum
+  possibleCards?: TPossibleCardState[]
 }
 
 export interface THintState {
@@ -72,28 +80,14 @@ export class Card {
   }
 }
 
-export class HandCard extends Card {
-  hints: THintResultState[] = []
-  static fromCard(c: Card) {
-    return new HandCard(c.color, c.num)
-  }
-  toCard() {
-    return new Card(this.color, this.num)
-  }
-  addHint(hint: THintState) {
-    this.hints.push({...hint, result: this.color === hint.is || this.num === hint.is})
-  }
-}
-
 export class PossibleCard extends Card {
   weight: number
-  constructor(color: TColor, num: TNum, weight: number) {
-    super(color, num)
-    this.weight = weight
+  constructor(pc: TPossibleCardState) {
+    super(...parseValueString(pc.value))
+    this.weight = pc.weight
   }
-  static deserialize({value, weight}: TPossibleCardState) {
-    const [color, num] = parseValueString(value)
-    return new this(color, num, weight)
+  static deserialize(pc: TPossibleCardState) {
+    return new this(pc)
   }
   toJSON(): any {
     return {value: this.color + this.num, weight: this.weight}
@@ -118,8 +112,8 @@ export class MyHandCard {
       this.num = hc.num
     }
   }
-  static deserialize(hcs: TMyHandCardState) {
-    return new this(hcs)
+  static deserialize(mhcs: TMyHandCardState) {
+    return new this(mhcs)
   }
   toJSON(): any {
     return {
@@ -129,4 +123,34 @@ export class MyHandCard {
       hints: this.hints,
     }
   }
+}
+
+export class HandCard extends MyHandCard {
+  hints: THintResultState[] = []
+  color: TColor // not optional
+  num: TNum // not optional
+
+  constructor(hc: THandCardState) {
+    super(hc as TMyHandCardState)
+    this.color = hc.color //redundant, but to make TS happy.
+    this.num = hc.num // redundant, but to make TS happy.
+    this.possibleCards = hc.possibleCards ? hc.possibleCards.map(pc => new PossibleCard(pc)) : undefined
+  }
+
+  static deserialize(hcs: THandCardState) {
+    return new this(hcs)
+  }
+
+  static fromCard(c: Card) {
+    return new HandCard({color: c.color, num: c.num, hints: []})
+  }
+  toCard() {
+    return new Card(this.color, this.num)
+  }
+  addHint(hint: THintState) {
+    this.hints.push({...hint, result: this.color === hint.is || this.num === hint.is})
+  }
+  // deserialize(state: THandCardState) {
+
+  // }
 }
