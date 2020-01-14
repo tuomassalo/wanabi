@@ -135,3 +135,6 @@ resources:
         TimeToLiveSpecification:
           AttributeName: ttl
           Enabled: true
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
