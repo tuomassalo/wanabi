@@ -15,7 +15,6 @@
     "broadcast": "sls invoke --function broadcast --data '{ \"body\": \"Hello from server\" }'",
     "localbroadcast": "sls invoke local --function broadcast --data '{ \"body\": \"Hello from server\" }'",
     "localbackend": "sls offline start --inMemory --stage dev",
-    "localfrontend": "http-server src/client",
     "webstart": "PORT=3002 react-scripts start",
     "webbuild": "react-scripts build",
     "webtest": "react-scripts test",

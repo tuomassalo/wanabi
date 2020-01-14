@@ -11,8 +11,8 @@ sls dynamodb install
 # Start the serverless-offline services: api gateway and dynamodb
 npm run localbackend
 
-# Run http-server
-npm run localfronttend
+# Run react dev web server
+npm run webstart
 
 # Then open http://localhost:8080/ in browser
 
