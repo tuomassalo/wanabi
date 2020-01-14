@@ -6,8 +6,13 @@
     "forceConsistentCasingInFileNames": true,
     "isolatedModules": true,
     "jsx": "react",
-    "lib": ["es2019", "dom", "dom.iterable", "esnext"],
-    "module": "commonjs",
+    "lib": [
+      "es2019",
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
+    "module": "esnext",
     "moduleResolution": "node",
     "noEmit": true,
     "noImplicitAny": false,
@@ -18,9 +23,7 @@
     "strict": true,
     "target": "es2017"
   },
-  // "exclude": [
-  //   "./test/*.test.ts",
-  //   "./test/*/*.test.ts"
-  // ],
-  "include": ["src"]
+  "include": [
+    "src"
+  ]
 }
