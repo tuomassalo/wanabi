@@ -38,6 +38,7 @@ npm i
 
 # first run only: install local dynamodb (creates `.dynamodb` directory)
 sls dynamodb install
+npm link ../engine
 
 # Start the serverless-offline services: api gateway and dynamodb
 npm run localbackend

@@ -7,8 +7,13 @@
     "forceConsistentCasingInFileNames": true,
     "isolatedModules": true,
     "jsx": "react",
-    "lib": ["es2019", "dom", "dom.iterable", "esnext"],
-    "module": "esnext",
+    "lib": [
+      "es2019",
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
+    "module": "commonjs",
     "moduleResolution": "node",
     "noImplicitAny": false,
     "outDir": "./dist",
@@ -17,7 +22,9 @@
     "skipLibCheck": true,
     "sourceMap": true,
     "strict": true,
-    "target": "es2019"
+    "target": "es2016"
   },
-  "include": ["src"]
+  "include": [
+    "src"
+  ]
 }

@@ -1,4 +1,6 @@
 import * as AWS from 'aws-sdk'
+import {Game} from 'wanabi-engine'
+
 // const AWS = require('aws-sdk')
 const apig = new AWS.ApiGatewayManagementApi({
   endpoint: process.env.APIG_ENDPOINT,
@@ -42,10 +44,14 @@ export const handler = async function(event: any, context: any) {
       break
 
     case 'routeA':
+      const g = new Game({playerNames: ['foo', 'bar']})
+      // console.warn(g.toJSON());
+      const foo = 'F2F' +g
       await apig
         .postToConnection({
           ConnectionId: connectionId,
-          Data: `Received on routeA: ${body}`,
+          Data: `Received on routeAx: ${foo}`,
+          // Data: `Received on routeAx: ${JSON.stringify(g.toJSON()).substring(0,100)}`,
         })
         .promise()
       break
