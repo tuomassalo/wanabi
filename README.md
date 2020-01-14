@@ -2,17 +2,30 @@
 
 This repo has three different subprojects:
 
+- `engine/` - the game logic, shared between client and server.
+
 - `client/` - React app for actually playing the game.
 
 - `server/` - Serverless server code. (Yes.)
 
-- `engine/` - the game logic, shared between client and server.
+## Engine
+
+```
+cd engine
+npm i
+npm tsc
+npm run test
+
+```
 
 ## Client
 
 ```
 # Run react dev web server
-cd client && npm i && npm run start
+cd client
+npm i
+npm link ../engine
+npm run start
 ```
 
 ## Server
@@ -31,15 +44,6 @@ npm run localbackend
 
 # To try broadcasting a message to all listening clients
 npm run localbroadcast
-```
-
-## Engine
-
-```
-cd engine
-npm i
-npm run test
-
 ```
 
 ### Deploy

@@ -2,10 +2,13 @@
   "name": "wanabi-engine",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "dist/game.js",
+  "types": "dist/game.d.ts",
   "author": "",
   "license": "ISC",
   "scripts": {
+    "watch": "tsc --watch",
+    "build": "tsc",
     "test": "jest"
   },
   "devDependencies": {
