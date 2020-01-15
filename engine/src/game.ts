@@ -8,6 +8,7 @@ import {demystify} from './demystifier'
 import {randomBytes} from 'crypto'
 
 type TGameStatus = 'WAITING_FOR_PLAYERS' | 'RUNNING' | 'GAMEOVER' | 'FINISHED'
+export type TGameId = string
 
 interface TPlayActionParams {
   type: 'PLAY'
@@ -27,8 +28,6 @@ interface THintActionParams {
 interface TStartActionParams {
   type: 'START'
 }
-
-type TGameId = string
 
 type TActionParams = TPlayActionParams | TDiscardActionParams | THintActionParams | TStartActionParams
 type TPlayableActionParams = TPlayActionParams | TDiscardActionParams | THintActionParams
@@ -88,6 +87,43 @@ interface TTurn {
   // stockSize: number
   // inTurn: number
 }
+
+export interface WS_getGamesStateParams {}
+export interface WS_getGameStateParams {
+  gameId: TGameId
+}
+export interface WS_createGameParams {
+  firstPlayerName: string
+}
+export interface WS_startGameParams {
+  gameId: TGameId
+}
+export interface WS_joinGameParams {
+  gameId: TGameId
+  newPlayerName: string
+}
+export interface WS_rejoinGameParams {
+  gameId: TGameId
+  playerIdx: number
+}
+export interface WS_actParams {
+  gameId: TGameId
+  actionParams: TPlayableActionParams
+}
+interface M_GamesState {
+  msg: 'M_GamesState'
+  games: TMaskedTurnState[] // latest turn of each game
+}
+interface M_GameState {
+  msg: 'M_GameState'
+  currentTurn: TMaskedTurnState
+}
+interface M_PlayerId {
+  msg: 'M_PlayerId'
+  playerId: TPlayerId
+}
+export type WebsocketServerMessage = M_GamesState | M_GameState | M_PlayerId
+
 class Turn {
   gameId: TGameId
   status: TGameStatus
@@ -299,7 +335,7 @@ export class Game {
           table: table || new Table(),
           stock: deck,
           discardPile: discardPile || new Pile([]),
-          players: playerNames.map((name, idx) => new Player(name, idx, new Hand([]))),
+          players: playerNames.map((name, idx) => new Player(name, idx, new Hand([]), `bogus_id_${name}`)),
           hintCount: 9,
           woundCount: 0,
           turnNumber: 0,
@@ -342,13 +378,13 @@ export class Game {
     return handSize
   }
 
-  static createPendingGame(firstPlayerName: string): Turn {
+  static createPendingGame(firstPlayerName: string, firstPlayerId: TPlayerId): Turn {
     return new Turn({
       gameId: randomBytes(20).toString('hex'),
       table: new Table(),
       stock: new Pile([]),
       discardPile: new Pile([]),
-      players: [new Player(firstPlayerName, 0, new Hand([]))], // no hand cards yet
+      players: [new Player(firstPlayerName, 0, new Hand([]), firstPlayerId)], // no hand cards yet
       hintCount: 9,
       woundCount: 0,
       turnNumber: 0,
@@ -358,10 +394,10 @@ export class Game {
     })
   }
 
-  static joinPendingGame(pendingGame: Turn, newPlayerName: string): Turn {
+  static joinPendingGame(pendingGame: Turn, newPlayerName: string, newPlayerId: TPlayerId): Turn {
     if (pendingGame.players.length >= 5) throw new GameError('GAME_FULL')
 
-    pendingGame.players.push(new Player(newPlayerName, 0, new Hand([])))
+    pendingGame.players.push(new Player(newPlayerName, 0, new Hand([]), newPlayerId))
     return pendingGame
   }
   static startPendingGame(pendingGame: Turn): Game {

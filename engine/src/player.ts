@@ -35,11 +35,11 @@ export class Player {
     this.mysteryHandCards = undefined
   }
 
-  constructor(name: string, idx: number, hand: Hand, id?: TPlayerId) {
+  constructor(name: string, idx: number, hand: Hand, id: TPlayerId) {
     this.idx = idx
     this.name = name
     this.hand = hand
-    this.id = id || randomBytes(20).toString('hex')
+    this.id = id
   }
   // like toJSON, but manually, since we need to pass `isMe`
   serialize(isMe: boolean): TPlayerState {

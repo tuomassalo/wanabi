@@ -5,7 +5,7 @@ import {createDeck, knownCard} from './helpers'
 describe('A new empty game', () => {
   let pg, pg2
   it('should look emptyish with only one player', () => {
-    pg = Game.createPendingGame('Athos')
+    pg = Game.createPendingGame('Athos', 'bogus_id_athos')
     expect(pg.getState(pg.players[0].id)).toEqual({
       action: {
         type: 'START',
@@ -35,7 +35,7 @@ describe('A new empty game', () => {
     })
   })
   it('should accept more players', () => {
-    pg2 = Game.joinPendingGame(pg, 'Porthos')
+    pg2 = Game.joinPendingGame(pg, 'Porthos', 'bogus_id_porthos')
     expect(pg2.getState(pg2.players[0].id)).toEqual({
       action: {type: 'START'},
       discardPile: [],
