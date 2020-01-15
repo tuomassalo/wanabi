@@ -24,6 +24,7 @@
     "serverless-dynamodb-client": "0.0.2",
     "serverless-dynamodb-local": "0.2.38",
     "serverless-offline": "5.12.1",
-    "serverless-plugin-typescript": "1.1.9"
+    "serverless-plugin-typescript": "1.1.9",
+    "wanabi-engine": "file:../engine"
   }
 }

@@ -7,20 +7,24 @@
     "@testing-library/react": "9.4.0",
     "@testing-library/user-event": "8.0.3",
     "@types/jest": "24.0.25",
-    "@types/node": "13.1.6",
+    "@types/node": "12.12.21",
     "@types/react": "16.9.17",
     "@types/react-dom": "16.9.4",
+    "eslint": "6.8.0",
+    "jest": "24.9.0",
+    "ts-jest": "24.3.0",
     "typescript": "3.7.4"
   },
   "dependencies": {
     "react": "16.12.0",
     "react-dom": "16.12.0",
-    "react-scripts": "3.3.0"
+    "react-scripts": "3.3.0",
+    "wanabi-engine": "file:../engine"
   },
   "scripts": {
     "start": "PORT=3002 react-scripts start",
     "build": "react-scripts build",
-    "test": "react-scripts test",
+    "test": "jest",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {

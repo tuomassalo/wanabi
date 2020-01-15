@@ -10,8 +10,8 @@ export default class App extends React.Component<{}, {messages: string[]}> {
 
   constructor(props:any) {
     super(props)
-    const endpoint = 'ws://localhost:3001'
-    this.wsclient = new WebSocketClient(endpoint)
+    this.wsclient = new WebSocketClient()
+    this.wsclient.connect()
     this.state = {messages: []}
     this.wsclient.on('msg', (...args) =>
       this.setState(state => ({
@@ -19,9 +19,8 @@ export default class App extends React.Component<{}, {messages: string[]}> {
       })),
     )
   }
-  connect = () => {
-    this.wsclient.connect()
-  }
+  // connect = () => {
+  // }
   send = () => {
     this.wsclient.send()
   }
@@ -30,7 +29,7 @@ export default class App extends React.Component<{}, {messages: string[]}> {
       <div className="App">
         <header className="App-header">
           {/* <img src={logo} className="App-logo" alt="logo" /> */}
-          <input type="button" onClick={this.connect} value="connect" />
+          {/* <input type="button" onClick={this.connect} value="connect" /> */}
           <input type="button" onClick={this.send} value="send" />
           <ul>
             {this.state.messages.map(msg => (

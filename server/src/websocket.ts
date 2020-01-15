@@ -32,6 +32,14 @@ export const handler = async function(event: any, context: any) {
           },
         })
         .promise()
+        // let i = 1
+        // setInterval(()  =>
+        await apig
+        .postToConnection({
+          ConnectionId: connectionId,
+          Data: `HELLO`,
+        }).promise()
+        // .promise(), 1000)
       break
 
     case '$disconnect':
