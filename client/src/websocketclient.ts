@@ -10,22 +10,14 @@ export class WebSocketClient extends EventEmitter {
     super()
     const endpoint = 'ws://localhost:3001'
     this.websocket = new WebSocket(endpoint)
-  }
-
-  connect() {
-    /*
-     * See https://html.spec.whatwg.org/multipage/indices.html#events-2
-     * for details around each WebSocket event type.
-     */
-
-    // WebSocket sends a message to API Gateway on creation that gets
-    // routed to the '$connect' route
 
     this.websocket.onclose = ({wasClean, code, reason}) => {
       this.emit('closing', 'CLOSE', {wasClean, code, reason})
     }
 
     this.websocket.onerror = error => {
+      console.warn('onerror', error)
+
       this.emit('error', 'ERROR', 'An error has occurred. See console for details.')
     }
 
@@ -44,8 +36,6 @@ export class WebSocketClient extends EventEmitter {
     }
   }
   send(action: string, data: any) {
-    // this.emit('msg', 'client:    Sending a message.')
-
     if (this.opened) {
       this.websocket.send(JSON.stringify({action, data}))
     } else {
@@ -53,9 +43,6 @@ export class WebSocketClient extends EventEmitter {
     }
   }
   disconnect() {
-    // WebSocket sends a message to API Gateway that gets routed to the
-    // '$disconnect' route.
-    // this.emit('closed', 'Closing the connection.')
     this.websocket.close()
   }
 

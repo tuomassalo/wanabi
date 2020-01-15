@@ -11,7 +11,6 @@ export default class App extends React.Component<{}, {messages: string[]}> {
   constructor(props: any) {
     super(props)
     this.wsclient = new WebSocketClient()
-    this.wsclient.connect()
     this.state = {messages: []}
     this.wsclient.on('msg', (...args) =>
       this.setState(state => ({
