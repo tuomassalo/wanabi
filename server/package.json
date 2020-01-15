@@ -8,11 +8,12 @@
   "scripts": {
     "broadcast": "sls invoke --function broadcast --data '{ \"body\": \"Hello from server\" }'",
     "localbroadcast": "sls invoke local --function broadcast --data '{ \"body\": \"Hello from server\" }'",
-    "localbackend": "sls offline start --inMemory --stage dev"
+    "localbackend": "nodemon --watch dist --exec sls offline start --inMemory --stage dev"
   },
   "devDependencies": {
     "@anttiviljami/serverless-stack-output": "0.3.1",
     "@types/node": "12.12.21",
+    "nodemon": "2.0.2",
     "serverless": "1.60.5",
     "serverless-plugin-common-excludes": "2.4.0",
     "serverless-plugin-include-dependencies": "3.2.1",
@@ -24,7 +25,6 @@
     "serverless-dynamodb-client": "0.0.2",
     "serverless-dynamodb-local": "0.2.38",
     "serverless-offline": "5.12.1",
-    "serverless-plugin-typescript": "1.1.9",
     "wanabi-engine": "file:../engine"
   }
 }

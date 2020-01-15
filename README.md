@@ -13,7 +13,7 @@ This repo has three different subprojects:
 ```
 cd engine
 npm i
-npm tsc
+npx tsc --watch
 npm run test
 
 ```
@@ -24,7 +24,6 @@ npm run test
 # Run react dev web server
 cd client
 npm i
-npm link ../engine
 npm run start
 ```
 
@@ -38,7 +37,8 @@ npm i
 
 # first run only: install local dynamodb (creates `.dynamodb` directory)
 sls dynamodb install
-npm link ../engine
+
+npx tsc --watch
 
 # Start the serverless-offline services: api gateway and dynamodb
 npm run localbackend

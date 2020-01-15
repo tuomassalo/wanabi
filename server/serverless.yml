@@ -4,7 +4,7 @@ plugins:
   - serverless-plugin-common-excludes
   - serverless-plugin-include-dependencies
   - "@anttiviljami/serverless-stack-output"
-  - serverless-plugin-typescript
+  # - serverless-plugin-typescript
   - serverless-dynamodb-local
   # needs to be last:
   - serverless-offline
@@ -77,15 +77,15 @@ provider:
 
 functions:
   authorizer:
-    handler: src/authorizer.handler
+    handler: dist/authorizer.handler
 
   broadcast:
-    handler: src/broadcast.handler
+    handler: dist/broadcast.handler
 
   # See https://serverless.com/framework/docs/providers/aws/events/websocket/
   # for full details
   websocket:
-    handler: src/websocket.handler
+    handler: dist/websocket.handler
     events:
       - websocket:
           # Handles new connection requests

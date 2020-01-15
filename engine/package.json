@@ -1,7 +1,11 @@
 {
   "name": "wanabi-engine",
   "version": "1.0.0",
-  "description": "",
+  "description": "Wanabi Game Engine",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tuomassalo/wanabi"
+  },
   "main": "dist/game.js",
   "types": "dist/game.d.ts",
   "author": "",

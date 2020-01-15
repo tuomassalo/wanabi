@@ -13,7 +13,7 @@ const connectionTable = 'WanabiGame'
 export const handler = async function(event: any, context: any) {
   // For debug purposes only.
   // You should not log any sensitive information in production.
-  console.log('EVENT: \n' + JSON.stringify(event, null, 2))
+  console.log(`EVENT: ${event.requestContext.routeKey}`)
 
   const {
     body,
@@ -54,7 +54,7 @@ export const handler = async function(event: any, context: any) {
     case 'routeA':
       const g = new Game({playerNames: ['foo', 'bar']})
       // console.warn(g.toJSON());
-      const foo = 'F2F' +g
+      const foo = 'FOO' +g
       await apig
         .postToConnection({
           ConnectionId: connectionId,
