@@ -9,7 +9,7 @@ const dynamodb = new AWS.DynamoDB.DocumentClient({endpoint: 'http://localhost:80
 
 // import * as dynamodb from 'serverless-dynamodb-client'
 
-const connectionTable = 'WanabiGame' // process.env.CONNECTIONS_TABLE
+const connectionTable = 'WanabiConnections' // process.env.CONNECTIONS_TABLE
 
 async function sendMessage(connectionId, body) {
   try {

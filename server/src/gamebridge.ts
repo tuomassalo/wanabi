@@ -9,28 +9,24 @@ const apig = new AWS.ApiGatewayManagementApi({
 })
 const dynamodb = new AWS.DynamoDB.DocumentClient({endpoint: 'http://localhost:8000'})
 
-const connectionTable = 'WanabiGame'
+const connectionTable = 'WanabiConnections'
+const gameTable = 'WanabiGames'
 
-async function getAllConnections(ExclusiveStartKey?: AWS.DynamoDB.DocumentClient.Key) {
-  // const ret = await dynamodb.doc.listTables({})
-
+async function scan(tableName: string, scanParams: any, ExclusiveStartKey?: AWS.DynamoDB.DocumentClient.Key) {
   const {Items, LastEvaluatedKey} = await dynamodb
-    .scan({
-      TableName: connectionTable,
-      AttributesToGet: ['connectionId'],
-      ExclusiveStartKey,
-    })
+    .scan({TableName: tableName, ...scanParams, ExclusiveStartKey})
     .promise()
 
-  if (!Items) {
-    throw new Error('No Items')
-  }
-  const connections = Items.map(({connectionId}) => connectionId)
-  if (LastEvaluatedKey) {
-    connections.push(...(await getAllConnections(LastEvaluatedKey)))
-  }
+  if (!Items) throw new Error('No Items')
 
-  return connections
+  // get more if the result was paginated
+  if (LastEvaluatedKey) Items.push(...(await scan(tableName, scanParams, LastEvaluatedKey)))
+
+  return Items
+}
+
+async function getAllConnections() {
+  return (await scan(connectionTable, {AttributesToGet: ['connectionId']})).map(item => item.connectionId)
 }
 
 async function broadcastMsg(data: engine.WebsocketServerMessage) {
@@ -51,10 +47,21 @@ function tmpCreateBogusGame() {
   return new engine.Game({from: 'NEW_TEST_GAME', playerNames: ['Foo', 'Bar']})
 }
 
-async function _getGame(gameId: engine.TGameId): Promise<engine.Game> {
-  // TODO: get from db
-  return tmpCreateBogusGame() // TMP!
-}
+// async function _getGame(gameId: engine.TGameId): Promise<engine.Game> {
+//   const {Items, LastEvaluatedKey} = await dynamodb
+//     .scan({TableName: gameTable, AttributesToGet: ['connectionId'], ExclusiveStartKey})
+//     .promise()
+
+//   if (!Items) {
+//     throw new Error('No Items')
+//   }
+//   const connections = Items.map(({connectionId}) => connectionId)
+//   if (LastEvaluatedKey) {
+//     connections.push(...(await getAllConnections(LastEvaluatedKey)))
+//   }
+
+//   return tmpCreateBogusGame() // TMP!
+// }
 async function _getGames(playerId: TPlayerId): Promise<engine.Game[]> {
   // TODO: get from db
   return [tmpCreateBogusGame()]

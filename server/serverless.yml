@@ -62,6 +62,8 @@ provider:
     APIG_ENDPOINT: ${self:custom.APIG_ENDPOINT.${self:provider.stage}}
     CONNECTIONS_TABLE:
       Ref: ConnectionsTable
+    TURNS_TABLE:
+      Ref: TurnsTable
 
   iamRoleStatements:
     - Effect: Allow
@@ -73,6 +75,7 @@ provider:
       Resource:
         Fn::GetAtt:
           - ConnectionsTable
+          - TurnsTable
           - Arn
 
 functions:
@@ -116,13 +119,32 @@ resources:
     ConnectionsTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: WanabiGame
+        TableName: WanabiConnections
         AttributeDefinitions:
           - AttributeName: connectionId
             AttributeType: S
         BillingMode: PAY_PER_REQUEST
         KeySchema:
           - AttributeName: connectionId
+            KeyType: HASH
+        SSESpecification:
+          SSEEnabled: true
+        TimeToLiveSpecification:
+          AttributeName: ttl
+          Enabled: true
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
+    TurnsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: WanabiTurns
+        AttributeDefinitions:
+          - AttributeName: gameId
+            AttributeType: S
+        BillingMode: PAY_PER_REQUEST
+        KeySchema:
+          - AttributeName: gameId
             KeyType: HASH
         SSESpecification:
           SSEEnabled: true
