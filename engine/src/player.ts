@@ -1,6 +1,6 @@
 import {randomBytes} from 'crypto'
 import {Hand} from './hand'
-import {Card, MyHandCard, TMyHandCardState, THandCardState, HandCard} from './card'
+import {MyHandCard, TMyHandCardState, THandCardState, HandCard} from './card'
 
 export type TPlayerId = string
 

@@ -5,6 +5,7 @@ import {Hand} from './hand'
 import {Table, TTableState} from './table'
 import {SyntaxError, GameError} from './errors'
 import {demystify} from './demystifier'
+import {randomBytes} from 'crypto'
 
 type TGameStatus = 'WAITING_FOR_PLAYERS' | 'RUNNING' | 'GAMEOVER' | 'FINISHED'
 
@@ -27,6 +28,8 @@ interface TStartActionParams {
   type: 'START'
 }
 
+type TGameId = string
+
 type TActionParams = TPlayActionParams | TDiscardActionParams | THintActionParams | TStartActionParams
 type TPlayableActionParams = TPlayActionParams | TDiscardActionParams | THintActionParams
 
@@ -47,6 +50,7 @@ type TResolvedActionState =
 
 //  json object
 interface TMaskedTurnState {
+  gameId: TGameId
   status: TGameStatus
   action: TResolvedActionState
   score: number
@@ -66,6 +70,7 @@ interface TCompleteTurnState extends TMaskedTurnState {
   players: TCompletePlayerState[]
 }
 interface TTurn {
+  gameId: TGameId
   status: TGameStatus
   action: TResolvedActionState
   discardPile: Pile
@@ -84,6 +89,7 @@ interface TTurn {
   // inTurn: number
 }
 class Turn {
+  gameId: TGameId
   status: TGameStatus
   action: TResolvedActionState
   discardPile: Pile
@@ -97,6 +103,7 @@ class Turn {
   stock: Pile
 
   constructor(t: TTurn) {
+    this.gameId = t.gameId
     this.status = t.status
     this.action = t.action
     this.discardPile = t.discardPile
@@ -119,7 +126,7 @@ class Turn {
     })
   }
   clone() {
-    // TODO: use JSON to make a deep copy
+    // TODO: do we need to use JSON to make a deep copy?
     return new Turn(this)
   }
 
@@ -254,42 +261,41 @@ class Turn {
   }
 }
 
-export interface TNewGameParams {
+export interface TExistingGameConstructor {
+  from: 'SERIALIZED_TURNS'
+  turns: TCompleteTurnState[]
+}
+export interface TNewGameConstructor {
+  from: 'NEW_TEST_GAME'
   playerNames: string[]
   deck?: Pile
   discardPile?: Pile
   table?: Table
 }
+// export interface TNewGameConstructor {from: 'FIRST_PLAYER', playerName: string}
 
 export class Game {
   turns: Turn[] = []
   playersById: {[id: string]: Player}
 
-  constructor(params: TNewGameParams | TCompleteTurnState[]) {
-    if (Array.isArray(params)) {
-      // deserialize a game
-      this.turns = params.map(p => Turn.deserialize(p))
-    } else {
-      // start a new game
+  constructor(params: TNewGameConstructor | TExistingGameConstructor) {
+    if (params.from === 'SERIALIZED_TURNS') {
+      // deserialize an ongoing game
+      this.turns = params.turns.map(p => Turn.deserialize(p))
+    } else if (params.from === 'NEW_TEST_GAME') {
+      // USED IN TESTS
+      // set up a new game
       let {playerNames, deck, discardPile, table} = params
       if (!deck) {
         deck = new Pile(deck || Card.getFullDeck())
         deck.shuffle()
       }
 
-      const handSize: number = {
-        '2': 5,
-        '3': 5,
-        '4': 4,
-        '5': 4,
-      }['' + playerNames.length]
+      const handSize: number = Game.getHandSize(playerNames.length)
 
-      if (!handSize) {
-        throw new Error('INVALID_NUMBER_OF_PLAYERS')
-      }
-
-      this.turns.push(
+      this.turns = [
         new Turn({
+          gameId: randomBytes(20).toString('hex'),
           table: table || new Table(),
           stock: deck,
           discardPile: discardPile || new Pile([]),
@@ -301,7 +307,7 @@ export class Game {
           status: 'RUNNING',
           action: {type: 'START'},
         }),
-      )
+      ]
 
       for (let i = 0; i < handSize; i++) {
         for (let p = 0; p < playerNames.length; p++) {
@@ -322,8 +328,59 @@ export class Game {
     return this.currentTurn.players
   }
 
+  static getHandSize(playerCnt: number): number {
+    const handSize = {
+      '2': 5,
+      '3': 5,
+      '4': 4,
+      '5': 4,
+    }['' + playerCnt]
+
+    if (!handSize) {
+      throw new Error('INVALID_NUMBER_OF_PLAYERS')
+    }
+    return handSize
+  }
+
+  static createPendingGame(firstPlayerName: string): Turn {
+    return new Turn({
+      gameId: randomBytes(20).toString('hex'),
+      table: new Table(),
+      stock: new Pile([]),
+      discardPile: new Pile([]),
+      players: [new Player(firstPlayerName, 0, new Hand([]))], // no hand cards yet
+      hintCount: 9,
+      woundCount: 0,
+      turnNumber: 0,
+      turnsLeft: null,
+      status: 'WAITING_FOR_PLAYERS',
+      action: {type: 'START'},
+    })
+  }
+
+  static joinPendingGame(pendingGame: Turn, newPlayerName: string): Turn {
+    if (pendingGame.players.length >= 5) throw new GameError('GAME_FULL')
+
+    pendingGame.players.push(new Player(newPlayerName, 0, new Hand([])))
+    return pendingGame
+  }
+  static startPendingGame(pendingGame: Turn): Game {
+    pendingGame.stock = new Pile(Card.getFullDeck())
+    pendingGame.stock.shuffle()
+
+    const handSize: number = Game.getHandSize(pendingGame.players.length)
+    for (let i = 0; i < handSize; i++) {
+      for (let p = 0; p < pendingGame.players.length; p++) {
+        pendingGame.players[p].hand.dealOne(pendingGame.stock.drawOne())
+      }
+    }
+    pendingGame.status = 'RUNNING'
+
+    return new Game({from: 'SERIALIZED_TURNS', turns: JSON.parse(JSON.stringify([pendingGame]))})
+  }
+
   toJSON() {
-    return this.turns
+    return {turns: this.turns}
   }
 
   act(playerId: TPlayerId, actionParams: TPlayableActionParams) {

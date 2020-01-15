@@ -3,6 +3,7 @@ import {Game} from '../src/game'
 
 function createTestGame() {
   const g = new Game({
+    from: 'NEW_TEST_GAME',
     playerNames: ['Thelma', 'Louise'],
     deck: createDeck(
       // p0 p1 p0 p1 p0 p1 (p0 plays and p1 discards)
@@ -29,6 +30,7 @@ describe('An ongoing game', () => {
   it('should have proper state after 2*6 turns, before hinting', () => {
     const g = createTestGame()
     expect(g.getState(g.players[1].id)).toEqual({
+      gameId: jasmine.any(String),
       timestamp: jasmine.any(String),
       action: jasmine.any(Object),
       stockSize: 60 - 2 * 5 - 2 * 6, // === 16

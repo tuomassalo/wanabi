@@ -9,6 +9,7 @@ describe('A tight three-player game', () => {
       g.act(g.players[1].id, {type: 'DISCARD', cardIdx: 0})
     }
     expect(g.getState(g.players[1].id)).toEqual({
+      gameId: jasmine.any(String),
       timestamp: jasmine.any(String),
       action: jasmine.any(Object),
       stockSize: 60 - 2 * 5 - 2 * 24, // === 2
@@ -64,6 +65,7 @@ describe('A tight three-player game', () => {
   it('should start countdown when the stock is emptied', () => {
     g.act(g.players[1].id, {type: 'DISCARD', cardIdx: 0})
     expect(g.getState(g.players[1].id)).toEqual({
+      gameId: jasmine.any(String),
       timestamp: jasmine.any(String),
       action: jasmine.any(Object),
       stockSize: 0,

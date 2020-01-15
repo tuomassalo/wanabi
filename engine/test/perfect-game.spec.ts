@@ -4,6 +4,7 @@ import {createDeck, knownCard} from './helpers'
 
 describe('A perfect two-player game without any hints or discards', () => {
   const g = new Game({
+    from: 'NEW_TEST_GAME',
     playerNames: ['Bonnie', 'Clyde'],
     deck: createDeck(
       ['A', 'B', 'C', 'D', 'E', 'X'].flatMap(c => [1, 2, 3, 4, 5].map(n => c + n)).join(' '),
@@ -12,6 +13,7 @@ describe('A perfect two-player game without any hints or discards', () => {
   })
   it('should have correct setup', () => {
     expect(g.getState(g.players[0].id)).toEqual({
+      gameId: jasmine.any(String),
       timestamp: jasmine.any(String),
       action: {type: 'START'},
       stockSize: 50,
@@ -51,6 +53,7 @@ describe('A perfect two-player game without any hints or discards', () => {
   it('should properly alter state after playing a card', () => {
     g.act(g.players[0].id, {type: 'PLAY', cardIdx: 0})
     expect(g.getState(g.players[1].id)).toEqual({
+      gameId: jasmine.any(String),
       timestamp: jasmine.any(String),
       action: {type: 'PLAY', cardIdx: 0, card: 'A1'},
       stockSize: 49,
@@ -93,6 +96,7 @@ describe('A perfect two-player game without any hints or discards', () => {
       g.act(g.players[i % 2].id, {type: 'PLAY', cardIdx: 0})
     }
     expect(g.getState(g.players[1].id)).toEqual({
+      gameId: jasmine.any(String),
       timestamp: jasmine.any(String),
       action: jasmine.any(Object),
       stockSize: 21,
@@ -133,6 +137,7 @@ describe('A perfect two-player game without any hints or discards', () => {
   it('should finish after the last card has been played', () => {
     g.act(g.players[1].id, {type: 'PLAY', cardIdx: 0})
     expect(g.getState(g.players[1].id)).toEqual({
+      gameId: jasmine.any(String),
       timestamp: jasmine.any(String),
       action: jasmine.any(Object),
       stockSize: 20,

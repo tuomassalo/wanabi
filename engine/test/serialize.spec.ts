@@ -17,7 +17,7 @@ describe('A game', () => {
 
     expect(serialized.length).toBeLessThan(70000)
 
-    const g2 = new Game(JSON.parse(serialized))
+    const g2 = new Game({...JSON.parse(serialized), from: 'SERIALIZED_TURNS'})
 
     expect(g2.getState(g.players[1].id)).toEqual(state1)
 

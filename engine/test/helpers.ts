@@ -129,6 +129,7 @@ export function createTightGame() {
   // * no p1 cards are playable.
 
   return new Game({
+    from: 'NEW_TEST_GAME',
     playerNames: ['Jekyll', 'Hyde'],
     deck: createDeck(
       zip(
