@@ -127,7 +127,7 @@ export async function joinGame({gameId, newPlayerName}: engine.WS_joinGameParams
   await updateGame(g, pendingGameTurn.timestamp)
 
   // send updated game state to all players
-  return getGamesState({}, connectionId)
+  await broadcastGamesState()
 }
 
 export async function startGame({gameId}: engine.WS_startGameParams, connectionId: string) {
