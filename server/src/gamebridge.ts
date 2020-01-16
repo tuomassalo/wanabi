@@ -12,7 +12,11 @@ const dynamodb = new AWS.DynamoDB.DocumentClient({endpoint: 'http://localhost:80
 const connectionTable = 'WanabiConnections'
 const gameTable = 'WanabiGames'
 
-async function scan(tableName: string, scanParams: any, ExclusiveStartKey?: AWS.DynamoDB.DocumentClient.Key) {
+async function scan<I>(
+  tableName: string,
+  scanParams: any,
+  ExclusiveStartKey?: AWS.DynamoDB.DocumentClient.Key,
+): Promise<I[]> {
   const {Items, LastEvaluatedKey} = await dynamodb
     .scan({TableName: tableName, ...scanParams, ExclusiveStartKey})
     .promise()
@@ -20,13 +24,13 @@ async function scan(tableName: string, scanParams: any, ExclusiveStartKey?: AWS.
   if (!Items) throw new Error('No Items')
 
   // get more if the result was paginated
-  if (LastEvaluatedKey) Items.push(...(await scan(tableName, scanParams, LastEvaluatedKey)))
+  if (LastEvaluatedKey) Items.push(...(await scan<I>(tableName, scanParams, LastEvaluatedKey)))
 
-  return Items
+  return Items as I[]
 }
 
 async function getAllConnections() {
-  return (await scan(connectionTable, {AttributesToGet: ['connectionId']})).map(item => item.connectionId)
+  return (await scan<any>(connectionTable, {AttributesToGet: ['connectionId']})).map(item => item.connectionId)
 }
 
 async function broadcastMsg(data: engine.WebsocketServerMessage) {
@@ -47,30 +51,26 @@ function tmpCreateBogusGame() {
   return new engine.Game({from: 'NEW_TEST_GAME', playerNames: ['Foo', 'Bar']})
 }
 
-// async function _getGame(gameId: engine.TGameId): Promise<engine.Game> {
-//   const {Items, LastEvaluatedKey} = await dynamodb
-//     .scan({TableName: gameTable, AttributesToGet: ['connectionId'], ExclusiveStartKey})
-//     .promise()
+async function _getGame(gameId: engine.TGameId): Promise<engine.Game> {
+  const turn = (await scan<engine.TCompleteTurnState>(gameTable, {})).find(
+    t => t.gameId === gameId && t.status === 'WAITING_FOR_PLAYERS',
+  )
+  if (!turn) throw new Error('No turn found')
 
-//   if (!Items) {
-//     throw new Error('No Items')
-//   }
-//   const connections = Items.map(({connectionId}) => connectionId)
-//   if (LastEvaluatedKey) {
-//     connections.push(...(await getAllConnections(LastEvaluatedKey)))
-//   }
+  return new engine.Game({from: 'SERIALIZED_TURNS', turns: [turn]})
+}
+async function _getGamesState(playerId: TPlayerId): Promise<engine.TMaskedTurnState[]> {
+  const turns = await scan<engine.TCompleteTurnState>(gameTable, {})
 
-//   return tmpCreateBogusGame() // TMP!
-// }
-async function _getGames(playerId: TPlayerId): Promise<engine.Game[]> {
-  // TODO: get from db
-  return [tmpCreateBogusGame()]
+  const turnsInMyGames = turns.filter(t => t.status === 'WAITING_FOR_PLAYERS' || t.players.some(p => p.id === playerId))
+
+  return turnsInMyGames.map(t => new engine.Game({from: 'SERIALIZED_TURNS', turns: [t]}).getState(playerId))
 }
 
 export async function getGamesState({}: engine.WS_getGamesStateParams, connectionId: string) {
   const data: engine.WebsocketServerMessage = {
     msg: 'M_GamesState',
-    games: (await _getGames(connectionId)).map(g => g.getState(connectionId)),
+    games: await _getGamesState(connectionId),
   }
   await apig.postToConnection({ConnectionId: connectionId, Data: JSON.stringify(data)}).promise()
 }
@@ -82,18 +82,25 @@ export async function getGameState({gameId}: engine.WS_getGameStateParams, conne
 }
 
 export async function createGame({firstPlayerName}: engine.WS_createGameParams, connectionId: string) {
-  const g = engine.Game.createPendingGame(firstPlayerName, connectionId)
-  // TODO: save game status to db
+  const turn0 = engine.Game.createPendingGame(firstPlayerName, connectionId)
+
+  if (firstPlayerName === 'BOBBY_TABLES' && process.env.IS_OFFLINE) {
+    for (const {gameId} of await scan<any>(gameTable, {AttributesToGet: ['gameId']})) {
+      await dynamodb.delete({TableName: gameTable, Key: {gameId}}).promise()
+    }
+  }
+
+  await dynamodb.put({TableName: gameTable, Item: JSON.parse(JSON.stringify(turn0))}).promise()
 
   // send updated state to all players
-  await broadcastMsg({msg: 'M_GamesState', games: [g.getState('')]})
+  await broadcastMsg({msg: 'M_GamesState', games: [turn0.getState(connectionId)]})
 }
-export async function joinGame({newPlayerName}: engine.WS_joinGameParams, connectionId: string) {
-  const g = engine.Game.createPendingGame(newPlayerName, connectionId)
+export async function joinGame({gameId, newPlayerName}: engine.WS_joinGameParams, connectionId: string) {
+  const g = engine.Game.joinPendingGame((await _getGame(gameId)).currentTurn, newPlayerName, connectionId)
   // TODO: save game status to db
 
   // send updated game state to all players
-  await broadcastMsg({msg: 'M_GamesState', games: [g.getState('')]})
+  await broadcastMsg({msg: 'M_GamesState', games: [g.getState(connectionId)]})
 }
 
 export async function act({gameId, actionParams}: engine.WS_actParams, connectionId: string) {

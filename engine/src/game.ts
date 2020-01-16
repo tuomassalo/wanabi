@@ -48,7 +48,7 @@ type TResolvedActionState =
   | TResolvedStartActionState
 
 //  json object
-interface TMaskedTurnState {
+export interface TMaskedTurnState {
   gameId: TGameId
   status: TGameStatus
   action: TResolvedActionState
@@ -64,7 +64,7 @@ interface TMaskedTurnState {
   players: TPlayerState[]
   timestamp: string // ISO string
 }
-interface TCompleteTurnState extends TMaskedTurnState {
+export interface TCompleteTurnState extends TMaskedTurnState {
   stock: TCardState[]
   players: TCompletePlayerState[]
 }
@@ -433,7 +433,8 @@ export class Game {
   }
   // this returns information that is public for a player
   getCompleteState(playerId: TPlayerId): TMaskedTurnState[] {
-    if (!this.playersById[playerId]) {
+    // allow querying all games when they are still waiting for players
+    if (!this.playersById[playerId] && this.currentTurn.status !== 'WAITING_FOR_PLAYERS') {
       throw new SyntaxError('INVALID_PLAYER_ID', playerId)
     }
 
@@ -443,6 +444,9 @@ export class Game {
   }
 
   checkIntegrity() {
+    // if the game has not started yet, cards are not dealt.
+    if (this.currentTurn.status === 'WAITING_FOR_PLAYERS') return
+
     // check that we have the correct set of cards
     const currentCards = [
       ...this.currentTurn.stock.cards,

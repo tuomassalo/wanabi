@@ -20,17 +20,18 @@ export default class App extends React.Component<{}, {messages: string[]}> {
   }
   // connect = () => {
   // }
-  send = () => {
-    this.wsclient.createGame({firstPlayerName: 'Foobar'})
-    // this.wsclient.send('getGamesStatus', {})
-  }
+  createGame = () => this.wsclient.createGame({firstPlayerName: 'Foobar'})
+  getGamesState = () => this.wsclient.getGamesState({})
+  // getGameState = () =>     this.wsclient.getGameState({})
   render() {
     return (
       <div className="App">
         <header className="App-header">
           {/* <img src={logo} className="App-logo" alt="logo" /> */}
           {/* <input type="button" onClick={this.connect} value="connect" /> */}
-          <input type="button" onClick={this.send} value="send!" />
+          <input type="button" onClick={this.createGame} value="createGame" />
+          <input type="button" onClick={this.getGamesState} value="getGamesState" />
+          {/* <input type="button" onClick={this.getGameState} value="getGameState" /> */}
           <ul>
             {this.state.messages.map(msg => (
               <li>MSG: {msg}</li>
