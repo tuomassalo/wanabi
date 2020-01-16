@@ -52,7 +52,7 @@ describe('A new empty game', () => {
         },
         {
           completeHandCards: [],
-          idx: 0,
+          idx: 1,
           isMe: false,
           mysteryHandCards: [],
           name: 'Porthos',
@@ -87,7 +87,7 @@ describe('A new empty game', () => {
         },
         {
           completeHandCards: [knownCard(), knownCard(), knownCard(), knownCard(), knownCard()],
-          idx: 0,
+          idx: 1,
           isMe: false,
           mysteryHandCards: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
           name: 'Porthos',
