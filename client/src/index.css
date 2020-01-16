@@ -1,0 +1,9 @@
+div.WanabiGameOverview {
+  background: #eee;
+}
+div.WanabiGameOverview ul,
+div.WanabiGameOverview li {
+  display: inline;
+  list-style: none;
+  padding: 0;
+}

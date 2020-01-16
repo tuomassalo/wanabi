@@ -45,7 +45,11 @@ async function broadcastMsg(data: engine.WebsocketServerMessage) {
 }
 async function sendStateToPlayers(game: engine.Game) {
   for (const p of game.players) {
-    const data: engine.WebsocketServerMessage = {msg: 'M_GameState', currentTurn: game.getState(p.id)}
+    const data: engine.WebsocketServerMessage = {
+      msg: 'M_GameState',
+      currentTurn: game.getState(p.id),
+      timestamp: new Date().toISOString(),
+    }
     await apig.postToConnection({ConnectionId: p.id, Data: JSON.stringify(data)}).promise()
   }
 }
@@ -95,13 +99,18 @@ export async function getGamesState({}: engine.WS_getGamesStateParams, connectio
   const data: engine.WebsocketServerMessage = {
     msg: 'M_GamesState',
     games: await _getGamesState(connectionId),
+    timestamp: new Date().toISOString(),
   }
   await apig.postToConnection({ConnectionId: connectionId, Data: JSON.stringify(data)}).promise()
 }
 
 export async function getGameState({gameId}: engine.WS_getGameStateParams, connectionId: string) {
   const g = await _getGame(gameId)
-  const data: engine.WebsocketServerMessage = {msg: 'M_GameState', currentTurn: g.getState(connectionId)}
+  const data: engine.WebsocketServerMessage = {
+    msg: 'M_GameState',
+    currentTurn: g.getState(connectionId),
+    timestamp: new Date().toISOString(),
+  }
   await apig.postToConnection({ConnectionId: connectionId, Data: JSON.stringify(data)}).promise()
 }
 
@@ -119,7 +128,7 @@ export async function createGame({firstPlayerName}: engine.WS_createGameParams, 
   await dynamodb.put({TableName: gameTable, Item: JSON.parse(JSON.stringify(turn0))}).promise()
 
   // send updated state to all players
-  await broadcastMsg({msg: 'M_GamesState', games: [turn0.getState(connectionId)]})
+  await broadcastMsg({msg: 'M_GamesState', games: [turn0.getState(connectionId)], timestamp: new Date().toISOString()})
 }
 export async function joinGame({gameId, newPlayerName}: engine.WS_joinGameParams, connectionId: string) {
   const pendingGame = await _getGame(gameId)

@@ -112,17 +112,16 @@ export interface WS_actParams {
 }
 interface M_GamesState {
   msg: 'M_GamesState'
+  timestamp: string
   games: TMaskedTurnState[] // latest turn of each game
 }
 interface M_GameState {
   msg: 'M_GameState'
+  timestamp: string
   currentTurn: TMaskedTurnState
 }
-interface M_PlayerId {
-  msg: 'M_PlayerId'
-  playerId: TPlayerId
-}
-export type WebsocketServerMessage = M_GamesState | M_GameState | M_PlayerId
+
+export type WebsocketServerMessage = M_GamesState | M_GameState
 
 export class Turn {
   gameId: TGameId

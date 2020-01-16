@@ -36,6 +36,7 @@ test('connect, createGame', done => {
         },
       ],
       msg: 'M_GamesState',
+      timestamp: jasmine.any(String),
     })
     gameId = msg.games[0].gameId
 
@@ -69,6 +70,7 @@ test('getGamesState', done => {
         },
       ],
       msg: 'M_GamesState',
+      timestamp: jasmine.any(String),
     })
     setTimeout(done, 100)
   })
@@ -101,6 +103,7 @@ test('joinGame', done => {
         },
       ],
       msg: 'M_GamesState',
+      timestamp: jasmine.any(String),
     })
     setTimeout(done, 100)
   })
@@ -151,6 +154,7 @@ test('startGame', done => {
         },
       ],
       msg: 'M_GamesState',
+      timestamp: jasmine.any(String),
     })
     setTimeout(done, 100)
   })
@@ -201,6 +205,7 @@ test('act', done => {
       },
 
       msg: 'M_GameState',
+      timestamp: jasmine.any(String),
     })
     if (!--assertionsLeft) setTimeout(done, 100)
   })
@@ -245,6 +250,7 @@ test('act', done => {
       },
 
       msg: 'M_GameState',
+      timestamp: jasmine.any(String),
     })
     if (!--assertionsLeft) setTimeout(done, 100)
   })
