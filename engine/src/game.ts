@@ -396,7 +396,7 @@ export class Game {
   static joinPendingGame(pendingGame: Turn, newPlayerName: string, newPlayerId: TPlayerId): Turn {
     if (pendingGame.players.length >= 5) throw new GameError('GAME_FULL')
 
-    pendingGame.players.push(new Player(newPlayerName, 0, new Hand([]), newPlayerId))
+    pendingGame.players.push(new Player(newPlayerName, pendingGame.players.length, new Hand([]), newPlayerId))
     return pendingGame
   }
   static startPendingGame(pendingGame: Turn): Game {

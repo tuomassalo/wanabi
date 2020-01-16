@@ -138,7 +138,7 @@ export async function startGame({gameId}: engine.WS_startGameParams, connectionI
   await updateGame(g.currentTurn, pendingGameTurn.timestamp)
 
   // send updated game state to all players
-  return getGamesState({}, connectionId)
+  await broadcastGamesState()
 }
 
 export async function act({gameId, actionParams}: engine.WS_actParams, connectionId: string) {
