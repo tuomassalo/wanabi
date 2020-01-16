@@ -3,7 +3,9 @@ import React from 'react'
 import './App.css'
 import {WebSocketClient} from './websocketclient'
 import {TMaskedTurnState, WebsocketServerMessage} from 'wanabi-engine'
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import WanabiGame from './WanabiGame'
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import WanabiMenu from './WanabiMenu'
 
 // import {Game} from 'wanabi-engine'
@@ -33,10 +35,10 @@ export default class App extends React.Component<{}, AppState> {
         this.setState(state => {
           return {phase: 'IN_MENU', games: data.games, messages: [...state.messages, data]}
         })
-      } else if (data.msg === 'M_GameState') {
-        this.setState(state => {
-          return {phase: 'IN_GAME', games: data.currentTurn, messages: [...state.messages, data]}
-        })
+        // } else if (data.msg === 'M_GameState') {
+        //   this.setState(state => {
+        //     return {phase: 'IN_GAME', games: data.currentTurn, messages: [...state.messages, data]}
+        //   })
       }
     })
   }

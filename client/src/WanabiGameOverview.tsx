@@ -1,5 +1,6 @@
 import React from 'react'
 import {TMaskedTurnState} from 'wanabi-engine'
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import WanabiPlayerList from './WanabiPlayerList'
 
 export default class WanabiGameOverview extends React.Component<{game: TMaskedTurnState}> {

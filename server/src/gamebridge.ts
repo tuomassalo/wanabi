@@ -36,22 +36,22 @@ async function getAllConnections() {
   return (await scan<any>(connectionTable, {AttributesToGet: ['connectionId']})).map(item => item.connectionId)
 }
 
-async function broadcastMsg(data: engine.WebsocketServerMessage) {
+async function broadcastGamesState() {
+  const turns = await scanGames()
+
   await Promise.all(
-    (await getAllConnections()).map(cId =>
-      apig.postToConnection({ConnectionId: cId, Data: JSON.stringify(data)}).promise(),
-    ),
+    (await getAllConnections()).map(cId => {
+      const data: engine.WebsocketServerMessage = {
+        msg: 'M_GamesState',
+        games: turns
+          .filter(t => t.status === 'WAITING_FOR_PLAYERS' || t.players.some(p => p.id === cId))
+          .map(t => engine.Turn.deserialize(t).getState(cId)),
+        timestamp: new Date().toISOString(),
+      }
+
+      return apig.postToConnection({ConnectionId: cId, Data: JSON.stringify(data)}).promise()
+    }),
   )
-}
-async function sendStateToPlayers(game: engine.Game) {
-  for (const p of game.players) {
-    const data: engine.WebsocketServerMessage = {
-      msg: 'M_GameState',
-      currentTurn: game.getState(p.id),
-      timestamp: new Date().toISOString(),
-    }
-    await apig.postToConnection({ConnectionId: p.id, Data: JSON.stringify(data)}).promise()
-  }
 }
 
 async function updateGame(turn: engine.Turn, prevTimestamp: string) {
@@ -85,30 +85,16 @@ async function _getGame(gameId: engine.TGameId): Promise<engine.Game> {
 
   return new engine.Game({from: 'SERIALIZED_TURNS', turns: [turn]})
 }
-async function _getGamesState(playerId: TPlayerId): Promise<engine.TMaskedTurnState[]> {
+async function _getGamesState(playerId: TPlayerId): Promise<engine.TCompleteTurnState[]> {
   const turns = await scanGames()
 
-  const turnsInMyGames = turns.filter(t => t.status === 'WAITING_FOR_PLAYERS' || t.players.some(p => p.id === playerId))
-
-  const ret = turnsInMyGames.map(t => new engine.Game({from: 'SERIALIZED_TURNS', turns: [t]}).getState(playerId))
-
-  return ret
+  return turns.filter(t => t.status === 'WAITING_FOR_PLAYERS' || t.players.some(p => p.id === playerId))
 }
 
 export async function getGamesState({}: engine.WS_getGamesStateParams, connectionId: string) {
   const data: engine.WebsocketServerMessage = {
     msg: 'M_GamesState',
-    games: await _getGamesState(connectionId),
-    timestamp: new Date().toISOString(),
-  }
-  await apig.postToConnection({ConnectionId: connectionId, Data: JSON.stringify(data)}).promise()
-}
-
-export async function getGameState({gameId}: engine.WS_getGameStateParams, connectionId: string) {
-  const g = await _getGame(gameId)
-  const data: engine.WebsocketServerMessage = {
-    msg: 'M_GameState',
-    currentTurn: g.getState(connectionId),
+    games: (await _getGamesState(connectionId)).map(t => engine.Turn.deserialize(t).getState(connectionId)),
     timestamp: new Date().toISOString(),
   }
   await apig.postToConnection({ConnectionId: connectionId, Data: JSON.stringify(data)}).promise()
@@ -128,7 +114,7 @@ export async function createGame({firstPlayerName}: engine.WS_createGameParams, 
   await dynamodb.put({TableName: gameTable, Item: JSON.parse(JSON.stringify(turn0))}).promise()
 
   // send updated state to all players
-  await broadcastMsg({msg: 'M_GamesState', games: [turn0.getState(connectionId)], timestamp: new Date().toISOString()})
+  await broadcastGamesState()
 }
 export async function joinGame({gameId, newPlayerName}: engine.WS_joinGameParams, connectionId: string) {
   const pendingGame = await _getGame(gameId)
@@ -137,7 +123,7 @@ export async function joinGame({gameId, newPlayerName}: engine.WS_joinGameParams
   const pendingGameTurn = pendingGame.currentTurn
   const g = engine.Game.joinPendingGame(pendingGameTurn, newPlayerName, connectionId)
 
-  // TODO: save game status to db
+  // save game status to db
   await updateGame(g, pendingGameTurn.timestamp)
 
   // send updated game state to all players
@@ -148,7 +134,7 @@ export async function startGame({gameId}: engine.WS_startGameParams, connectionI
   const pendingGameTurn = (await _getGame(gameId)).currentTurn
   const g = engine.Game.startPendingGame(pendingGameTurn)
 
-  // TODO: save game status to db
+  // save game status to db
   await updateGame(g.currentTurn, pendingGameTurn.timestamp)
 
   // send updated game state to all players
@@ -157,8 +143,12 @@ export async function startGame({gameId}: engine.WS_startGameParams, connectionI
 
 export async function act({gameId, actionParams}: engine.WS_actParams, connectionId: string) {
   const g = await _getGame(gameId)
+  const prevTimestamp = g.currentTurn.timestamp
   g.act(connectionId, actionParams)
 
+  // save game status to db
+  await updateGame(g.currentTurn, prevTimestamp)
+
   // send updated game state to all players
-  await sendStateToPlayers(g)
+  await broadcastGamesState()
 }
