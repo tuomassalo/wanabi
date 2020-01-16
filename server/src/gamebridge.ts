@@ -64,7 +64,13 @@ async function _getGamesState(playerId: TPlayerId): Promise<engine.TMaskedTurnSt
 
   const turnsInMyGames = turns.filter(t => t.status === 'WAITING_FOR_PLAYERS' || t.players.some(p => p.id === playerId))
 
-  return turnsInMyGames.map(t => new engine.Game({from: 'SERIALIZED_TURNS', turns: [t]}).getState(playerId))
+  console.warn(111, turnsInMyGames[0].players, playerId)
+
+  const ret = turnsInMyGames.map(t => new engine.Game({from: 'SERIALIZED_TURNS', turns: [t]}).getState(playerId))
+
+  console.warn(222, ret[0].players, playerId)
+
+  return ret
 }
 
 export async function getGamesState({}: engine.WS_getGamesStateParams, connectionId: string) {
@@ -85,6 +91,8 @@ export async function createGame({firstPlayerName}: engine.WS_createGameParams, 
   const turn0 = engine.Game.createPendingGame(firstPlayerName, connectionId)
 
   if (firstPlayerName === 'BOBBY_TABLES' && process.env.IS_OFFLINE) {
+    console.warn('Wiping dev tables.')
+
     for (const {gameId} of await scan<any>(gameTable, {AttributesToGet: ['gameId']})) {
       await dynamodb.delete({TableName: gameTable, Key: {gameId}}).promise()
     }

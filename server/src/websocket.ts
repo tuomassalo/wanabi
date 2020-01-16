@@ -8,12 +8,12 @@ const connectionTable = 'WanabiConnections'
 export const handler = async function(event: any, context: any) {
   // For debug purposes only.
   // You should not log any sensitive information in production.
-  console.log(`EVENT: ${event.requestContext.routeKey}`)
+  const {
+    body,
+    requestContext: {connectionId, routeKey},
+  } = event
+  console.log(`EVENT: ${event.requestContext.routeKey} ${connectionId}`)
   try {
-    const {
-      body,
-      requestContext: {connectionId, routeKey},
-    } = event
     switch (routeKey) {
       case '$connect':
         await dynamodb
