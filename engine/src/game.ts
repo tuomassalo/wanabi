@@ -124,7 +124,7 @@ interface M_PlayerId {
 }
 export type WebsocketServerMessage = M_GamesState | M_GameState | M_PlayerId
 
-class Turn {
+export class Turn {
   gameId: TGameId
   status: TGameStatus
   action: TResolvedActionState
