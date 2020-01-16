@@ -106,34 +106,146 @@ test('joinGame', done => {
   })
 })
 
-// test('startGame', done => {
-//   expect.assertions(1)
-//   ws1.startGame({gameId})
-//   ws1.on('msg', msg => {
-//     expect(msg).toEqual({
-//       games: [
-//         {
-//           action: {type: 'START'},
-//           discardPile: [],
-//           gameId: jasmine.any(String),
-//           hintCount: 9,
-//           inTurn: 0,
-//           players: [
-//             {completeHandCards: [], idx: 0, isMe: false, mysteryHandCards: [], name: 'BOBBY_TABLES'},
-//             {completeHandCards: [], idx: 0, isMe: false, mysteryHandCards: [], name: 'Beatrice'},
-//           ],
-//           score: 0,
-//           status: 'RUNNING',
-//           stockSize: 50,
-//           table: {A: [], B: [], C: [], D: [], E: [], X: []},
-//           timestamp: jasmine.any(String),
-//           turnNumber: 0,
-//           turnsLeft: null,
-//           woundCount: 0,
-//         },
-//       ],
-//       msg: 'M_GamesState',
-//     })
-//     setTimeout(done, 100)
-//   })
-// })
+test('startGame', done => {
+  expect.assertions(1)
+  ws1.startGame({gameId})
+  ws1.on('msg', msg => {
+    expect(msg).toEqual({
+      games: [
+        {
+          action: {type: 'START'},
+          discardPile: [],
+          gameId: jasmine.any(String),
+          hintCount: 9,
+          inTurn: 0,
+          players: [
+            {
+              completeHandCards: [],
+              idx: 0,
+              isMe: true,
+              mysteryHandCards: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
+              name: 'BOBBY_TABLES',
+            },
+            {
+              completeHandCards: [
+                {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
+                {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
+                {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
+                {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
+                {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
+              ],
+              idx: 0,
+              isMe: false,
+              mysteryHandCards: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
+              name: 'Beatrice',
+            },
+          ],
+          score: 0,
+          status: 'RUNNING',
+          stockSize: 50,
+          table: {A: [], B: [], C: [], D: [], E: [], X: []},
+          timestamp: jasmine.any(String),
+          turnNumber: 0,
+          turnsLeft: null,
+          woundCount: 0,
+        },
+      ],
+      msg: 'M_GamesState',
+    })
+    setTimeout(done, 100)
+  })
+})
+
+test('act', done => {
+  let assertionsLeft = 2
+  expect.assertions(2)
+  ws1.act({gameId, actionParams: {type: 'DISCARD', cardIdx: 2}})
+  ws1.on('msg', msg => {
+    expect(msg).toEqual({
+      currentTurn: {
+        action: {type: 'DISCARD', card: jasmine.any(String), cardIdx: 2},
+        discardPile: [jasmine.any(String)],
+        gameId: jasmine.any(String),
+        hintCount: 9,
+        inTurn: 1,
+        players: [
+          {
+            completeHandCards: [],
+            idx: 0,
+            isMe: true,
+            mysteryHandCards: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
+            name: 'BOBBY_TABLES',
+          },
+          {
+            completeHandCards: [
+              {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
+              {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
+              {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
+              {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
+              {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
+            ],
+            idx: 0,
+            isMe: false,
+            mysteryHandCards: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
+            name: 'Beatrice',
+          },
+        ],
+        score: 0,
+        status: 'RUNNING',
+        stockSize: 49,
+        table: {A: [], B: [], C: [], D: [], E: [], X: []},
+        timestamp: jasmine.any(String),
+        turnNumber: 1,
+        turnsLeft: null,
+        woundCount: 0,
+      },
+
+      msg: 'M_GameState',
+    })
+    if (!--assertionsLeft) setTimeout(done, 100)
+  })
+  ws2.on('msg', msg => {
+    expect(msg).toEqual({
+      currentTurn: {
+        action: {type: 'DISCARD', card: jasmine.any(String), cardIdx: 2},
+        discardPile: [jasmine.any(String)],
+        gameId: jasmine.any(String),
+        hintCount: 9,
+        inTurn: 1,
+        players: [
+          {
+            completeHandCards: [
+              {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
+              {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
+              {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
+              {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
+              {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
+            ],
+            idx: 0,
+            isMe: false,
+            mysteryHandCards: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
+            name: 'BOBBY_TABLES',
+          },
+          {
+            completeHandCards: [],
+            idx: 0,
+            isMe: true,
+            mysteryHandCards: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
+            name: 'Beatrice',
+          },
+        ],
+        score: 0,
+        status: 'RUNNING',
+        stockSize: 49,
+        table: {A: [], B: [], C: [], D: [], E: [], X: []},
+        timestamp: jasmine.any(String),
+        turnNumber: 1,
+        turnsLeft: null,
+        woundCount: 0,
+      },
+
+      msg: 'M_GameState',
+    })
+    if (!--assertionsLeft) setTimeout(done, 100)
+  })
+})

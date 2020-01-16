@@ -76,7 +76,7 @@ async function updateGame(turn: engine.Turn, prevTimestamp: string) {
 }
 
 async function _getGame(gameId: engine.TGameId): Promise<engine.Game> {
-  const turn = (await scanGames()).find(t => t.gameId === gameId && t.status === 'WAITING_FOR_PLAYERS')
+  const turn = (await scanGames()).find(t => t.gameId === gameId)
   if (!turn) throw new Error('No turn found')
 
   return new engine.Game({from: 'SERIALIZED_TURNS', turns: [turn]})
@@ -122,11 +122,25 @@ export async function createGame({firstPlayerName}: engine.WS_createGameParams, 
   await broadcastMsg({msg: 'M_GamesState', games: [turn0.getState(connectionId)]})
 }
 export async function joinGame({gameId, newPlayerName}: engine.WS_joinGameParams, connectionId: string) {
-  const pendingGameTurn = (await _getGame(gameId)).currentTurn
+  const pendingGame = await _getGame(gameId)
+  if (pendingGame.currentTurn.status !== 'WAITING_FOR_PLAYERS') throw new Error('GAME_ALREADY_STARTED')
+
+  const pendingGameTurn = pendingGame.currentTurn
   const g = engine.Game.joinPendingGame(pendingGameTurn, newPlayerName, connectionId)
 
   // TODO: save game status to db
   await updateGame(g, pendingGameTurn.timestamp)
+
+  // send updated game state to all players
+  return getGamesState({}, connectionId)
+}
+
+export async function startGame({gameId}: engine.WS_startGameParams, connectionId: string) {
+  const pendingGameTurn = (await _getGame(gameId)).currentTurn
+  const g = engine.Game.startPendingGame(pendingGameTurn)
+
+  // TODO: save game status to db
+  await updateGame(g.currentTurn, pendingGameTurn.timestamp)
 
   // send updated game state to all players
   return getGamesState({}, connectionId)
