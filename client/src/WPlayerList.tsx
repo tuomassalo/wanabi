@@ -1,7 +1,7 @@
 import React from 'react'
-import {TPlayerState} from 'wanabi-engine/dist/player'
+import {MaskedPlayer} from 'wanabi-engine/dist/player'
 
-export default class WPlayerList extends React.Component<{players: TPlayerState[]}> {
+export default class WPlayerList extends React.Component<{players: MaskedPlayer[]}> {
   render() {
     return (
       <ul className="WPlayerList">

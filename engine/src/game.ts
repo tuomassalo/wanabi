@@ -1,5 +1,5 @@
 import {Pile} from './pile'
-import {Player, TPlayerId, TPlayerState, TCompletePlayerState} from './player'
+import {Player, MaskedPlayer, TPlayerId, TMaskedPlayerState, TCompletePlayerState} from './player'
 import {Card, TColor, TNum, AllColors, AllNums, TCardState} from './card'
 import {Hand} from './hand'
 import {Table, TTableState} from './table'
@@ -61,7 +61,7 @@ export interface TMaskedTurnState {
   turnNumber: number
   inTurn: number
   turnsLeft: number | null // `null` means that the countdown has not started yet.
-  players: TPlayerState[]
+  players: TMaskedPlayerState[]
   timestamp: string // ISO string
 }
 export interface TCompleteTurnState extends TMaskedTurnState {
@@ -293,6 +293,25 @@ export class Turn {
     }
 
     return nextTurn
+  }
+}
+export class MaskedTurn extends Turn {
+  players: MaskedPlayer[]
+  constructor(state: TTurn, maskedPlayers) {
+    super(state)
+    this.players = maskedPlayers
+  }
+  static deserialize(state: TMaskedTurnState): MaskedTurn {
+    return new this(
+      {
+        ...state,
+        stock: new Pile([]),
+        discardPile: new Pile(state.discardPile.map(v => Card.fromValueString(v))),
+        table: Table.deserialize(state.table),
+        players: [],
+      },
+      state.players.map(p => MaskedPlayer.deserializeMasked(p, p.isMe)),
+    )
   }
 }
 

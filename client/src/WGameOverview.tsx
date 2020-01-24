@@ -1,12 +1,12 @@
 import React from 'react'
-import {TMaskedTurnState} from 'wanabi-engine'
+import {MaskedTurn} from 'wanabi-engine'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import WPlayerList from './WPlayerList'
 import {WebSocketClient} from './websocketclient'
 import {promptPlayerName} from './helpers'
 declare const wsclient: WebSocketClient
 
-export default class WGameOverview extends React.Component<{game: TMaskedTurnState}> {
+export default class WGameOverview extends React.Component<{game: MaskedTurn}> {
   join = () => {
     wsclient.joinGame({gameId: this.props.game.gameId, newPlayerName: promptPlayerName()})
   }
