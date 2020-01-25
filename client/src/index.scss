@@ -1,0 +1,80 @@
+div.WGameOverview {
+  background: #eee;
+}
+div.WGameOverview ul,
+div.WGameOverview li {
+  display: inline;
+  list-style: none;
+  padding: 0;
+}
+
+div.WMyHand,
+div.WOtherHand {
+  > div {
+    display: inline-block;
+    margin: 2px;
+  }
+}
+div.WCard {
+  border: 1px solid #888;
+  border-radius: 4px;
+  width: 80px;
+  height: 120px;
+  text-align: center;
+  line-height: 120px;
+  font-size: 70px;
+}
+// used in hints and cards
+.WColor-A {
+  background-color: red;
+}
+.WColor-B {
+  background-color: green;
+}
+.WColor-C {
+  background-color: blue;
+}
+.WColor-D {
+  background-color: yellow;
+}
+.WColor-E {
+  background-color: white;
+}
+.WColor-X {
+  background: linear-gradient(135deg, orange, yellow, green, cyan, blue, violet);
+}
+body {
+  background: #ccc;
+}
+
+div.WPlayer-inturn::before {
+  content: '-> ';
+  float: left;
+}
+
+.WHints {
+  position: relative;
+}
+// clearfix
+.WHints:after {
+  display: block;
+  clear: both;
+  content: ' ';
+}
+.WHint {
+  border: 1px solid #888;
+  float: left;
+  width: 20px;
+  height: 30px;
+  > div {
+    width: 100%;
+    height: 100%;
+  }
+  &.WHint-false:before {
+    content: '❌';
+    position: absolute;
+    opacity: 0.5;
+    font-size: 20px;
+    top: 3px;
+  }
+}

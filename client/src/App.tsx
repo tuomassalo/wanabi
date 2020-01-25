@@ -1,5 +1,4 @@
 import React from 'react'
-import './App.css'
 import {WebSocketClient} from './websocketclient'
 import * as engine from 'wanabi-engine'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -38,20 +37,79 @@ const exampleTurn: engine.TMaskedTurnState = {
       idx: 0,
       isMe: false,
       completeHandCards: [
-        {color: 'E', num: 5, hints: []},
-        {color: 'X', num: 1, hints: []},
+        {
+          color: 'E',
+          num: 5,
+          hints: [
+            {turnNumber: 1, is: 5, result: true},
+            {turnNumber: 2, is: 1, result: false},
+          ],
+        },
+        {color: 'X', num: 1, hints: [{turnNumber: 1, is: 1, result: true}]},
         {color: 'A', num: 2, hints: []},
         {color: 'B', num: 2, hints: []},
         {color: 'X', num: 4, hints: []},
       ],
-      mysteryHandCards: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
+      mysteryHandCards: [
+        {
+          hints: [
+            {turnNumber: 1, is: 5, result: true},
+            {turnNumber: 2, is: 1, result: false},
+          ],
+        },
+        {hints: [{turnNumber: 1, is: 1, result: true}]},
+        {hints: []},
+        {hints: []},
+        {hints: []},
+      ],
     },
     {
       name: 'Hyde',
       idx: 1,
       isMe: true,
       completeHandCards: [],
-      mysteryHandCards: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
+      mysteryHandCards: [
+        {
+          hints: [
+            {turnNumber: 1, is: 'C', result: true},
+            {turnNumber: 2, is: 'D', result: false},
+            {turnNumber: 4, is: 2, result: true},
+          ],
+          color: 'C',
+          num: 2,
+        },
+        {
+          hints: [
+            {turnNumber: 1, is: 'C', result: false},
+            {turnNumber: 2, is: 2, result: true},
+          ],
+          num: 2,
+          possibleCards: [
+            {value: 'D2', weight: 1},
+            {value: 'E2', weight: 2},
+          ],
+        },
+        {
+          hints: [
+            {turnNumber: 1, is: 'C', result: true},
+            {turnNumber: 2, is: 'D', result: false},
+          ],
+          color: 'C',
+          possibleCards: [
+            {value: 'C2', weight: 1},
+            {value: 'C3', weight: 2},
+          ],
+        },
+        {
+          hints: [{turnNumber: 1, is: 'C', result: true}],
+          possibleCards: [
+            {value: 'C2', weight: 1},
+            {value: 'C3', weight: 2},
+            {value: 'X3', weight: 2},
+          ],
+        },
+        {hints: []},
+      ],
     },
   ],
 }

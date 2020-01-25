@@ -28,8 +28,8 @@ export default class WGame extends React.Component<{currentTurn: engine.MaskedTu
     ;(window as any).PLA = players
     return (
       <div className="WGame">
-        {players.map((p, idx) => (
-          <div className={`WPlayer ${idx === inTurn ? 'WPlayer-inturn' : ''}`}>
+        {players.map(p => (
+          <div key={p.idx} className={`WPlayer ${p.idx === inTurn ? 'WPlayer-inturn' : ''}`}>
             <h3>{p.name}</h3>
             {p.isMe ? <WMyHand cards={p.getMysteryHandCards()} /> : <WOtherHand cards={p.completeHandCards} />}
           </div>

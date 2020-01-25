@@ -2,16 +2,21 @@ import React from 'react'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 
 import {WebSocketClient} from './websocketclient'
-import {TColor, TNum} from 'wanabi-engine/dist/card'
 
 declare const wsclient: WebSocketClient
 
-export default class WCard extends React.Component<{card: {color: TColor; num: TNum}}> {
+export default class WMyCardActionButtons extends React.Component<{cardIdx: number}> {
   // startGame = () => {
   //   wsclient.startGame({gameId: this.props.currentTurn.gameId})
   // }
 
   render() {
-    return <div className={`WCard WColor-${this.props.card.color}`}>{this.props.card.num}</div>
+    return (
+      <div>
+        <input type="button" value="Play" />
+        <br />
+        <input type="button" value="Discard" />
+      </div>
+    )
   }
 }
