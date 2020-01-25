@@ -23,6 +23,7 @@ export interface TMyHandCardState {
 export interface THandCardState extends TMyHandCardState {
   color: TColor
   num: TNum
+  hints: THintResultState[]
   possibleCards?: TPossibleCardState[]
 }
 
@@ -135,6 +136,7 @@ export class HandCard extends MyHandCard {
     this.color = hc.color //redundant, but to make TS happy.
     this.num = hc.num // redundant, but to make TS happy.
     this.possibleCards = hc.possibleCards ? hc.possibleCards.map(pc => new PossibleCard(pc)) : undefined
+    this.hints = hc.hints
   }
 
   static deserialize(hcs: THandCardState) {
