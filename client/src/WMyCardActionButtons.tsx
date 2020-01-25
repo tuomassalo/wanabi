@@ -12,7 +12,7 @@ export default class WMyCardActionButtons extends React.Component<{cardIdx: numb
 
   render() {
     return (
-      <div>
+      <div className="WMyCardActionButtons">
         <input type="button" value="Play" />
         <br />
         <input type="button" value="Discard" />

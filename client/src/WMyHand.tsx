@@ -21,9 +21,9 @@ export default class WMyHand extends React.Component<{cards: MyHandCard[]}> {
       <div className="WMyHand">
         {this.props.cards.map((c, idx) => (
           <div key={idx}>
-            <WHints hints={c.hints} />
-            <WMysteryCard card={c} />
             <WMyCardActionButtons cardIdx={idx} />
+            <WMysteryCard card={c} />
+            <WHints hints={c.hints} />
           </div>
         ))}
       </div>

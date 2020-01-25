@@ -1,5 +1,7 @@
 body {
   font-family: Arial, Helvetica, sans-serif;
+  padding: 0;
+  margin: 0;
 }
 div.WGameOverview {
   background: #eee;
@@ -15,17 +17,18 @@ div.WMyHand,
 div.WOtherHand {
   > div {
     display: inline-block;
-    margin: 2px;
+    margin: 5px;
   }
 }
 div.WCard {
-  border: 1px solid #888;
+  border: 0.5px solid #8888;
   border-radius: 4px;
   width: 80px;
   height: 120px;
   text-align: center;
   line-height: 120px;
   font-size: 70px;
+  box-shadow: rgba(0, 0, 0, 0.3) 2px 2px 6px;
 }
 // used in hints and cards
 .WColor-A {
@@ -56,7 +59,10 @@ div.WPlayer-inturn::before {
 }
 
 .WHints {
+  margin-top: 5px;
+  margin-left: 5px;
   position: relative;
+  max-width: 80px;
 }
 // clearfix
 .WHints:after {
@@ -65,7 +71,12 @@ div.WPlayer-inturn::before {
   content: ' ';
 }
 .WHint {
-  border: 1px solid #888;
+  border: 0.5px solid #888;
+  margin-right: 3px;
+  margin-bottom: 3px;
+  box-shadow: rgba(0, 0, 0, 0.3) 2px 2px 3px;
+
+  border-radius: 3px;
   float: left;
   width: 20px;
   height: 30px;
@@ -74,6 +85,7 @@ div.WPlayer-inturn::before {
   > div {
     width: 100%;
     height: 100%;
+    text-align: center;
   }
   &.WHint-false:before {
     content: 'X';
@@ -82,4 +94,32 @@ div.WPlayer-inturn::before {
     font-family: Arial, Helvetica, sans-serif;
     font-size: 29px;
   }
+}
+
+.WHintButtons input {
+  width: 30px;
+  height: 30px;
+  margin: 3px;
+}
+
+.WMyCardActionButtons {
+  margin-bottom: 4px;
+  input {
+    width: 100%;
+  }
+}
+
+.WHeader {
+  background: white;
+  padding: 10px;
+
+  em {
+    font-style: normal;
+    font-weight: bold;
+    padding-right: 30px;
+  }
+}
+
+.WGame {
+  padding: 10px;
 }

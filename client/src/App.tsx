@@ -71,8 +71,9 @@ const exampleTurn: engine.TMaskedTurnState = {
       mysteryHandCards: [
         {
           hints: [
-            {turnNumber: 1, is: 'C', result: true},
-            {turnNumber: 2, is: 'D', result: false},
+            {turnNumber: 1, is: 'A', result: false},
+            {turnNumber: 2, is: 'C', result: true},
+            {turnNumber: 3, is: 'D', result: false},
             {turnNumber: 4, is: 2, result: true},
           ],
           color: 'C',
@@ -181,7 +182,7 @@ export default class App extends React.Component<{}, AppState> {
       )
     return (
       <div className="App">
-        {this.state.phase}
+        {/* {this.state.phase} */}
         {phaseComponent}
         <header className="App-header">
           <ul>

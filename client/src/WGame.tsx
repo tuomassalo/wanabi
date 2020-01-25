@@ -18,22 +18,62 @@ export default class WGame extends React.Component<{currentTurn: engine.MaskedTu
     const {
       players,
       // table,
-      // stockSize,
+      stockSize,
       // discardPile,
-      // woundCount,
-      // hintCount,
-      // turnsLeft,
+      woundCount,
+      hintCount,
+      turnsLeft,
       inTurn,
+      turnNumber,
     } = this.props.currentTurn
     ;(window as any).PLA = players
     return (
-      <div className="WGame">
-        {players.map(p => (
-          <div key={p.idx} className={`WPlayer ${p.idx === inTurn ? 'WPlayer-inturn' : ''}`}>
-            <h3>{p.name}</h3>
-            {p.isMe ? <WMyHand cards={p.getMysteryHandCards()} /> : <WOtherHand cards={p.completeHandCards} />}
-          </div>
-        ))}
+      <div>
+        <div className="WHeader">
+          {/* <dl>
+            <dt>Vuoro</dt>
+            <dd>{turnNumber}</dd>
+            <dt>Pakassa kortteja</dt>
+            <dd>{stockSize}</dd>
+            <dt>Vihjeitä</dt>
+            <dd>{hintCount}</dd>
+            <dt>Haavoja</dt>
+            <dd>{woundCount}</dd>
+            <dt style={turnsLeft ? {} : {visibility: 'hidden'}}>Vuoroja jäljellä</dt>
+            <dd>{turnsLeft}</dd>
+          </dl> */}
+          <span>
+            Vuoro: <em>{turnNumber}</em>
+          </span>
+
+          <span>
+            Pakassa kortteja: <em>{stockSize}</em>
+          </span>
+
+          <span>
+            Vihjeitä: <em>{hintCount}</em>
+          </span>
+
+          <span>
+            Haavoja: <em>{woundCount}</em>
+          </span>
+
+          <span style={turnsLeft ? {} : {visibility: 'hidden'}}>
+            Vuoroja jäljellä: <em>{turnsLeft}</em>
+          </span>
+        </div>
+        <div className="WGame">
+          {players.map(p => (
+            <div key={p.idx} className={`WPlayer ${p.idx === inTurn ? 'WPlayer-inturn' : ''}`}>
+              <h3>{p.name}</h3>
+              {p.isMe ? (
+                <WMyHand cards={p.getMysteryHandCards()} />
+              ) : (
+                <WOtherHand cards={p.completeHandCards} playerIdx={p.idx} />
+              )}
+            </div>
+          ))}
+        </div>
       </div>
     )
   }
