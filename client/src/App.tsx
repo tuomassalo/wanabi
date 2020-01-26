@@ -15,13 +15,14 @@ const exampleTurn: engine.TMaskedTurnState = {
   timestamp: '2020-01-01',
   action: {type: 'DISCARD', cardIdx: 1, card: 'E2'},
   stockSize: 60 - 2 * 5 - 2 * 24, // === 2
-  discardPile: [],
+  discardPile: ['A3', 'A4', 'C3', 'A1', 'X4'],
   hintCount: 9,
   woundCount: 0,
   table: {
     A: 'A1,A2,A3,A4,A5'.split(','),
     B: 'B1,B2,B3,B4,B5'.split(','),
-    C: 'C1,C2,C3,C4,C5'.split(','),
+    C: [],
+    // C: 'C1,C2,C3,C4,C5'.split(','),
     D: 'D1,D2,D3,D4,D5'.split(','),
     E: 'E1,E2,E3,E4'.split(','),
     X: [],

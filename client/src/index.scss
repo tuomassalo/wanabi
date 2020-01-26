@@ -1,3 +1,16 @@
+$cardWidth: 80px;
+$cardHeight: 120px;
+
+$colorA: red;
+$colorB: lightgreen;
+$colorC: lightblue;
+$colorD: yellow;
+$colorE: #ffe;
+
+* {
+  box-sizing: border-box;
+}
+
 body {
   font-family: Arial, Helvetica, sans-serif;
   padding: 0;
@@ -17,34 +30,35 @@ div.WMyHand,
 div.WOtherHand {
   > div {
     display: inline-block;
-    margin: 5px;
+    vertical-align: top;
+    margin: $cardWidth / 16;
   }
 }
 div.WCard {
   border: 1px solid #8888;
   border-radius: 4px;
-  width: 80px;
-  height: 120px;
-  text-align: center;
-  line-height: 120px;
-  font-size: 70px;
   box-shadow: rgba(0, 0, 0, 0.3) 2px 2px 6px;
+  width: $cardWidth;
+  height: $cardHeight;
+  text-align: center;
+  line-height: $cardHeight;
+  font-size: 7/12 * $cardHeight;
 }
 // used in hints and cards
 .WColor-A {
-  background-color: red;
+  background-color: $colorA;
 }
 .WColor-B {
-  background-color: lightgreen;
+  background-color: $colorB;
 }
 .WColor-C {
-  background-color: lightblue;
+  background-color: $colorC;
 }
 .WColor-D {
-  background-color: yellow;
+  background-color: $colorD;
 }
 .WColor-E {
-  background-color: white;
+  background-color: $colorE;
 }
 .WColor-X {
   background: linear-gradient(135deg, orange, yellow, green, cyan, blue, violet);
@@ -62,17 +76,17 @@ div.WPlayer-inturn::before {
   margin-top: 5px;
   margin-left: 5px;
   position: relative;
-  max-width: 80px;
+  max-width: $cardWidth;
 }
 // clearfix
-.WHints:after {
+.clearfix:after {
   display: block;
   clear: both;
   content: ' ';
 }
 .WHint {
   // border: 1px solid #888;
-  margin-right: 3px;
+  margin-right: 5px;
   margin-bottom: 3px;
   box-shadow: rgba(0, 0, 0, 0.3) 1px 1px 3px;
 
@@ -123,4 +137,73 @@ div.WPlayer-inturn::before {
 
 .WGame {
   padding: 10px;
+}
+
+div.WUpToFourPossibleCards,
+div.WUpToNinePossibleCards {
+  width: $cardWidth;
+  height: $cardHeight;
+  border: 1px solid #8888;
+  border-radius: 4px;
+  box-shadow: rgba(0, 0, 0, 0.3) 2px 2px 6px;
+  padding-top: $cardWidth / 13;
+  padding-left: $cardWidth / 30;
+  > .WCard {
+    display: inline-block;
+    box-shadow: rgba(0, 0, 0, 0.3) 1px 1px 2px;
+    border: none;
+    margin: $cardWidth / 80;
+  }
+}
+
+div.WUpToFourPossibleCards .WCard {
+  width: $cardWidth / 2.4;
+  height: $cardHeight / 2.4;
+  line-height: $cardHeight / 2.4;
+  font-size: 7/12 * $cardHeight / 2.4;
+  // float: left;
+}
+div.WUpToNinePossibleCards .WCard {
+  width: $cardWidth / 3.6;
+  height: $cardHeight / 3.6;
+  line-height: $cardHeight / 3.6;
+  font-size: 7/12 * $cardHeight / 3.6;
+  // float: left;
+}
+
+div.WGreen {
+  background: darkgreen;
+  padding: $cardWidth / 5;
+  border-radius: $cardWidth/5;
+  div.WTable {
+    > div {
+      display: inline-block;
+      vertical-align: top;
+      margin: $cardWidth / 16;
+    }
+  }
+}
+
+.WCardPlaceHolder {
+  width: $cardWidth;
+  height: $cardHeight;
+  border-width: 2px;
+  border-style: dashed;
+  border-color: darkgreen;
+  border-radius: 4px;
+  opacity: 0.5;
+}
+
+.WDiscardPile {
+  width: 30vw;
+  float: right;
+  .WCard {
+    display: inline-block;
+    vertical-align: top;
+    width: $cardWidth / 2.4;
+    height: $cardHeight / 2.4;
+    line-height: $cardHeight / 2.4;
+    font-size: 7/12 * $cardHeight / 2.4;
+    margin: $cardWidth / 40;
+  }
 }

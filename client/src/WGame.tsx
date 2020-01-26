@@ -1,5 +1,9 @@
 import React from 'react'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
+import WTable from './WTable'
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import WDiscardPile from './WDiscardPile'
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import WMyHand from './WMyHand'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import WOtherHand from './WOtherHand'
@@ -17,9 +21,9 @@ export default class WGame extends React.Component<{currentTurn: engine.MaskedTu
     // const currentPlayerCount = this.props.currentTurn.players.length
     const {
       players,
-      // table,
+      table,
       stockSize,
-      // discardPile,
+      discardPile,
       woundCount,
       hintCount,
       turnsLeft,
@@ -63,6 +67,10 @@ export default class WGame extends React.Component<{currentTurn: engine.MaskedTu
           </span>
         </div>
         <div className="WGame">
+          <div className="WGreen clearfix">
+            <WDiscardPile discardPile={discardPile} />
+            <WTable table={table} />
+          </div>
           {players.map(p => (
             <div key={p.idx} className={`WPlayer ${p.idx === inTurn ? 'WPlayer-inturn' : ''}`}>
               <h3>{p.name}</h3>
