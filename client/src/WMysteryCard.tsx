@@ -13,7 +13,7 @@ export default class WMysteryCard extends React.Component<{card: MyHandCard}> {
 
   render() {
     return (
-      <div className={`WCard WMysteryCard WMysteryCard-${this.props.card.color}`}>{this.props.card.num || '?'}</div>
+      <div className={`WCard WMysteryCard WMysteryCard-${this.props.card.color}`}>{this.props.card.num || '\xa0'}</div>
     )
   }
 }
