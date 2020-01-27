@@ -1,14 +1,17 @@
-import {Card, HandCard, THintState} from './card'
+import {Card, THintState, TCardState} from './card'
 import {GameError} from './errors'
 import {Pile} from './pile'
 
-// export type THandState = THandCardState[]
+export type THandState = TCardState[]
 
 export class Hand {
-  cards: HandCard[]
+  cards: Card[]
 
-  constructor(cards: HandCard[]) {
-    this.cards = cards
+  constructor(cards: (Card | TCardState)[]) {
+    this.cards = cards.map(c => new Card(c))
+  }
+  toJSON(): THandState {
+    return this.cards
   }
   shuffle() {
     for (let i = this.cards.length - 1; i > 0; i--) {
@@ -17,16 +20,16 @@ export class Hand {
     }
   }
   dealOne(card: Card) {
-    this.cards.push(HandCard.fromCard(card))
+    this.cards.push(card)
   }
   take(idx: number, stock: Pile): Card {
     if (!this.cards[idx]) {
       throw new GameError('NO_SUCH_CARD', {idx})
     }
-    const drawnCard = this.cards.splice(idx, 1)[0].toCard()
+    const drawnCard = this.cards.splice(idx, 1)[0]
     if (stock.size) {
       const newCard: Card = stock.drawOne()
-      this.cards.push(new HandCard({color: newCard.color, num: newCard.num, hints: []}))
+      this.cards.push(new Card({color: newCard.color, num: newCard.num, hints: []}))
     }
     return drawnCard
   }

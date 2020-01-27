@@ -1,5 +1,6 @@
-import {Card, MyHandCard, PossibleCard, HandCard} from './card'
+import {Card} from './card'
 import {sum, range} from 'lodash'
+import {Table} from './table'
 
 interface CardWithFewSolutions {
   possibleCards: PossibleCard[]
@@ -36,7 +37,7 @@ function countPossibleCards(possibleCards: Card[]): PossibleCard[] {
 
   const possibleCardCounts: {card: Card; count: number}[] = []
   for (const pc of possibleCards) {
-    const pcc = possibleCardCounts.find(c => c.card.is(pc))
+    const pcc = possibleCardCounts.find(c => c.card.looksLike(pc))
     if (pcc) {
       pcc.count++
     } else {
@@ -59,22 +60,29 @@ function countPossibleCards(possibleCards: Card[]): PossibleCard[] {
 }
 
 // NB: modifies myHand entries: adds `possibleCards` and fills out `color` and `num`
+// export function demystify(myHand: MyHandCard[], table:Table, otherRevealedCards: Card[]): MyHandCard[] {
 export function demystify(myHand: MyHandCard[], revealedCards: Card[]): MyHandCard[] {
+  // console.warn(
+  //   'DEMYS',
+  //   revealedCards.map(c => c.toString()),
+  // )
+
   // console.warn(
   //   'DEM',
   //   myHand.map(c => c.hints),
   //   revealedCards.length,
   // )
+  // const revealedCards:Card[] = [otherRevealedCards, table.]
 
   const unrevealedCards = Card.getFullDeck()
   for (const r of revealedCards) {
     unrevealedCards.splice(
-      unrevealedCards.findIndex(u => u.is(r)),
+      unrevealedCards.findIndex(u => u.equals(r)),
       1,
     )
   }
 
-  // console.warn('DEMY', unrevealedCards)
+  // console.warn('UNR', unrevealedCards)
   // for (const c of myHand) {
   //   console.warn(c)
   // }
@@ -94,7 +102,7 @@ export function demystify(myHand: MyHandCard[], revealedCards: Card[]): MyHandCa
           if (handCard.color && handCard.num) {
             revealedCards.push(new Card(handCard[k].color, handCard[k].num))
             unrevealedCards.splice(
-              unrevealedCards.findIndex(u => u.is(handCard[k])),
+              unrevealedCards.findIndex(u => u.looksLike(handCard[k])),
               1,
             )
           }
@@ -184,7 +192,7 @@ export function demystify(myHand: MyHandCard[], revealedCards: Card[]): MyHandCa
       const take = (availableCards: Card[], p: Card): {nowAvailableCards: Card[]; taken: Card} => {
         const nowAvailableCards = [...availableCards] // make a copy
         const taken = nowAvailableCards.splice(
-          nowAvailableCards.findIndex(u => u.is(p)),
+          nowAvailableCards.findIndex(u => u.looksLike(p)),
           1,
         )[0]
         return {nowAvailableCards, taken}
@@ -213,7 +221,9 @@ export function demystify(myHand: MyHandCard[], revealedCards: Card[]): MyHandCa
         }
         // console.warn('looping', c.possibleCards)
 
-        for (const p of expandPossibleCards(c.possibleCards).filter((p: Card) => availableCards.find(u => u.is(p)))) {
+        for (const p of expandPossibleCards(c.possibleCards).filter((p: Card) =>
+          availableCards.find(u => u.looksLike(p)),
+        )) {
           // console.warn('TAKING', p)
           const {nowAvailableCards, taken} = take(availableCards, p)
           guessCard(idx + 1, [...currentGuess, taken], nowAvailableCards)
@@ -243,7 +253,7 @@ export function demystify(myHand: MyHandCard[], revealedCards: Card[]): MyHandCa
     // console.warn('ANOTHER GO...', {revealedCards, unrevealedCards})
   }
 
-  // console.warn('RET', myHand)
+  // console.warn('RET', ...myHand)
 
   return myHand
 }

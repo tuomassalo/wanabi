@@ -1,91 +1,57 @@
-import {randomBytes} from 'crypto'
 import {Hand} from './hand'
-import {MyHandCard, TMyHandCardState, THandCardState, HandCard} from './card'
+import {TCardState} from './card'
 
 export type TPlayerId = string
 
-export interface TMaskedPlayerState {
-  name: string
-  idx: number
-  isMe: boolean
-  completeHandCards: THandCardState[]
-  mysteryHandCards: TMyHandCardState[]
-}
-
-export interface TCompletePlayerState extends TMaskedPlayerState {
+export interface TPlayerState {
+  hand: TCardState[]
   id: TPlayerId
+  idx: number
+  // isMasked: boolean
+  name: string
 }
 
 export class Player {
   name: string
   hand: Hand
-  mysteryHandCards?: MyHandCard[]
   id: TPlayerId
   idx: number
 
-  getMysteryHandCards(): MyHandCard[] {
-    console.warn('GETM', this.mysteryHandCards)
+  // getMysteryHandCards(): MyHandCard[] {
+  //   return this.mysteryHandCards || this.hand.cards.map(c => new MyHandCard(c))
+  // }
 
-    return this.mysteryHandCards || this.hand.cards.map(c => new MyHandCard(c))
-  }
+  // setMysteryHandCards(cards: MyHandCard[]) {
+  //   this.mysteryHandCards = cards
+  // }
 
-  setMysteryHandCards(cards: MyHandCard[]) {
-    this.mysteryHandCards = cards
-  }
+  // clearMysteryHandCards() {
+  //   this.mysteryHandCards = undefined
+  // }
 
-  clearMysteryHandCards() {
-    this.mysteryHandCards = undefined
-  }
-
-  constructor(name: string, idx: number, hand: Hand, id: TPlayerId) {
-    this.idx = idx
-    this.name = name
-    this.hand = hand
-    this.id = id
+  constructor(p: TPlayerState) {
+    this.idx = p.idx
+    this.name = p.name
+    this.hand = new Hand(p.hand)
+    this.id = p.id
   }
   // like toJSON, but manually, since we need to pass `isMe`
-  serialize(isMe: boolean): TMaskedPlayerState {
+  serialize(isMe: boolean): TPlayerState {
     return {
       name: this.name,
       idx: this.idx,
-      isMe,
-      completeHandCards: isMe ? [] : this.hand.cards.map(c => c.toJSON()),
-      mysteryHandCards: this.getMysteryHandCards().map(c => c.toJSON()),
+      id: isMe ? this.id : 'bogus_id',
+      // isMasked: isMe,
+      hand: isMe ? this.getMysteryHandCards().map(c => c.toJSON()) : this.hand.cards.map(c => c.toJSON()),
+      // isMe,
+      // completeHandCards: isMe ? [] :
+      // mysteryHandCards: ,
     }
   }
-  toJSON(): TCompletePlayerState {
+  toJSON(): TPlayerState {
     return {...this.serialize(false), id: this.id}
-  }
-  static deserialize(state: TCompletePlayerState): Player {
-    return new Player(
-      state.name,
-      state.idx,
-      new Hand(state.completeHandCards.map(c => HandCard.deserialize(c))),
-      state.id,
-    )
   }
   setHand(hand: Hand) {
     this.hand = hand
-  }
-}
-
-export class MaskedPlayer extends Player {
-  isMe: boolean
-  completeHandCards: HandCard[]
-  constructor(name: string, idx: number, hand: Hand, id: TPlayerId, isMe: boolean) {
-    super(name, idx, hand, id)
-    this.isMe = isMe
-    this.completeHandCards = hand.cards
-  }
-  static deserializeMasked(state: TMaskedPlayerState, isMe: boolean): MaskedPlayer {
-    const ret = new this(
-      state.name,
-      state.idx,
-      new Hand(state.completeHandCards.map(c => HandCard.deserialize(c))),
-      'bogus_id',
-      isMe,
-    )
-    ret.mysteryHandCards = state.mysteryHandCards.map(hc => new MyHandCard(hc))
-    return ret
   }
 }

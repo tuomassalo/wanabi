@@ -1,22 +1,15 @@
-import {TCardState, TColor, AllColors, Card} from './card'
+import {TCardValueState, TColor, AllColors, Card} from './card'
 import {Pile} from './pile'
 
 export type TTable = {[key in TColor]: Pile}
-export type TTableState = {[key in TColor]: TCardState[]}
+export type TTableState = {[key in TColor]: TCardValueState[]}
 
 export class Table {
   table: TTable
 
-  constructor(table?: TTable) {
+  constructor(table?: TTableState) {
     // NB: why does fromEntries need `as`
-    this.table = table || (Object.fromEntries(AllColors.map(color => [color, new Pile([])])) as TTable)
-  }
-  static deserialize(state: TTableState): Table {
-    return new Table(
-      Object.fromEntries(
-        AllColors.map(color => [color, new Pile(state[color].map(c => Card.fromValueString(c)))]),
-      ) as TTable,
-    )
+    this.table = Object.fromEntries(AllColors.map(color => [color, new Pile(table ? table[color] : [])])) as TTable
   }
   getScore(): number {
     return Object.values(this.table)

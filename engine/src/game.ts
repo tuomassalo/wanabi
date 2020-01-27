@@ -1,6 +1,6 @@
 import {Pile} from './pile'
-import {Player, MaskedPlayer, TPlayerId, TMaskedPlayerState, TCompletePlayerState} from './player'
-import {Card, TColor, TNum, AllColors, AllNums, TCardState} from './card'
+import {Player, TPlayerId, TPlayerState} from './player'
+import {Card, TColor, TNum, AllColors, AllNums, TCardState, TCardValueState} from './card'
 import {Hand} from './hand'
 import {Table, TTableState} from './table'
 import {SyntaxError, GameError} from './errors'
@@ -47,46 +47,45 @@ type TResolvedActionState =
   | TResolvedHintActionState
   | TResolvedStartActionState
 
+// type TMaskedPlayerState = TMaskedMePlayerState | TMaskedOtherPlayerState
+
 //  json object
-export interface TMaskedTurnState {
+export interface TTurnState {
   gameId: TGameId
   status: TGameStatus
   action: TResolvedActionState
   score: number
+  stock: TCardValueState[] // empty if is masked
   stockSize: number
-  discardPile: TCardState[]
+  discardPile: TCardValueState[]
   hintCount: number
   woundCount: number
   table: TTableState
   turnNumber: number
   inTurn: number
   turnsLeft: number | null // `null` means that the countdown has not started yet.
-  players: TMaskedPlayerState[]
   timestamp: string // ISO string
+  players: TPlayerState[]
 }
-export interface TCompleteTurnState extends TMaskedTurnState {
-  stock: TCardState[]
-  players: TCompletePlayerState[]
-}
-interface TTurn {
-  gameId: TGameId
-  status: TGameStatus
-  action: TResolvedActionState
-  discardPile: Pile
-  hintCount: number
-  woundCount: number
-  table: Table
-  turnNumber: number
-  turnsLeft: number | null // `null` means that the countdown has not started yet.
-  players: Player[]
-  timestamp?: string // ISO string
-  // not in TMaskedTurnState:
-  stock: Pile
-  // not needed, as these are calculated from above:
-  // score: number
-  // stockSize: number
-  // inTurn: number
-}
+// interface TTurn {
+//   gameId: TGameId
+//   status: TGameStatus
+//   action: TResolvedActionState
+//   discardPile: Pile
+//   hintCount: number
+//   woundCount: number
+//   table: Table
+//   turnNumber: number
+//   turnsLeft: number | null // `null` means that the countdown has not started yet.
+//   players: Player[]
+//   timestamp?: string // ISO string
+//   // not in TMaskedTurnState:
+//   stock: Pile
+//   // not needed, as these are calculated from above:
+//   // score: number
+//   // stockSize: number
+//   // inTurn: number
+// }
 
 export interface WS_getGamesStateParams {}
 export interface WS_getGameStateParams {
@@ -113,7 +112,7 @@ export interface WS_actParams {
 interface M_GamesState {
   msg: 'M_GamesState'
   timestamp: string
-  games: TMaskedTurnState[] // latest turn of each game
+  games: TTurnState[] // latest turn of each game
 }
 // interface M_GameState {
 //   msg: 'M_GameState'
@@ -137,32 +136,33 @@ export class Turn {
   timestamp: string // ISO string
   stock: Pile
 
-  constructor(t: TTurn) {
+  constructor(t: TTurnState) {
     this.gameId = t.gameId
     this.status = t.status
     this.action = t.action
-    this.discardPile = t.discardPile
+    this.discardPile = new Pile(t.discardPile.map(c => Card.fromValueString(c)))
     this.hintCount = t.hintCount
     this.woundCount = t.woundCount
-    this.table = t.table
+    this.table = new Table(t.table)
     this.turnNumber = t.turnNumber
     this.turnsLeft = t.turnsLeft
-    this.players = t.players
+    this.players = t.players.map(p => new Player(p))
     this.timestamp = t.timestamp || new Date().toISOString()
-    this.stock = t.stock
-  }
-  static deserialize(state: TCompleteTurnState): Turn {
-    return new this({
-      ...state,
-      stock: new Pile(state.stock.map(v => Card.fromValueString(v))),
-      discardPile: new Pile(state.discardPile.map(v => Card.fromValueString(v))),
-      table: Table.deserialize(state.table),
-      players: state.players.map(p => Player.deserialize(p)),
-    })
+    this.stock = new Pile(t.stock)
   }
   clone() {
     // TODO: do we need to use JSON to make a deep copy?
-    return new Turn(this)
+    return new Turn(this.serialize())
+  }
+
+  serialize(): TTurnState {
+    return {
+      ...this,
+      stock: this.stock.toJSON(),
+      discardPile: this.discardPile.toJSON(),
+      table: this.table.toJSON(),
+      players: this.players.map(p => p.toJSON()),
+    }
   }
 
   get score() {
@@ -175,14 +175,18 @@ export class Turn {
     return this.turnNumber % this.players.length
   }
 
-  getState(forPlayerId: TPlayerId): TMaskedTurnState {
+  getState(forPlayerId: TPlayerId): TTurnState {
     return {
       ...JSON.parse(JSON.stringify(this)),
       stock: undefined,
       stockSize: this.stock.size,
       inTurn: this.inTurn,
       score: this.score,
-      players: this.players.map(p => p.serialize(p.id === forPlayerId)),
+      players: [],
+      // TODO!!!
+      // this.players.map(p =>
+      //   p.id === forPlayerId ? MaskedMePlayer.fromPlayer(p) : MaskedOtherPlayer.fromPlayer(p),
+      // ),
     }
   }
 
@@ -282,42 +286,52 @@ export class Turn {
       nextTurn.turnsLeft = nextTurn.players.length
     }
 
-    for (const p of nextTurn.players) {
-      p.clearMysteryHandCards()
-      p.setMysteryHandCards(
-        demystify(
-          p.getMysteryHandCards(),
-          [nextTurn.discardPile.cards, Object.values(nextTurn.table.table).flatMap(p => p.cards)].flat(),
-        ),
-      )
-    }
+    // for (const p of nextTurn.players) {
+    //   const handCards = p.hand.cards
+    //   p.hand.cards =
+    //     demystify(
+    //       handCards,
+    //       // nextTurn.table,
+    //       [
+    //         // discard pile
+    //         nextTurn.discardPile.cards,
+    //         // table
+    //         Object.values(nextTurn.table.table).flatMap(p => p.cards),
+    //         // hands of other players
+    //         nextTurn.players
+    //           .filter(player => player.idx !== p.idx)
+    //           .flatMap(player => player.hand.cards.map(hc => new Card(hc.color, hc.num))),
+    //       ].flat(),
+    //     ),
+    //   )
+    // }
 
     return nextTurn
   }
 }
-export class MaskedTurn extends Turn {
-  players: MaskedPlayer[]
-  constructor(state: TTurn, maskedPlayers) {
-    super(state)
-    this.players = maskedPlayers
-  }
-  static deserialize(state: TMaskedTurnState): MaskedTurn {
-    return new this(
-      {
-        ...state,
-        stock: new Pile([]),
-        discardPile: new Pile(state.discardPile.map(v => Card.fromValueString(v))),
-        table: Table.deserialize(state.table),
-        players: [],
-      },
-      state.players.map(p => MaskedPlayer.deserializeMasked(p, p.isMe)),
-    )
-  }
-}
+// export class MaskedTurn extends Turn {
+//   players: MaskedPlayer[]
+//   constructor(state: TTurn, maskedPlayers) {
+//     super(state)
+//     this.players = maskedPlayers
+//   }
+//   static deserialize(state: TMaskedTurnState): MaskedTurn {
+//     return new this(
+//       {
+//         ...state,
+//         stock: new Pile([]),
+//         discardPile: new Pile(state.discardPile.map(v => Card.fromValueString(v))),
+//         table: Table.deserialize(state.table),
+//         players: [],
+//       },
+//       state.players.map(p => MaskedPlayer.deserializeMasked(p, p.isMe)),
+//     )
+//   }
+// }
 
 export interface TExistingGameConstructor {
   from: 'SERIALIZED_TURNS'
-  turns: TCompleteTurnState[]
+  turns: TTurnState[]
 }
 export interface TNewGameConstructor {
   from: 'NEW_TEST_GAME'
@@ -335,7 +349,7 @@ export class Game {
   constructor(params: TNewGameConstructor | TExistingGameConstructor) {
     if (params.from === 'SERIALIZED_TURNS') {
       // deserialize an ongoing game
-      this.turns = params.turns.map(p => Turn.deserialize(p))
+      this.turns = params.turns.map(t => new Turn(t))
     } else if (params.from === 'NEW_TEST_GAME') {
       // USED IN TESTS
       // set up a new game
@@ -350,16 +364,23 @@ export class Game {
       this.turns = [
         new Turn({
           gameId: randomBytes(20).toString('hex'),
-          table: table || new Table(),
-          stock: deck,
-          discardPile: discardPile || new Pile([]),
-          players: playerNames.map((name, idx) => new Player(name, idx, new Hand([]), `bogus_id_${name}`)),
+          table: new Table(table ? table.toJSON() : undefined).toJSON(),
+          stock: deck.toJSON(),
+          discardPile: (discardPile || new Pile([])).toJSON(),
+          players: playerNames.map((name, idx) =>
+            new Player({name, idx, hand: new Hand([]).toJSON(), id: `bogus_id_${name}`}).toJSON(),
+          ),
           hintCount: 9,
           woundCount: 0,
           turnNumber: 0,
           turnsLeft: null,
           status: 'RUNNING',
           action: {type: 'START'},
+          // needed only for typescript
+          score: 0,
+          inTurn: 0,
+          timestamp: new Date().toISOString(),
+          stockSize: deck.size,
         }),
       ]
 
@@ -399,23 +420,29 @@ export class Game {
   static createPendingGame(firstPlayerName: string, firstPlayerId: TPlayerId): Turn {
     return new Turn({
       gameId: randomBytes(20).toString('hex'),
-      table: new Table(),
-      stock: new Pile([]),
-      discardPile: new Pile([]),
-      players: [new Player(firstPlayerName, 0, new Hand([]), firstPlayerId)], // no hand cards yet
+      table: new Table().toJSON(),
+      stock: new Pile([]).toJSON(),
+      discardPile: new Pile([]).toJSON(),
+      players: [new Player({name: firstPlayerName, idx: 0, hand: new Hand([]).toJSON(), id: firstPlayerId}).toJSON()], // no hand cards yet
       hintCount: 9,
       woundCount: 0,
       turnNumber: 0,
       turnsLeft: null,
       status: 'WAITING_FOR_PLAYERS',
       action: {type: 'START'},
+      score: 0,
+      stockSize: 0,
+      inTurn: 0,
+      timestamp: new Date().toISOString(),
     })
   }
 
   static joinPendingGame(pendingGame: Turn, newPlayerName: string, newPlayerId: TPlayerId): Turn {
     if (pendingGame.players.length >= 5) throw new GameError('GAME_FULL')
 
-    pendingGame.players.push(new Player(newPlayerName, pendingGame.players.length, new Hand([]), newPlayerId))
+    pendingGame.players.push(
+      new Player({name: newPlayerName, idx: pendingGame.players.length, hand: new Hand([]).toJSON(), id: newPlayerId}),
+    )
     return pendingGame
   }
   static startPendingGame(pendingGame: Turn): Game {
@@ -446,17 +473,17 @@ export class Game {
   // static deserialize(turns: TMaskedTurnState[]) {}
 
   // this returns information that is public for a player
-  getState(playerId: TPlayerId): TMaskedTurnState {
+  getState(playerId: TPlayerId): TTurnState {
     return this.getCompleteState(playerId).slice(-1)[0]
   }
   // this returns information that is public for a player
-  getCompleteState(playerId: TPlayerId): TMaskedTurnState[] {
+  getCompleteState(playerId: TPlayerId): TTurnState[] {
     // allow querying all games when they are still waiting for players
     if (!this.playersById[playerId] && this.currentTurn.status !== 'WAITING_FOR_PLAYERS') {
       throw new SyntaxError('INVALID_PLAYER_ID', playerId)
     }
 
-    const ret = JSON.parse(JSON.stringify(this.turns.map(t => t.getState(playerId)))) as TMaskedTurnState[]
+    const ret = JSON.parse(JSON.stringify(this.turns.map(t => t.getState(playerId)))) as TTurnState[]
 
     return ret
   }
@@ -469,7 +496,7 @@ export class Game {
     const currentCards = [
       ...this.currentTurn.stock.cards,
       ...this.currentTurn.discardPile.cards,
-      ...this.currentTurn.players.flatMap(p => p.hand.cards.map(hc => new Card(hc.color, hc.num))),
+      ...this.currentTurn.players.flatMap(p => p.hand.cards.map(hc => new Card(hc))),
       ...Object.values(this.currentTurn.table.table)
         .map(p => p.cards)
         .flat(),
