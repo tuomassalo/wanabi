@@ -41,19 +41,20 @@ async function deleteGame(gameId: engine.TGameId) {
   await dynamodb.delete({TableName: gameTable, Key: {gameId}}).promise()
 }
 
-async function broadcastGamesState() {
+async function sendGamesState(toConnections: TConnectionId[]) {
   const games = await scanGames()
 
   const allConnections = new Set(await getAllConnections())
 
-  // set isConnected to all players in all games
+  // set isConnected for all players in all games
   for (const game of games) {
     for (const p of game.players) {
       p.isConnected = allConnections.has(p.id)
     }
   }
+
   await Promise.all(
-    (await getAllConnections()).map(cId => {
+    toConnections.map(cId => {
       const data: engine.WebsocketServerMessage = {
         msg: 'M_GamesState',
         games: games.map(t => new engine.Turn(t).getState(cId)),
@@ -64,7 +65,9 @@ async function broadcastGamesState() {
     }),
   )
 }
-
+async function broadcastGamesState() {
+  return await sendGamesState(await getAllConnections())
+}
 async function updateGame(turn: engine.Turn, prevTimestamp: string) {
   const newData = JSON.parse(JSON.stringify(turn))
   if (!newData.turnsLeft) delete newData.turnsLeft
@@ -96,18 +99,15 @@ async function _getGame(gameId: engine.TGameId): Promise<engine.Game> {
 
   return new engine.Game({from: 'SERIALIZED_TURNS', turns: [turn]})
 }
-async function _getGamesState(playerId: TPlayerId): Promise<engine.TTurnState[]> {
-  const games = await scanGames()
-  return games // .filter(t => t.status === 'WAITING_FOR_PLAYERS' || t.players.some(p => p.id === playerId))
-}
 
 export async function getGamesState({}: engine.WS_getGamesStateParams, connectionId: string) {
-  const data: engine.WebsocketServerMessage = {
-    msg: 'M_GamesState',
-    games: (await _getGamesState(connectionId)).map(t => new engine.Turn(t).getState(connectionId)),
-    timestamp: new Date().toISOString(),
-  }
-  await apig.postToConnection({ConnectionId: connectionId, Data: JSON.stringify(data)}).promise()
+  await sendGamesState([connectionId])
+  // const data: engine.WebsocketServerMessage = {
+  //   msg: 'M_GamesState',
+  //   games: (await _getGamesState(connectionId)).map(t => new engine.Turn(t).getState(connectionId)),
+  //   timestamp: new Date().toISOString(),
+  // }
+  // await apig.postToConnection({ConnectionId: connectionId, Data: JSON.stringify(data)}).promise()
 }
 
 export async function createGame({firstPlayerName}: engine.WS_createGameParams, connectionId: string) {

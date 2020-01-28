@@ -6,7 +6,10 @@ export default class WPlayerList extends React.Component<{players: MaskedPlayer[
     return (
       <ul className="WPlayerList">
         {this.props.players.map(p => (
-          <li key={p.idx}>{p.name}</li>
+          <li key={p.idx}>
+            {p.isConnected ? '' : '🔌'}
+            {p.name}
+          </li>
         ))}
       </ul>
     )

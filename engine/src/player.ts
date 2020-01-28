@@ -26,45 +26,23 @@ export class Player {
   hand: Hand
   id: TPlayerId
   idx: number
-
-  // getMysteryHandCards(): MyHandCard[] {
-  //   return this.mysteryHandCards || this.hand.cards.map(c => new MyHandCard(c))
-  // }
-
-  // setMysteryHandCards(cards: MyHandCard[]) {
-  //   this.mysteryHandCards = cards
-  // }
-
-  // clearMysteryHandCards() {
-  //   this.mysteryHandCards = undefined
-  // }
+  isConnected: boolean
 
   constructor(p: TPlayerState) {
     this.idx = p.idx
     this.name = p.name
     this.hand = new Hand(p.hand)
     this.id = p.id
+    this.isConnected = p.isConnected
   }
-  // like toJSON, but manually, since we need to pass `isMe`
-  // serialize(isMe: boolean): TPlayerState {
-  //   return {
-  //     name: this.name,
-  //     idx: this.idx,
-  //     id: isMe ? this.id : 'bogus_id',
-  //     // isMasked: isMe,
-  //     hand: isMe ? this.getMysteryHandCards().map(c => c.toJSON()) : this.hand.cards.map(c => c.toJSON()),
-  //     // isMe,
-  //     // completeHandCards: isMe ? [] :
-  //     // mysteryHandCards: ,
-  //   }
-  // }
+
   toJSON(): TPlayerState {
     return {
       name: this.name,
       idx: this.idx,
       hand: this.hand.cards.map(c => c.serializeWithHints()),
       id: this.id,
-      isConnected: true, // this is actually filled in gamebridge.ts
+      isConnected: this.isConnected,
     }
   }
   setHand(hand: Hand) {
@@ -78,12 +56,14 @@ export class MaskedPlayer {
   // id: TPlayerId
   idx: number
   isMe: boolean
+  isConnected: boolean
   constructor(p: TMaskedPlayerState) {
     this.idx = p.idx
     this.name = p.name
     this.hand = new MaskedHand(p.hand)
     // this.id = p.id
     this.isMe = p.isMe
+    this.isConnected = p.isConnected
   }
   static meFromPlayer(p: Player, revealedCards: Card[]): MaskedPlayer {
     return new MaskedPlayer({
@@ -94,7 +74,6 @@ export class MaskedPlayer {
         revealedCards,
       ),
       isMe: true,
-      isConnected: true, // this is actually filled in gamebridge.ts
     })
   }
   static otherFromPlayer(p: Player): MaskedPlayer {
@@ -102,7 +81,6 @@ export class MaskedPlayer {
       ...p,
       hand: p.hand.toJSON(),
       isMe: false,
-      isConnected: true, // this is actually filled in gamebridge.ts
     })
   }
   static outsiderFromPlayer(p: Player): MaskedPlayer {
@@ -110,7 +88,6 @@ export class MaskedPlayer {
       ...p,
       hand: [], // look, no hand(s)
       isMe: false,
-      isConnected: true,
     })
   }
   toJSON(): TMaskedPlayerState {
@@ -119,7 +96,7 @@ export class MaskedPlayer {
       hand: this.hand.toJSON(),
       idx: this.idx,
       isMe: this.isMe,
-      isConnected: true, // this is actually filled in gamebridge.ts
+      isConnected: this.isConnected,
     }
   }
 }

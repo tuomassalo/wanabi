@@ -44,6 +44,7 @@ export class WebSocketClient extends EventEmitter {
   }
   disconnect() {
     this.websocket.close()
+    setTimeout(() => window.location.reload(), 1000)
   }
 
   // perl -wlne 'print qq!$2(p: game.$1): void { this.send("$2", p) } // prettier-ignore! if /interface (WS_(\w+)Params)\b/' ../engine/src/game.ts | pbcopy
