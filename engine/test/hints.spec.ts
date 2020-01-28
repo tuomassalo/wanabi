@@ -61,7 +61,7 @@ describe('An ongoing game', () => {
     const g = createTestGame()
     g.act(g.players[0].id, {type: 'HINT', toPlayerIdx: 1, is: 5})
     expect(g.getState(g.players[1].id).hintCount).toEqual(8)
-    expect(g.getState(g.players[1].id).players[1].mysteryHandCards).toEqual([
+    expect(g.getState(g.players[1].id).players[1].hand).toEqual([
       {hints: [{turnNumber: 12, is: 5, result: false}]},
       {hints: [{turnNumber: 12, is: 5, result: false}]},
       {hints: [{turnNumber: 12, is: 5, result: false}]},
@@ -76,7 +76,7 @@ describe('An ongoing game', () => {
     expect(g.getState(g.players[1].id).hintCount).toEqual(6)
 
     // still not enough hints
-    expect(g.getState(g.players[1].id).players[1].mysteryHandCards).toEqual([
+    expect(g.getState(g.players[1].id).players[1].hand).toEqual([
       {
         hints: [
           {turnNumber: 12, is: 5, result: false},
@@ -115,12 +115,20 @@ describe('An ongoing game', () => {
     expect(g.getState(g.players[1].id).hintCount).toEqual(4)
 
     // now we have enough hints to possibly identify some cards
-    expect(g.getState(g.players[1].id).players[1].mysteryHandCards).toEqual([
+    expect(g.getState(g.players[1].id).players[1].hand).toEqual([
       {
         hints: [
           {turnNumber: 12, is: 5, result: false},
           {turnNumber: 14, is: 'B', result: true},
           {turnNumber: 16, is: 2, result: false},
+        ],
+        possibleCards: [
+          {value: 'B1', weight: 1},
+          {value: 'B3', weight: 1},
+          {value: 'B4', weight: 2},
+          {value: 'X1', weight: 1},
+          {value: 'X3', weight: 2},
+          {value: 'X4', weight: 2},
         ],
       },
       {

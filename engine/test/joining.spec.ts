@@ -1,9 +1,9 @@
-import {Game} from '../src/game'
+import {Game, Turn} from '../src/game'
 
-import {createDeck, knownCard} from './helpers'
+import {knownCard} from './helpers'
 
 describe('A new empty game', () => {
-  let pg, pg2
+  let pg: Turn, pg2: Turn
   it('should look emptyish with only one player', () => {
     pg = Game.createPendingGame('Athos', 'bogus_id_athos')
     expect(pg.getState(pg.players[0].id)).toEqual({
@@ -16,10 +16,9 @@ describe('A new empty game', () => {
       inTurn: 0,
       players: [
         {
-          completeHandCards: [],
           idx: 0,
           isMe: true,
-          mysteryHandCards: [],
+          hand: [],
           name: 'Athos',
         },
       ],
@@ -44,17 +43,15 @@ describe('A new empty game', () => {
       inTurn: 0,
       players: [
         {
-          completeHandCards: [],
+          hand: [],
           idx: 0,
           isMe: true,
-          mysteryHandCards: [],
           name: 'Athos',
         },
         {
-          completeHandCards: [],
+          hand: [],
           idx: 1,
           isMe: false,
-          mysteryHandCards: [],
           name: 'Porthos',
         },
       ],
@@ -79,17 +76,15 @@ describe('A new empty game', () => {
       inTurn: 0,
       players: [
         {
-          completeHandCards: [],
           idx: 0,
           isMe: true,
-          mysteryHandCards: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
+          hand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
           name: 'Athos',
         },
         {
-          completeHandCards: [knownCard(), knownCard(), knownCard(), knownCard(), knownCard()],
+          hand: [knownCard(), knownCard(), knownCard(), knownCard(), knownCard()],
           idx: 1,
           isMe: false,
-          mysteryHandCards: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
           name: 'Porthos',
         },
       ],

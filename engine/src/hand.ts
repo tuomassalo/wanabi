@@ -1,8 +1,9 @@
-import {Card, THintState, TCardState} from './card'
+import {Card, MaskedCard, THintState, TCardState, TMaskedCardState} from './card'
 import {GameError} from './errors'
 import {Pile} from './pile'
 
 export type THandState = TCardState[]
+export type TMaskedHandState = TMaskedCardState[]
 
 export class Hand {
   cards: Card[]
@@ -11,7 +12,7 @@ export class Hand {
     this.cards = cards.map(c => new Card(c))
   }
   toJSON(): THandState {
-    return this.cards
+    return this.cards.map(c => c.serializeWithHints())
   }
   shuffle() {
     for (let i = this.cards.length - 1; i > 0; i--) {
@@ -40,5 +41,16 @@ export class Hand {
     for (const c of this.cards) {
       c.addHint(hint)
     }
+  }
+}
+
+// readonly class
+export class MaskedHand {
+  cards: MaskedCard[]
+  constructor(cards: (MaskedCard | TMaskedCardState)[]) {
+    this.cards = cards.map(c => new MaskedCard(c))
+  }
+  toJSON(): TMaskedHandState {
+    return this.cards.map(c => c.toJSON())
   }
 }

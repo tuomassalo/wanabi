@@ -2,6 +2,8 @@ import {createTightGame, knownCard} from './helpers'
 
 describe('A tight three-player game', () => {
   const g = createTightGame()
+  // console.warn('HAND0', g.getState(g.players[1].id).players[0].hand)
+  // console.warn('HAND1', g.getState(g.players[0].id).players[1].hand)
   it('should have proper state after 2*24 turns', () => {
     // p0 always plays the oldest card from hand, p1 always discards
     for (let i = 1; i <= 24; i++) {
@@ -34,21 +36,19 @@ describe('A tight three-player game', () => {
           name: 'Jekyll',
           idx: 0,
           isMe: false,
-          completeHandCards: [
+          hand: [
             {color: 'E', num: 5, hints: []},
             {color: 'X', num: 1, hints: []},
             {color: 'X', num: 2, hints: []},
             {color: 'X', num: 3, hints: []},
             {color: 'X', num: 4, hints: []},
           ],
-          mysteryHandCards: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
         },
         {
           name: 'Hyde',
           idx: 1,
           isMe: true,
-          completeHandCards: [],
-          mysteryHandCards: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
+          hand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
         },
       ],
     })
@@ -87,7 +87,7 @@ describe('A tight three-player game', () => {
       status: 'RUNNING',
       players: [
         {
-          completeHandCards: [
+          hand: [
             {color: 'X', hints: [], num: 1},
             {color: 'X', hints: [], num: 2},
             {color: 'X', hints: [], num: 3},
@@ -96,14 +96,12 @@ describe('A tight three-player game', () => {
           ],
           idx: 0,
           isMe: false,
-          mysteryHandCards: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
           name: 'Jekyll',
         },
         {
-          completeHandCards: [],
           idx: 1,
           isMe: true,
-          mysteryHandCards: [
+          hand: [
             {
               color: 'X',
               hints: [],

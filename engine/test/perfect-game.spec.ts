@@ -31,21 +31,19 @@ describe('A perfect two-player game without any hints or discards', () => {
           name: 'Bonnie',
           idx: 0,
           isMe: true,
-          completeHandCards: [],
-          mysteryHandCards: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
+          hand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
         },
         {
           name: 'Clyde',
           idx: 1,
           isMe: false,
-          completeHandCards: [
+          hand: [
             {color: 'A', num: 2, hints: []},
             {color: 'A', num: 4, hints: []},
             {color: 'B', num: 1, hints: []},
             {color: 'B', num: 3, hints: []},
             {color: 'B', num: 5, hints: []},
           ],
-          mysteryHandCards: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
         },
       ],
     })
@@ -71,21 +69,19 @@ describe('A perfect two-player game without any hints or discards', () => {
           name: 'Bonnie',
           idx: 0,
           isMe: false,
-          completeHandCards: [
+          hand: [
             {color: 'A', num: 3, hints: []},
             {color: 'A', num: 5, hints: []},
             {color: 'B', num: 2, hints: []},
             {color: 'B', num: 4, hints: []},
             {color: 'C', num: 1, hints: []},
           ],
-          mysteryHandCards: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
         },
         {
           name: 'Clyde',
           idx: 1,
           isMe: true,
-          completeHandCards: [],
-          mysteryHandCards: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
+          hand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
         },
       ],
     })
@@ -121,15 +117,13 @@ describe('A perfect two-player game without any hints or discards', () => {
           name: 'Bonnie',
           idx: 0,
           isMe: false,
-          completeHandCards: [knownCard(), knownCard(), knownCard(), knownCard(), knownCard()],
-          mysteryHandCards: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
+          hand: [knownCard(), knownCard(), knownCard(), knownCard(), knownCard()],
         },
         {
           name: 'Clyde',
           idx: 1,
           isMe: true,
-          completeHandCards: [],
-          mysteryHandCards: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
+          hand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
         },
       ],
     })
@@ -162,15 +156,13 @@ describe('A perfect two-player game without any hints or discards', () => {
           name: 'Bonnie',
           idx: 0,
           isMe: false,
-          completeHandCards: [knownCard(), knownCard(), knownCard(), knownCard(), knownCard()],
-          mysteryHandCards: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
+          hand: [knownCard(), knownCard(), knownCard(), knownCard(), knownCard()],
         },
         {
           name: 'Clyde',
           idx: 1,
           isMe: true,
-          completeHandCards: [],
-          mysteryHandCards: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
+          hand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
         },
       ],
     })

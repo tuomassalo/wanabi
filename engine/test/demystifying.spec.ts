@@ -1,5 +1,5 @@
 import {demystify} from '../src/demystifier'
-import {Card, TColor, TNum, TMyHandCardState, MyHandCard} from '../src/card'
+import {Card, TColor, TNum, TMaskedCardState, MaskedCard} from '../src/card'
 
 interface CreateHint {
   is: TColor | TNum
@@ -11,17 +11,18 @@ interface CreateHandParam {
   num?: TNum
   hints?: CreateHint[]
 }
-function dem(myHand: MyHandCard[], revealedCards: Card[]): TMyHandCardState[] {
-  return JSON.parse(JSON.stringify(demystify(myHand, revealedCards))) as TMyHandCardState[]
+function dem(myHand: MaskedCard[], revealedCards: Card[]): TMaskedCardState[] {
+  return JSON.parse(JSON.stringify(demystify(myHand, revealedCards))) as TMaskedCardState[]
 }
 
-function hand(...cards: CreateHandParam[]): MyHandCard[] {
-  return cards.map(c =>
-    MyHandCard.deserialize({
-      ...c,
-      possibleCards: [],
-      hints: (c.hints || []).map(h => ({...h, turnNumber: 0, result: h.result ?? true})),
-    }),
+function hand(...cards: CreateHandParam[]): MaskedCard[] {
+  return cards.map(
+    c =>
+      new MaskedCard({
+        ...c,
+        possibleCards: [],
+        hints: (c.hints || []).map(h => ({...h, turnNumber: 0, result: h.result ?? true})),
+      }),
   )
 }
 
@@ -40,7 +41,7 @@ function fullDeckMinus(r: string): Card[] {
     .filter(v => /\w/.test(v))
     .map(Card.fromValueString)) {
     left.splice(
-      left.findIndex(f => f.is(c)),
+      left.findIndex(f => f.equals(c)),
       1,
     )
   }

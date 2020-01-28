@@ -27,22 +27,19 @@ describe('A three-player game without any moves', () => {
           name: 'Huey',
           idx: 0,
           isMe: true,
-          mysteryHandCards: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
-          completeHandCards: [],
+          hand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
         },
         {
           name: 'Dewey',
           idx: 1,
           isMe: false,
-          mysteryHandCards: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
-          completeHandCards: [knownCard(), knownCard(), knownCard(), knownCard(), knownCard()],
+          hand: [knownCard(), knownCard(), knownCard(), knownCard(), knownCard()],
         },
         {
           name: 'Louie',
           idx: 2,
           isMe: false,
-          mysteryHandCards: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
-          completeHandCards: [knownCard(), knownCard(), knownCard(), knownCard(), knownCard()],
+          hand: [knownCard(), knownCard(), knownCard(), knownCard(), knownCard()],
         },
       ],
     })
@@ -78,15 +75,13 @@ describe('A three-player game with a custom deck', () => {
           name: 'Huey',
           idx: 0,
           isMe: true,
-          mysteryHandCards: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
-          completeHandCards: [],
+          hand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
         },
         {
           name: 'Dewey',
           idx: 1,
           isMe: false,
-          mysteryHandCards: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
-          completeHandCards: [
+          hand: [
             {color: 'A', num: 2, hints: []},
             {color: 'A', num: 5, hints: []},
             {color: 'B', num: 3, hints: []},
@@ -98,8 +93,7 @@ describe('A three-player game with a custom deck', () => {
           name: 'Louie',
           idx: 2,
           isMe: false,
-          mysteryHandCards: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
-          completeHandCards: [
+          hand: [
             {color: 'A', num: 3, hints: []},
             {color: 'B', num: 5, hints: []},
             {color: 'B', num: 2, hints: []},
