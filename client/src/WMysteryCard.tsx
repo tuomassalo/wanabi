@@ -2,11 +2,11 @@ import React from 'react'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 
 import {WebSocketClient} from './websocketclient'
-import {MyHandCard} from 'wanabi-engine/dist/card'
+import {MaskedCard} from 'wanabi-engine/dist/card'
 
 declare const wsclient: WebSocketClient
 
-export default class WMysteryCard extends React.Component<{card: MyHandCard}> {
+export default class WMysteryCard extends React.Component<{card: MaskedCard}> {
   // startGame = () => {
   //   wsclient.startGame({gameId: this.props.currentTurn.gameId})
   // }

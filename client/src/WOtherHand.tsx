@@ -7,11 +7,11 @@ import WHints from './WHints'
 import WOtherHandActionButtons from './WOtherHandActionButtons'
 
 import {WebSocketClient} from './websocketclient'
-import {HandCard} from 'wanabi-engine/dist/card'
+import {Card} from 'wanabi-engine/dist/card'
 
 declare const wsclient: WebSocketClient
 
-export default class WOtherHand extends React.Component<{cards: HandCard[]; playerIdx: number}> {
+export default class WOtherHand extends React.Component<{cards: Card[]; playerIdx: number}> {
   // startGame = () => {
   //   wsclient.startGame({gameId: this.props.currentTurn.gameId})
   // }

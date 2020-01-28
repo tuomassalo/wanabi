@@ -54,7 +54,6 @@ export interface TBaseTurnState {
   status: TGameStatus
   action: TResolvedActionState
   score: number
-  stock: TCardValueState[] // empty if is masked
   stockSize: number
   discardPile: TCardValueState[]
   hintCount: number
@@ -67,29 +66,11 @@ export interface TBaseTurnState {
 }
 export interface TTurnState extends TBaseTurnState {
   players: TPlayerState[]
+  stock: TCardValueState[] // empty if is masked
 }
 export interface TMaskedTurnState extends TBaseTurnState {
   players: TMaskedPlayerState[]
 }
-// interface TTurn {
-//   gameId: TGameId
-//   status: TGameStatus
-//   action: TResolvedActionState
-//   discardPile: Pile
-//   hintCount: number
-//   woundCount: number
-//   table: Table
-//   turnNumber: number
-//   turnsLeft: number | null // `null` means that the countdown has not started yet.
-//   players: Player[]
-//   timestamp?: string // ISO string
-//   // not in TMaskedTurnState:
-//   stock: Pile
-//   // not needed, as these are calculated from above:
-//   // score: number
-//   // stockSize: number
-//   // inTurn: number
-// }
 
 export interface WS_getGamesStateParams {}
 export interface WS_getGameStateParams {
@@ -116,7 +97,7 @@ export interface WS_actParams {
 interface M_GamesState {
   msg: 'M_GamesState'
   timestamp: string
-  games: TTurnState[] // latest turn of each game
+  games: TMaskedTurnState[] // latest turn of each game
 }
 // interface M_GameState {
 //   msg: 'M_GameState'
@@ -126,7 +107,7 @@ interface M_GamesState {
 
 export type WebsocketServerMessage = M_GamesState // | M_GameState
 
-export class Turn {
+abstract class BaseTurn {
   gameId: TGameId
   status: TGameStatus
   action: TResolvedActionState
@@ -136,11 +117,9 @@ export class Turn {
   table: Table
   turnNumber: number
   turnsLeft: number | null // `null` means that the countdown has not started yet.
-  players: Player[]
   timestamp: string // ISO string
-  stock: Pile
 
-  constructor(t: TTurnState) {
+  constructor(t: TBaseTurnState) {
     this.gameId = t.gameId
     this.status = t.status
     this.action = t.action
@@ -150,13 +129,27 @@ export class Turn {
     this.table = new Table(t.table)
     this.turnNumber = t.turnNumber
     this.turnsLeft = t.turnsLeft
-    this.players = t.players.map(p => new Player(p))
     this.timestamp = t.timestamp || new Date().toISOString()
+  }
+  get score() {
+    return this.table.getScore()
+  }
+}
+export class Turn extends BaseTurn {
+  players: Player[]
+  stock: Pile
+
+  constructor(t: TTurnState) {
+    super(t)
+    this.players = t.players.map(p => new Player(p))
     this.stock = new Pile(t.stock)
   }
   clone() {
     // make a deep copy
     return new Turn(JSON.parse(JSON.stringify(this.toJSON())))
+  }
+  get inTurn() {
+    return this.turnNumber % this.players.length
   }
 
   toJSON(): TTurnState {
@@ -168,15 +161,8 @@ export class Turn {
       players: this.players.map(p => p.toJSON()),
     }
   }
-
-  get score() {
-    return this.table.getScore()
-  }
   get stockSize() {
     return this.stock.cards.length
-  }
-  get inTurn() {
-    return this.turnNumber % this.players.length
   }
 
   getState(forPlayerId: TPlayerId): TMaskedTurnState {
@@ -325,25 +311,18 @@ export class Turn {
     return nextTurn
   }
 }
-// export class MaskedTurn extends Turn {
-//   players: MaskedPlayer[]
-//   constructor(state: TTurn, maskedPlayers) {
-//     super(state)
-//     this.players = maskedPlayers
-//   }
-//   static deserialize(state: TMaskedTurnState): MaskedTurn {
-//     return new this(
-//       {
-//         ...state,
-//         stock: new Pile([]),
-//         discardPile: new Pile(state.discardPile.map(v => Card.fromValueString(v))),
-//         table: Table.deserialize(state.table),
-//         players: [],
-//       },
-//       state.players.map(p => MaskedPlayer.deserializeMasked(p, p.isMe)),
-//     )
-//   }
-// }
+export class MaskedTurn extends BaseTurn {
+  players: MaskedPlayer[]
+  stockSize: number
+  constructor(state: TMaskedTurnState) {
+    super(state)
+    this.players = state.players.map(p => new MaskedPlayer(p))
+    this.stockSize = state.stockSize
+  }
+  get inTurn() {
+    return this.turnNumber % this.players.length
+  }
+}
 
 export interface TExistingGameConstructor {
   from: 'SERIALIZED_TURNS'

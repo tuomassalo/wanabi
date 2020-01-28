@@ -37,7 +37,7 @@ const exampleTurn: engine.TMaskedTurnState = {
       name: 'Jekyll',
       idx: 0,
       isMe: false,
-      completeHandCards: [
+      hand: [
         {
           color: 'E',
           num: 5,
@@ -51,25 +51,12 @@ const exampleTurn: engine.TMaskedTurnState = {
         {color: 'B', num: 2, hints: []},
         {color: 'X', num: 4, hints: []},
       ],
-      mysteryHandCards: [
-        {
-          hints: [
-            {turnNumber: 1, is: 5, result: true},
-            {turnNumber: 2, is: 1, result: false},
-          ],
-        },
-        {hints: [{turnNumber: 1, is: 1, result: true}]},
-        {hints: []},
-        {hints: []},
-        {hints: []},
-      ],
     },
     {
       name: 'Hyde',
       idx: 1,
       isMe: true,
-      completeHandCards: [],
-      mysteryHandCards: [
+      hand: [
         {
           hints: [
             {turnNumber: 1, is: 'A', result: false},
@@ -140,7 +127,7 @@ export default class App extends React.Component<{}, AppState> {
     if (1) {
       this.state = {
         phase: 'IN_GAME',
-        currentTurn: engine.MaskedTurn.deserialize(exampleTurn),
+        currentTurn: new engine.MaskedTurn(exampleTurn),
         messages: [],
       }
     } else
