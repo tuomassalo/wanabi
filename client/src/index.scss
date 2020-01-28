@@ -28,11 +28,15 @@ body {
   }
 }
 
-div.WGameOverview {
-  background: #eee;
+div.WGameGlance,
+div.WWaiting {
+  padding: 20px;
+  margin: 20px;
+  color: black;
+  background-color: #ccc;
 }
-div.WGameOverview ul,
-div.WGameOverview li {
+div.WGameGlance ul,
+div.WGameGlance li {
   display: inline;
   list-style: none;
   padding: 0;

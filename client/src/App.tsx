@@ -133,18 +133,32 @@ export default class App extends React.Component<{}, AppState> {
       ;(window as any).gameId = '123'
     } else
       this.wsclient.on('msg', (data: engine.WebsocketServerMessage) => {
+        console.warn('MSG', data)
+
         if (data.msg === 'M_GamesState') {
           const currentTurn = data.games.find(t => t.players.some(p => p.isMe))
 
           if (currentTurn) {
-            this.setState(state => {
-              return {phase: 'IN_GAME', currentTurn, messages: [...state.messages, data]}
-            })
+            this.setState(
+              (state): AppState => {
+                return {
+                  phase: 'IN_GAME',
+                  currentTurn: new engine.MaskedTurn(currentTurn),
+                  messages: [...state.messages, data],
+                }
+              },
+            )
             ;(window as any).gameId = currentTurn.gameId
           } else
-            this.setState(state => {
-              return {phase: 'IN_MENU', games: data.games, messages: [...state.messages, data]}
-            })
+            this.setState(
+              (state): AppState => {
+                return {
+                  phase: 'IN_MENU',
+                  games: data.games.map(g => new engine.MaskedTurn(g)),
+                  messages: [...state.messages, data],
+                }
+              },
+            )
           // } else if (data.msg === 'M_GameState') {
           //   this.setState(state => {
           //     return {phase: 'IN_GAME', games: data.currentTurn, messages: [...state.messages, data]}

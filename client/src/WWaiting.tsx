@@ -21,6 +21,7 @@ export default class WWaiting extends React.Component<{currentTurn: MaskedTurn}>
       )
     return (
       <div className="WWaiting">
+        <h3>Waiting for players...</h3>
         Players: <WPlayerList players={this.props.currentTurn.players} />
         {startButton}
       </div>

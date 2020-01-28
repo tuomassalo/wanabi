@@ -6,7 +6,7 @@ import {WebSocketClient} from './websocketclient'
 import {promptPlayerName} from './helpers'
 declare const wsclient: WebSocketClient
 
-export default class WGameOverview extends React.Component<{game: MaskedTurn}> {
+export default class WGameGlance extends React.Component<{game: MaskedTurn}> {
   join = () => {
     const newPlayerName: string | undefined = promptPlayerName()
     if (newPlayerName) wsclient.joinGame({gameId: this.props.game.gameId, newPlayerName})
@@ -29,9 +29,7 @@ export default class WGameOverview extends React.Component<{game: MaskedTurn}> {
       )
     }
     return (
-      <div className="WGameOverview">
-        [{this.props.game.status}]
-        <br />
+      <div className="WGameGlance">
         Players: <WPlayerList players={this.props.game.players} />
         {actionButtons}
       </div>

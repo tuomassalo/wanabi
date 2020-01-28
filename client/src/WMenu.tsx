@@ -1,7 +1,7 @@
 import React from 'react'
 import {MaskedTurn} from 'wanabi-engine'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import WGameOverview from './WGameOverview'
+import WGameGlance from './WGameGlance'
 import {promptPlayerName} from './helpers'
 import {WebSocketClient} from './websocketclient'
 
@@ -15,17 +15,9 @@ export default class WMenu extends React.Component<{games: MaskedTurn[]}> {
   render() {
     return (
       <div className="WMenu">
-        {this.props.games.length ? (
-          <div>
-            <h1>JOIN GAME</h1>
-            {this.props.games.map(g => (
-              <WGameOverview key={g.gameId} game={g} />
-            ))}
-            ... or
-          </div>
-        ) : (
-          ''
-        )}
+        {this.props.games.map(g => (
+          <WGameGlance key={g.gameId} game={g} />
+        ))}
         <input type="button" onClick={this.createGame} value="Create a new game" />
       </div>
     )
