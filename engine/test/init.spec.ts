@@ -26,18 +26,21 @@ describe('A three-player game without any moves', () => {
         {
           name: 'Huey',
           idx: 0,
+          isConnected: true,
           isMe: true,
           hand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
         },
         {
           name: 'Dewey',
           idx: 1,
+          isConnected: true,
           isMe: false,
           hand: [knownCard(), knownCard(), knownCard(), knownCard(), knownCard()],
         },
         {
           name: 'Louie',
           idx: 2,
+          isConnected: true,
           isMe: false,
           hand: [knownCard(), knownCard(), knownCard(), knownCard(), knownCard()],
         },
@@ -74,12 +77,14 @@ describe('A three-player game with a custom deck', () => {
         {
           name: 'Huey',
           idx: 0,
+          isConnected: true,
           isMe: true,
           hand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
         },
         {
           name: 'Dewey',
           idx: 1,
+          isConnected: true,
           isMe: false,
           hand: [
             {color: 'A', num: 2, hints: []},
@@ -92,6 +97,7 @@ describe('A three-player game with a custom deck', () => {
         {
           name: 'Louie',
           idx: 2,
+          isConnected: true,
           isMe: false,
           hand: [
             {color: 'A', num: 3, hints: []},

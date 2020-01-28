@@ -35,6 +35,7 @@ describe('A tight three-player game', () => {
         {
           name: 'Jekyll',
           idx: 0,
+          isConnected: true,
           isMe: false,
           hand: [
             {color: 'E', num: 5, hints: []},
@@ -47,6 +48,7 @@ describe('A tight three-player game', () => {
         {
           name: 'Hyde',
           idx: 1,
+          isConnected: true,
           isMe: true,
           hand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
         },
@@ -95,11 +97,13 @@ describe('A tight three-player game', () => {
             {color: 'X', hints: [], num: 5},
           ],
           idx: 0,
+          isConnected: true,
           isMe: false,
           name: 'Jekyll',
         },
         {
           idx: 1,
+          isConnected: true,
           isMe: true,
           hand: [
             {

@@ -166,6 +166,7 @@ export class Turn extends BaseTurn {
   }
 
   getState(forPlayerId: TPlayerId): TMaskedTurnState {
+    const isOutsider = !this.players.some(p => p.id === forPlayerId)
     return {
       ...JSON.parse(JSON.stringify(this)),
       stock: undefined,
@@ -173,7 +174,9 @@ export class Turn extends BaseTurn {
       inTurn: this.inTurn,
       score: this.score,
       players: this.players.map(p =>
-        p.id === forPlayerId
+        isOutsider
+          ? MaskedPlayer.outsiderFromPlayer(p)
+          : p.id === forPlayerId
           ? MaskedPlayer.meFromPlayer(
               p,
               [
@@ -363,7 +366,7 @@ export class Game {
           stock: deck.toJSON(),
           discardPile: (discardPile || new Pile([])).toJSON(),
           players: playerNames.map((name, idx) =>
-            new Player({name, idx, hand: new Hand([]).toJSON(), id: `bogus_id_${name}`}).toJSON(),
+            new Player({name, idx, hand: new Hand([]).toJSON(), id: `bogus_id_${name}`, isConnected: true}).toJSON(),
           ),
           hintCount: 9,
           woundCount: 0,
@@ -418,7 +421,15 @@ export class Game {
       table: new Table().toJSON(),
       stock: new Pile([]).toJSON(),
       discardPile: new Pile([]).toJSON(),
-      players: [new Player({name: firstPlayerName, idx: 0, hand: new Hand([]).toJSON(), id: firstPlayerId}).toJSON()], // no hand cards yet
+      players: [
+        new Player({
+          name: firstPlayerName,
+          idx: 0,
+          hand: new Hand([]).toJSON(),
+          id: firstPlayerId,
+          isConnected: true,
+        }).toJSON(),
+      ], // no hand cards yet
       hintCount: 9,
       woundCount: 0,
       turnNumber: 0,
@@ -436,7 +447,13 @@ export class Game {
     if (pendingGame.players.length >= 5) throw new GameError('GAME_FULL')
 
     pendingGame.players.push(
-      new Player({name: newPlayerName, idx: pendingGame.players.length, hand: new Hand([]).toJSON(), id: newPlayerId}),
+      new Player({
+        name: newPlayerName,
+        idx: pendingGame.players.length,
+        hand: new Hand([]).toJSON(),
+        id: newPlayerId,
+        isConnected: true,
+      }),
     )
     return pendingGame
   }

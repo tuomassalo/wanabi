@@ -30,12 +30,14 @@ describe('A perfect two-player game without any hints or discards', () => {
         {
           name: 'Bonnie',
           idx: 0,
+          isConnected: true,
           isMe: true,
           hand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
         },
         {
           name: 'Clyde',
           idx: 1,
+          isConnected: true,
           isMe: false,
           hand: [
             {color: 'A', num: 2, hints: []},
@@ -68,6 +70,7 @@ describe('A perfect two-player game without any hints or discards', () => {
         {
           name: 'Bonnie',
           idx: 0,
+          isConnected: true,
           isMe: false,
           hand: [
             {color: 'A', num: 3, hints: []},
@@ -80,6 +83,7 @@ describe('A perfect two-player game without any hints or discards', () => {
         {
           name: 'Clyde',
           idx: 1,
+          isConnected: true,
           isMe: true,
           hand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
         },
@@ -116,12 +120,14 @@ describe('A perfect two-player game without any hints or discards', () => {
         {
           name: 'Bonnie',
           idx: 0,
+          isConnected: true,
           isMe: false,
           hand: [knownCard(), knownCard(), knownCard(), knownCard(), knownCard()],
         },
         {
           name: 'Clyde',
           idx: 1,
+          isConnected: true,
           isMe: true,
           hand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
         },
@@ -155,12 +161,14 @@ describe('A perfect two-player game without any hints or discards', () => {
         {
           name: 'Bonnie',
           idx: 0,
+          isConnected: true,
           isMe: false,
           hand: [knownCard(), knownCard(), knownCard(), knownCard(), knownCard()],
         },
         {
           name: 'Clyde',
           idx: 1,
+          isConnected: true,
           isMe: true,
           hand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
         },

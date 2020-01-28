@@ -42,15 +42,21 @@ async function deleteGame(gameId: engine.TGameId) {
 }
 
 async function broadcastGamesState() {
-  const turns = await scanGames()
+  const games = await scanGames()
 
+  const allConnections = new Set(await getAllConnections())
+
+  // set isConnected to all players in all games
+  for (const game of games) {
+    for (const p of game.players) {
+      p.isConnected = allConnections.has(p.id)
+    }
+  }
   await Promise.all(
     (await getAllConnections()).map(cId => {
       const data: engine.WebsocketServerMessage = {
         msg: 'M_GamesState',
-        games: turns
-          .filter(t => t.status === 'WAITING_FOR_PLAYERS' || t.players.some(p => p.id === cId))
-          .map(t => new engine.Turn(t).getState(cId)),
+        games: games.map(t => new engine.Turn(t).getState(cId)),
         timestamp: new Date().toISOString(),
       }
 
@@ -91,9 +97,8 @@ async function _getGame(gameId: engine.TGameId): Promise<engine.Game> {
   return new engine.Game({from: 'SERIALIZED_TURNS', turns: [turn]})
 }
 async function _getGamesState(playerId: TPlayerId): Promise<engine.TTurnState[]> {
-  const turns = await scanGames()
-
-  return turns.filter(t => t.status === 'WAITING_FOR_PLAYERS' || t.players.some(p => p.id === playerId))
+  const games = await scanGames()
+  return games // .filter(t => t.status === 'WAITING_FOR_PLAYERS' || t.players.some(p => p.id === playerId))
 }
 
 export async function getGamesState({}: engine.WS_getGamesStateParams, connectionId: string) {

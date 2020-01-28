@@ -36,6 +36,7 @@ const exampleTurn: engine.TMaskedTurnState = {
     {
       name: 'Jekyll',
       idx: 0,
+      isConnected: true,
       isMe: false,
       hand: [
         {
@@ -55,6 +56,7 @@ const exampleTurn: engine.TMaskedTurnState = {
     {
       name: 'Hyde',
       idx: 1,
+      isConnected: true,
       isMe: true,
       hand: [
         {
@@ -133,7 +135,7 @@ export default class App extends React.Component<{}, AppState> {
       ;(window as any).gameId = '123'
     } else
       this.wsclient.on('msg', (data: engine.WebsocketServerMessage) => {
-        console.warn('MSG', data)
+        // console.warn('MSG', data)
 
         if (data.msg === 'M_GamesState') {
           const currentTurn = data.games.find(t => t.players.some(p => p.isMe))

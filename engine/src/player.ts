@@ -9,6 +9,7 @@ export interface TPlayerState {
   id: TPlayerId
   idx: number
   name: string
+  isConnected: boolean
 }
 
 export interface TMaskedPlayerState {
@@ -17,6 +18,7 @@ export interface TMaskedPlayerState {
   // id: string
   name: string
   isMe: boolean
+  isConnected: boolean
 }
 
 export class Player {
@@ -62,6 +64,7 @@ export class Player {
       idx: this.idx,
       hand: this.hand.cards.map(c => c.serializeWithHints()),
       id: this.id,
+      isConnected: true, // this is actually filled in gamebridge.ts
     }
   }
   setHand(hand: Hand) {
@@ -91,12 +94,32 @@ export class MaskedPlayer {
         revealedCards,
       ),
       isMe: true,
+      isConnected: true, // this is actually filled in gamebridge.ts
     })
   }
   static otherFromPlayer(p: Player): MaskedPlayer {
-    return new MaskedPlayer({...p, hand: p.hand.toJSON(), isMe: false})
+    return new MaskedPlayer({
+      ...p,
+      hand: p.hand.toJSON(),
+      isMe: false,
+      isConnected: true, // this is actually filled in gamebridge.ts
+    })
+  }
+  static outsiderFromPlayer(p: Player): MaskedPlayer {
+    return new MaskedPlayer({
+      ...p,
+      hand: [], // look, no hand(s)
+      isMe: false,
+      isConnected: true,
+    })
   }
   toJSON(): TMaskedPlayerState {
-    return {name: this.name, hand: this.hand.toJSON(), idx: this.idx, isMe: this.isMe}
+    return {
+      name: this.name,
+      hand: this.hand.toJSON(),
+      idx: this.idx,
+      isMe: this.isMe,
+      isConnected: true, // this is actually filled in gamebridge.ts
+    }
   }
 }

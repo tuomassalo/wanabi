@@ -17,6 +17,7 @@ describe('A new empty game', () => {
       players: [
         {
           idx: 0,
+          isConnected: true,
           isMe: true,
           hand: [],
           name: 'Athos',
@@ -45,12 +46,14 @@ describe('A new empty game', () => {
         {
           hand: [],
           idx: 0,
+          isConnected: true,
           isMe: true,
           name: 'Athos',
         },
         {
           hand: [],
           idx: 1,
+          isConnected: true,
           isMe: false,
           name: 'Porthos',
         },
@@ -77,6 +80,7 @@ describe('A new empty game', () => {
       players: [
         {
           idx: 0,
+          isConnected: true,
           isMe: true,
           hand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
           name: 'Athos',
@@ -84,6 +88,7 @@ describe('A new empty game', () => {
         {
           hand: [knownCard(), knownCard(), knownCard(), knownCard(), knownCard()],
           idx: 1,
+          isConnected: true,
           isMe: false,
           name: 'Porthos',
         },
