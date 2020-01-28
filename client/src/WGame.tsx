@@ -68,7 +68,7 @@ export default class WGame extends React.Component<{currentTurn: engine.MaskedTu
           </span>
         </div>
         <div className="WGame">
-          <div className="WGreen clearfix">
+          <div className="clearfix">
             <WDiscardPile discardPile={discardPile} />
             <WTable table={table} />
           </div>

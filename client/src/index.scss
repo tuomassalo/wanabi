@@ -64,12 +64,23 @@ div.WCard {
   background: linear-gradient(135deg, orange, yellow, green, cyan, blue, violet);
 }
 body {
-  background: #ccc;
+  background: darkgreen;
 }
 
-div.WPlayer-inturn::before {
-  content: '-> ';
-  float: left;
+div.WPlayer {
+  background: #ddd;
+  padding: $cardWidth / 10 $cardWidth / 10 $cardWidth / 10 60px;
+  border-radius: $cardWidth/5;
+  margin-top: $cardHeight/14;
+  h3 {
+    position: absolute;
+    transform-origin: 0 0;
+    transform: rotate(90deg) translate(-10px, 20px);
+  }
+  &.WPlayer-inturn h3::before {
+    content: '➡ ';
+    float: left;
+  }
 }
 
 .WHints {
@@ -171,16 +182,11 @@ div.WUpToNinePossibleCards .WCard {
   // float: left;
 }
 
-div.WGreen {
-  background: darkgreen;
-  padding: $cardWidth / 5;
-  border-radius: $cardWidth/5;
-  div.WTable {
-    > div {
-      display: inline-block;
-      vertical-align: top;
-      margin: $cardWidth / 16;
-    }
+div.WTable {
+  > div {
+    display: inline-block;
+    vertical-align: top;
+    margin: 0 $cardWidth / 16 $cardWidth / 16 0;
   }
 }
 

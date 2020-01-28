@@ -7,7 +7,7 @@ export default class WDiscardPile extends React.Component<{discardPile: Pile}> {
   render() {
     return (
       <div className="WDiscardPile">
-        <h2>Discard Pile</h2>
+        {/* <h3>Discard Pile</h3> */}
         {this.props.discardPile.cards.map(card => (
           <WCard card={card} />
         ))}
