@@ -16,6 +16,18 @@ body {
   padding: 0;
   margin: 0;
 }
+
+.WMenu {
+  color: #ccc;
+  text-align: center;
+  padding-top: $cardHeight;
+  input {
+    display: block;
+    margin: auto;
+    font-size: 200%;
+  }
+}
+
 div.WGameOverview {
   background: #eee;
 }

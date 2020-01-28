@@ -8,7 +8,8 @@ declare const wsclient: WebSocketClient
 
 export default class WGameOverview extends React.Component<{game: MaskedTurn}> {
   join = () => {
-    wsclient.joinGame({gameId: this.props.game.gameId, newPlayerName: promptPlayerName()})
+    const newPlayerName: string | undefined = promptPlayerName()
+    if (newPlayerName) wsclient.joinGame({gameId: this.props.game.gameId, newPlayerName})
   }
   render() {
     let actionButtons = <div></div>

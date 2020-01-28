@@ -8,8 +8,10 @@ import WMysteryCard from './WMysteryCard'
 import WMyCardActionButtons from './WMyCardActionButtons'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import WHints from './WHints'
+import {TGameId} from 'wanabi-engine'
 
 declare const wsclient: WebSocketClient
+declare const gameId: TGameId
 
 export default class WMyHand extends React.Component<{cards: MaskedCard[]}> {
   // startGame = () => {

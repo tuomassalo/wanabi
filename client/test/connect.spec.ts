@@ -24,7 +24,7 @@ test('connect, createGame', done => {
           gameId: jasmine.any(String),
           hintCount: 9,
           inTurn: 0,
-          players: [{completeHandCards: [], idx: 0, isMe: true, mysteryHandCards: [], name: 'BOBBY_TABLES'}],
+          players: [{hand: [], idx: 0, isMe: true, name: 'BOBBY_TABLES'}],
           score: 0,
           status: 'WAITING_FOR_PLAYERS',
           stockSize: 0,
@@ -58,7 +58,7 @@ test('getGamesState', done => {
           gameId: jasmine.any(String),
           hintCount: 9,
           inTurn: 0,
-          players: [{completeHandCards: [], idx: 0, isMe: false, mysteryHandCards: [], name: 'BOBBY_TABLES'}],
+          players: [{hand: [], idx: 0, isMe: false, name: 'BOBBY_TABLES'}],
           score: 0,
           status: 'WAITING_FOR_PLAYERS',
           stockSize: 0,
@@ -89,8 +89,8 @@ test('joinGame', done => {
           hintCount: 9,
           inTurn: 0,
           players: [
-            {completeHandCards: [], idx: 0, isMe: false, mysteryHandCards: [], name: 'BOBBY_TABLES'},
-            {completeHandCards: [], idx: 1, isMe: true, mysteryHandCards: [], name: 'Beatrice'},
+            {hand: [], idx: 0, isMe: false, name: 'BOBBY_TABLES'},
+            {hand: [], idx: 1, isMe: true, name: 'Beatrice'},
           ],
           score: 0,
           status: 'WAITING_FOR_PLAYERS',
@@ -123,14 +123,13 @@ test('startGame', done => {
           inTurn: 0,
           players: [
             {
-              completeHandCards: [],
               idx: 0,
               isMe: true,
-              mysteryHandCards: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
+              hand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
               name: 'BOBBY_TABLES',
             },
             {
-              completeHandCards: [
+              hand: [
                 {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
                 {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
                 {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
@@ -139,7 +138,6 @@ test('startGame', done => {
               ],
               idx: 1,
               isMe: false,
-              mysteryHandCards: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
               name: 'Beatrice',
             },
           ],
@@ -175,14 +173,13 @@ test('act', done => {
           inTurn: 1,
           players: [
             {
-              completeHandCards: [],
               idx: 0,
               isMe: true,
-              mysteryHandCards: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
+              hand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
               name: 'BOBBY_TABLES',
             },
             {
-              completeHandCards: [
+              hand: [
                 {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
                 {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
                 {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
@@ -191,7 +188,6 @@ test('act', done => {
               ],
               idx: 1,
               isMe: false,
-              mysteryHandCards: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
               name: 'Beatrice',
             },
           ],
@@ -222,7 +218,7 @@ test('act', done => {
           inTurn: 1,
           players: [
             {
-              completeHandCards: [
+              hand: [
                 {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
                 {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
                 {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
@@ -231,14 +227,12 @@ test('act', done => {
               ],
               idx: 0,
               isMe: false,
-              mysteryHandCards: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
               name: 'BOBBY_TABLES',
             },
             {
-              completeHandCards: [],
               idx: 1,
               isMe: true,
-              mysteryHandCards: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
+              hand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
               name: 'Beatrice',
             },
           ],

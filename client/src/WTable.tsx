@@ -9,9 +9,13 @@ export default class WTable extends React.Component<{table: Table}> {
       <div className="WTable">
         {Object.entries(this.props.table.table).map(([color, pile]) => {
           if (pile.size) {
-            return <WCard card={pile.top} />
+            return <WCard key={color} card={pile.top} />
           } else {
-            return <div className={`WCardPlaceHolder xWCardPlaceHolder-${color} WColor-${color}`}>&nbsp;</div>
+            return (
+              <div key={color} className={`WCardPlaceHolder xWCardPlaceHolder-${color} WColor-${color}`}>
+                &nbsp;
+              </div>
+            )
           }
         })}
       </div>

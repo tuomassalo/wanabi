@@ -9,16 +9,24 @@ declare const wsclient: WebSocketClient
 
 export default class WMenu extends React.Component<{games: MaskedTurn[]}> {
   createGame = () => {
-    wsclient.createGame({firstPlayerName: promptPlayerName()})
+    const firstPlayerName: string | undefined = promptPlayerName()
+    if (firstPlayerName) wsclient.createGame({firstPlayerName})
   }
   render() {
     return (
       <div className="WMenu">
+        {this.props.games.length ? (
+          <div>
+            <h1>JOIN GAME</h1>
+            {this.props.games.map(g => (
+              <WGameOverview key={g.gameId} game={g} />
+            ))}
+            ... or
+          </div>
+        ) : (
+          ''
+        )}
         <input type="button" onClick={this.createGame} value="Create a new game" />
-        <h1>CHOOSE GAME</h1>
-        {this.props.games.map(g => (
-          <WGameOverview key={g.gameId} game={g} />
-        ))}
       </div>
     )
   }

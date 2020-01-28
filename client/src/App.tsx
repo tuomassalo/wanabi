@@ -124,22 +124,24 @@ export default class App extends React.Component<{}, AppState> {
     this.wsclient = new WebSocketClient()
     this.state = {messages: [], phase: 'IN_MENU', games: []}
 
-    if (1) {
+    if (0) {
       this.state = {
         phase: 'IN_GAME',
         currentTurn: new engine.MaskedTurn(exampleTurn),
         messages: [],
       }
+      ;(window as any).gameId = '123'
     } else
       this.wsclient.on('msg', (data: engine.WebsocketServerMessage) => {
         if (data.msg === 'M_GamesState') {
           const currentTurn = data.games.find(t => t.players.some(p => p.isMe))
 
-          if (currentTurn)
+          if (currentTurn) {
             this.setState(state => {
               return {phase: 'IN_GAME', currentTurn, messages: [...state.messages, data]}
             })
-          else
+            ;(window as any).gameId = currentTurn.gameId
+          } else
             this.setState(state => {
               return {phase: 'IN_MENU', games: data.games, messages: [...state.messages, data]}
             })
@@ -172,13 +174,13 @@ export default class App extends React.Component<{}, AppState> {
       <div className="App">
         {/* {this.state.phase} */}
         {phaseComponent}
-        <header className="App-header">
+        {/* <header className="App-header">
           <ul>
             {this.state.messages.map(msg => (
               <li key={msg.timestamp}>MSG: {JSON.stringify(msg)}</li>
             ))}
           </ul>
-        </header>
+        </header> */}
       </div>
     )
   }

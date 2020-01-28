@@ -6,21 +6,15 @@ import WHints from './WHints'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import WOtherHandActionButtons from './WOtherHandActionButtons'
 
-import {WebSocketClient} from './websocketclient'
 import {Card} from 'wanabi-engine/dist/card'
 
-declare const wsclient: WebSocketClient
-
 export default class WOtherHand extends React.Component<{cards: Card[]; playerIdx: number}> {
-  // startGame = () => {
-  //   wsclient.startGame({gameId: this.props.currentTurn.gameId})
-  // }
-
   render() {
     return (
       <div className="WOtherHand">
-        {this.props.cards.map(c => (
-          <div>
+        {/* NB: bogus index, might break animations */}
+        {this.props.cards.map((c, idx) => (
+          <div key={idx}>
             <WCard key={Math.random()} card={c} />
             <WHints hints={c.hints} />
           </div>

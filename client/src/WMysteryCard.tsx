@@ -1,16 +1,9 @@
 import React from 'react'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 
-import {WebSocketClient} from './websocketclient'
 import {MaskedCard} from 'wanabi-engine/dist/card'
 
-declare const wsclient: WebSocketClient
-
 export default class WMysteryCard extends React.Component<{card: MaskedCard}> {
-  // startGame = () => {
-  //   wsclient.startGame({gameId: this.props.currentTurn.gameId})
-  // }
-
   render() {
     const {color, num, possibleCards} = this.props.card
     const allPossibleCards = (possibleCards || []).flatMap(pc => Array(pc.weight).fill(pc))
@@ -27,8 +20,11 @@ export default class WMysteryCard extends React.Component<{card: MaskedCard}> {
       // show a collection of miniature cards
       return (
         <div className={allPossibleCards.length > 4 ? 'WUpToNinePossibleCards' : 'WUpToFourPossibleCards'}>
-          {allPossibleCards.map(pc => (
-            <div className={`WCard WColor-${pc.color}`}>{pc.num}</div>
+          {/* NB: bogus index, might break animations */}
+          {allPossibleCards.map((pc, idx) => (
+            <div key={idx} className={`WCard WColor-${pc.color}`}>
+              {pc.num}
+            </div>
           ))}
         </div>
       )
