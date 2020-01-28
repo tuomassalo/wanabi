@@ -2,6 +2,8 @@ import * as AWS from 'aws-sdk'
 import * as engine from 'wanabi-engine'
 import {TPlayerId} from 'wanabi-engine/dist/player'
 
+type TConnectionId = string
+
 // const AWS = require('aws-sdk')
 const apig = new AWS.ApiGatewayManagementApi({
   endpoint: process.env.APIG_ENDPOINT,
@@ -29,11 +31,14 @@ async function scan<I>(
   return Items as I[]
 }
 async function scanGames(scanParams = {}) {
-  return await scan<engine.TCompleteTurnState>(gameTable, scanParams)
+  return await scan<engine.TTurnState>(gameTable, scanParams)
 }
 
-async function getAllConnections() {
+async function getAllConnections(): Promise<TConnectionId[]> {
   return (await scan<any>(connectionTable, {AttributesToGet: ['connectionId']})).map(item => item.connectionId)
+}
+async function deleteGame(gameId: engine.TGameId) {
+  await dynamodb.delete({TableName: gameTable, Key: {gameId}}).promise()
 }
 
 async function broadcastGamesState() {
@@ -45,7 +50,7 @@ async function broadcastGamesState() {
         msg: 'M_GamesState',
         games: turns
           .filter(t => t.status === 'WAITING_FOR_PLAYERS' || t.players.some(p => p.id === cId))
-          .map(t => engine.Turn.deserialize(t).getState(cId)),
+          .map(t => new engine.Turn(t).getState(cId)),
         timestamp: new Date().toISOString(),
       }
 
@@ -85,7 +90,7 @@ async function _getGame(gameId: engine.TGameId): Promise<engine.Game> {
 
   return new engine.Game({from: 'SERIALIZED_TURNS', turns: [turn]})
 }
-async function _getGamesState(playerId: TPlayerId): Promise<engine.TCompleteTurnState[]> {
+async function _getGamesState(playerId: TPlayerId): Promise<engine.TTurnState[]> {
   const turns = await scanGames()
 
   return turns.filter(t => t.status === 'WAITING_FOR_PLAYERS' || t.players.some(p => p.id === playerId))
@@ -94,7 +99,7 @@ async function _getGamesState(playerId: TPlayerId): Promise<engine.TCompleteTurn
 export async function getGamesState({}: engine.WS_getGamesStateParams, connectionId: string) {
   const data: engine.WebsocketServerMessage = {
     msg: 'M_GamesState',
-    games: (await _getGamesState(connectionId)).map(t => engine.Turn.deserialize(t).getState(connectionId)),
+    games: (await _getGamesState(connectionId)).map(t => new engine.Turn(t).getState(connectionId)),
     timestamp: new Date().toISOString(),
   }
   await apig.postToConnection({ConnectionId: connectionId, Data: JSON.stringify(data)}).promise()
@@ -107,7 +112,7 @@ export async function createGame({firstPlayerName}: engine.WS_createGameParams, 
     console.warn('Wiping dev tables.')
 
     for (const {gameId} of await scanGames({AttributesToGet: ['gameId']})) {
-      await dynamodb.delete({TableName: gameTable, Key: {gameId}}).promise()
+      await deleteGame(gameId)
     }
   }
 
@@ -151,4 +156,18 @@ export async function act({gameId, actionParams}: engine.WS_actParams, connectio
 
   // send updated game state to all players
   await broadcastGamesState()
+}
+
+export async function purgeGames() {
+  const allConnections = new Set(await getAllConnections())
+
+  // purge non-started games that have no connected players
+  const purgeGames = (await scanGames()).filter(
+    game => game.status === 'WAITING_FOR_PLAYERS' && game.players.every(p => !allConnections.has(p.id)),
+  )
+
+  if (purgeGames.length) {
+    await Promise.all(purgeGames.map(game => deleteGame(game.gameId)))
+    await broadcastGamesState()
+  }
 }

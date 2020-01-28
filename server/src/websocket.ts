@@ -30,12 +30,9 @@ export const handler = async function(event: any, context: any) {
         break
 
       case '$disconnect':
-        await dynamodb
-          .delete({
-            TableName: connectionTable,
-            Key: {connectionId},
-          })
-          .promise()
+        await dynamodb.delete({TableName: connectionTable, Key: {connectionId}}).promise()
+
+        await gamebridge.purgeGames()
         break
 
       case '$default':
