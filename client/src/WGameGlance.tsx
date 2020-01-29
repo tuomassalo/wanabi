@@ -13,7 +13,9 @@ export default class WGameGlance extends React.Component<{game: MaskedTurn}> {
   }
   render() {
     let actionButtons = <div></div>
+    let status = <div></div>
     if (this.props.game.status === 'WAITING_FOR_PLAYERS') {
+      status = <h4>Waiting for players...</h4>
       if (this.props.game.players.length < 5) {
         actionButtons = (
           <div>
@@ -22,15 +24,12 @@ export default class WGameGlance extends React.Component<{game: MaskedTurn}> {
         )
       }
     } else if (this.props.game.status === 'RUNNING') {
-      actionButtons = (
-        <div>
-          TODO
-          {/* <input type="button" value="Re-join game as..." /> */}
-        </div>
-      )
+      status = <h4>Game is running... (turn {this.props.game.turnNumber})</h4>
+      // no actions
     }
     return (
       <div className="WGameGlance">
+        {status}
         Players: <WPlayerList turn={this.props.game} />
         {actionButtons}
       </div>

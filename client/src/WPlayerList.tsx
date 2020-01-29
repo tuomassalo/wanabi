@@ -16,15 +16,15 @@ export default class WPlayerList extends React.Component<{turn: MaskedTurn}> {
       <ul className="WPlayerList">
         {players.map(p => (
           <li key={p.idx}>
+            {p.name}
             {p.isConnected ? (
               ''
             ) : (
               <span>
-                🔌
+                {' 🔌 '}
                 {amIInThisGame ? '' : <input type="button" value="rejoin" onClick={() => rejoin(p.idx)} />}
               </span>
             )}
-            {p.name}
           </li>
         ))}
       </ul>
