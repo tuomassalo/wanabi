@@ -44,7 +44,9 @@ export class WebSocketClient extends EventEmitter {
   }
   disconnect() {
     this.websocket.close()
-    setTimeout(() => window.location.reload(), 1000)
+
+    // If the websocket was disconnected, reload the window. (But not when testing, since jsdom does not implement location.reload().)
+    if (!/\bjsdom\b/.test(navigator.userAgent)) setTimeout(() => window.location.reload(), 1000)
   }
 
   // perl -wlne 'print qq!$2(p: game.$1): void { this.send("$2", p) } // prettier-ignore! if /interface (WS_(\w+)Params)\b/' ../engine/src/game.ts | pbcopy

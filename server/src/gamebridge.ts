@@ -53,6 +53,8 @@ async function sendGamesState(toConnections: TConnectionId[]) {
     }
   }
 
+  console.warn('sending game state to ', ...toConnections)
+
   await Promise.all(
     toConnections.map(cId => {
       const data: engine.WebsocketServerMessage = {
@@ -94,7 +96,7 @@ async function updateGame(turn: engine.Turn, prevTimestamp: string) {
 }
 
 async function _getGame(gameId: engine.TGameId): Promise<engine.Game> {
-  const turn = (await scanGames()).find(t => t.gameId === gameId)
+  const turn = (await scanGames()).find(t => t.gameId === gameId) // TODO: do this on server
   if (!turn) throw new Error('No turn found')
 
   return new engine.Game({from: 'SERIALIZED_TURNS', turns: [turn]})
@@ -163,6 +165,24 @@ export async function act({gameId, actionParams}: engine.WS_actParams, connectio
   await broadcastGamesState()
 }
 
+export async function rejoinGame({gameId, playerIdx}: engine.WS_rejoinGameParams, connectionId: string) {
+  const game = await _getGame(gameId)
+  const player = game.players[playerIdx]
+  if (!player) {
+    throw new Error('No such player')
+  }
+  if ((await getAllConnections()).some(cId => cId === player.id)) {
+    throw new Error('PLayer already connected')
+  }
+  game.players[playerIdx].id = connectionId
+  game.players[playerIdx].isConnected = true
+
+  await updateGame(game.currentTurn, game.currentTurn.timestamp)
+
+  // send updated game state to all players
+  await broadcastGamesState()
+}
+
 export async function purgeGames() {
   const allConnections = new Set(await getAllConnections())
 
@@ -171,8 +191,7 @@ export async function purgeGames() {
     game => game.status === 'WAITING_FOR_PLAYERS' && game.players.every(p => !allConnections.has(p.id)),
   )
 
-  if (purgeGames.length) {
-    await Promise.all(purgeGames.map(game => deleteGame(game.gameId)))
-    await broadcastGamesState()
-  }
+  await Promise.all(purgeGames.map(game => deleteGame(game.gameId)))
+
+  await broadcastGamesState()
 }

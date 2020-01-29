@@ -1,4 +1,7 @@
 import {WebSocketClient} from '../src/websocketclient'
+import * as game from 'wanabi-engine'
+
+jasmine.DEFAULT_TIMEOUT_INTERVAL = 30000
 
 let gameId: string
 let ws1: WebSocketClient, ws2: WebSocketClient, ws3: WebSocketClient
@@ -294,4 +297,58 @@ test('An outsider sees the started game, but cannot see any hands', done => {
     })
     setTimeout(done, 100)
   })
+})
+
+test('An "outsider" can join a game if someone disconnects', async done => {
+  expect.assertions(2)
+  // ws2 disconnects, ws3 replaces them.
+
+  const ws3msgs: game.WebsocketServerMessage[] = []
+
+  // poll for new messages
+  async function waitMsg() {
+    while (ws3msgs.length === 0) {
+      await new Promise(r => setTimeout(r, 10))
+    }
+    return ws3msgs.shift() as game.WebsocketServerMessage
+  }
+
+  ws3.on('msg', msg => ws3msgs.push(msg))
+
+  await new Promise(r => setTimeout(r, 100))
+  ws2.disconnect()
+  await new Promise(r => setTimeout(r, 100))
+
+  const msg = await waitMsg()
+  expect(msg.games[0].players).toEqual([
+    {hand: [], idx: 0, isConnected: true, isMe: false, name: 'BOBBY_TABLES'},
+    {hand: [], idx: 1, isConnected: false, isMe: false, name: 'Beatrice'}, // NB: not connected!
+  ])
+
+  await new Promise(r => setTimeout(r, 100))
+  ws3.rejoinGame({gameId: msg.games[0].gameId, playerIdx: 1})
+
+  expect((await waitMsg()).games[0].players).toEqual([
+    {
+      hand: [
+        {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
+        {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
+        {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
+        {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
+        {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
+      ],
+      idx: 0,
+      isConnected: true,
+      isMe: false,
+      name: 'BOBBY_TABLES',
+    },
+    {
+      hand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
+      idx: 1,
+      isConnected: true,
+      isMe: true,
+      name: 'Beatrice',
+    },
+  ])
+  setTimeout(done, 100)
 })
