@@ -17,20 +17,21 @@ export default class WGameGlance extends React.Component<{game: MaskedTurn}> {
       if (this.props.game.players.length < 5) {
         actionButtons = (
           <div>
-            <input type="button" value="Join game" onClick={this.join} />
+            <input type="button" className="major" value="Join game" onClick={this.join} />
           </div>
         )
       }
     } else if (this.props.game.status === 'RUNNING') {
       actionButtons = (
         <div>
-          <input type="button" value="Re-join game as..." />
+          TODO
+          {/* <input type="button" value="Re-join game as..." /> */}
         </div>
       )
     }
     return (
       <div className="WGameGlance">
-        Players: <WPlayerList players={this.props.game.players} />
+        Players: <WPlayerList turn={this.props.game} />
         {actionButtons}
       </div>
     )
