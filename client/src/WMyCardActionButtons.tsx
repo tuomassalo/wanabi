@@ -11,13 +11,16 @@ export default class WMyCardActionButtons extends React.Component<{cardIdx: numb
   playCard = () => {
     wsclient.act({gameId, actionParams: {type: 'PLAY', cardIdx: this.props.cardIdx}})
   }
+  discardCard = () => {
+    wsclient.act({gameId, actionParams: {type: 'DISCARD', cardIdx: this.props.cardIdx}})
+  }
 
   render() {
     return (
       <div className="WMyCardActionButtons">
         <input type="button" value="Play" onClick={this.playCard} />
         <br />
-        <input type="button" value="Discard" />
+        <input type="button" value="Discard" onClick={this.discardCard} />
       </div>
     )
   }

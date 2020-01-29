@@ -21,6 +21,7 @@ export default class WGame extends React.Component<{currentTurn: engine.MaskedTu
   render() {
     // const currentPlayerCount = this.props.currentTurn.players.length
     const {
+      status,
       players,
       table,
       stockSize,
@@ -31,22 +32,10 @@ export default class WGame extends React.Component<{currentTurn: engine.MaskedTu
       inTurn,
       turnNumber,
     } = this.props.currentTurn
-    ;(window as any).PLA = players
+    const className = status === 'RUNNING' ? (players[inTurn].isMe ? 'WGame-myturn' : '') : 'WGame-gameover'
     return (
       <div>
         <div className="WHeader">
-          {/* <dl>
-            <dt>Vuoro</dt>
-            <dd>{turnNumber}</dd>
-            <dt>Pakassa kortteja</dt>
-            <dd>{stockSize}</dd>
-            <dt>Vihjeitä</dt>
-            <dd>{hintCount}</dd>
-            <dt>Haavoja</dt>
-            <dd>{woundCount}</dd>
-            <dt style={turnsLeft ? {} : {visibility: 'hidden'}}>Vuoroja jäljellä</dt>
-            <dd>{turnsLeft}</dd>
-          </dl> */}
           <span>
             Vuoro: <em>{turnNumber}</em>
           </span>
@@ -63,18 +52,21 @@ export default class WGame extends React.Component<{currentTurn: engine.MaskedTu
             Haavoja: <em>{woundCount}</em>
           </span>
 
-          <span style={turnsLeft ? {} : {visibility: 'hidden'}}>
+          <span style={turnsLeft ? {} : {display: 'none'}}>
             Vuoroja jäljellä: <em>{turnsLeft}</em>
           </span>
         </div>
-        <div className="WGame">
+        <div className={`WGame ${className}`}>
           <div className="clearfix">
             <WDiscardPile discardPile={discardPile} />
             <WTable table={table} />
           </div>
           {players.map(p => (
             <div key={p.idx} className={`WPlayer ${p.idx === inTurn ? 'WPlayer-inturn' : ''}`}>
-              <h3>{p.name}</h3>
+              <h3>
+                {p.name}
+                {p.isConnected ? '' : ' 🔌 '}
+              </h3>
               {p.isMe ? (
                 <WMyHand cards={p.hand.cards} />
               ) : (

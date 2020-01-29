@@ -184,6 +184,7 @@ export default class App extends React.Component<{}, AppState> {
       ) : this.state.currentTurn.status === 'WAITING_FOR_PLAYERS' ? (
         <WWaiting currentTurn={this.state.currentTurn} />
       ) : (
+        // RUNNING or GAME_OVER
         <WGame currentTurn={this.state.currentTurn} />
       )
     return (

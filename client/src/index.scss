@@ -11,6 +11,14 @@ $colorE: #ffe;
   box-sizing: border-box;
 }
 
+html,
+body,
+#root,
+.App,
+.App > div {
+  height: 100%;
+}
+
 body {
   font-family: Arial, Helvetica, sans-serif;
   padding: 0;
@@ -85,18 +93,22 @@ body {
 
 div.WPlayer {
   background: #ddd;
-  padding: $cardWidth / 10 $cardWidth / 10 $cardWidth / 10 60px;
+  padding: 0 0 0 50px;
   border-radius: $cardWidth/5;
+  border: 10px solid #ddd;
   margin-top: $cardHeight/14;
   h3 {
     position: absolute;
     transform-origin: 0 0;
     transform: rotate(90deg) translate(-10px, 20px);
   }
-  &.WPlayer-inturn h3::before {
-    content: '➡ ';
-    float: left;
+  &.WPlayer-inturn {
+    border-color: white;
   }
+  // &.WPlayer-inturn h3::before {
+  //   content: '➡ ';
+  //   float: left;
+  // }
 }
 
 .WHints {
@@ -138,17 +150,30 @@ div.WPlayer {
   }
 }
 
-.WHintButtons input {
-  width: 30px;
-  height: 30px;
-  margin: 3px;
+.WHintButtons {
+  input {
+    width: 30px;
+    height: 30px;
+    margin: 3px;
+  }
 }
 
 .WMyCardActionButtons {
+  display: none;
   margin-bottom: 4px;
   input {
     width: 100%;
   }
+}
+
+.WGame .WHintButtons,
+.WGame .WMyCardActionButtons {
+  display: none;
+}
+
+.WGame.WGame-myturn .WHintButtons,
+.WGame.WGame-myturn .WMyCardActionButtons {
+  display: inherit;
 }
 
 .WHeader {
@@ -164,6 +189,10 @@ div.WPlayer {
 
 .WGame {
   padding: 10px;
+  height: 100%;
+}
+.WGame-gameover {
+  background: red;
 }
 
 div.WUpToFourPossibleCards,

@@ -22,7 +22,7 @@ export default class WMyCardActionButtons extends React.Component<{playerIdx: nu
         ))}
         &nbsp; &nbsp;
         {[1, 2, 3, 4, 5].map(is => (
-          <input type="button" value={is} />
+          <input type="button" value={is} onClick={() => this.giveHint(is as 1 | 2 | 3 | 4 | 5)} />
         ))}
       </div>
     )
