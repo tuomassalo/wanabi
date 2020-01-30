@@ -88,17 +88,18 @@ export class Card extends BaseCard {
   equals(subject: Card) {
     return this.color === subject.color && this.num === subject.num
   }
-  looksLike(subject: Card | TCardState | TColor | TNum): boolean {
+  looksLike(subject: TColor | TNum): boolean {
     if (typeof subject === 'number') {
       return this.num === subject
-    } else if (typeof subject === 'string') {
-      return this.color === subject || this.color === 'X'
     } else {
-      return this.color === subject.color && this.num === subject.num
+      return this.color === subject || this.color === 'X'
     }
   }
   addHint(hint: THintState) {
-    this.hints.push({...hint, result: this.color === hint.is || this.num === hint.is})
+    this.hints.push({
+      ...hint,
+      result: this.color === hint.is || (this.color === 'X' && typeof hint.is === 'string') || this.num === hint.is,
+    })
   }
 }
 

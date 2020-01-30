@@ -321,3 +321,56 @@ describe('information inferred from a partial hit', () => {
     ])
   })
 })
+
+describe('more cases', () => {
+  it('a D5/X5 is inferred from shown fives', () => {
+    expect(
+      dem(
+        hand(
+          {hints: [{is: 5}, {is: 'E'}, {is: 'D', result: false}]}, // => must be E5
+          {hints: [{is: 5, result: false}, {is: 'D'}]},
+          {hints: [{is: 5}]}, // => must D5/E5/X5, but E5 is taken => must be D5/X5
+        ),
+        revealedCards(
+          [
+            'A1 A1 A1 A2 A2 A3 A3 A4 A4 A5',
+            'B1 B1 B1 B2 B2 B3 B3 B4 B4 B5',
+            'C1 C1 C1 C2 C2 C3 C3 C4 C4 C5',
+            'D1 D1 D1 D2 D2 D3 D3 D4', //    all but D4 D5
+            'E1 E1 E1 E2 E2 E3 E3 E4 E4', // all but E5
+            'X1 X1 X1 X2 X2 X3 X3 X4', //    all but X5
+          ].join(' '),
+        ),
+      ),
+    ).toEqual([
+      {
+        color: 'E',
+        hints: [
+          {is: 5, result: true, turnNumber: 0},
+          {is: 'E', result: true, turnNumber: 0},
+          {is: 'D', result: false, turnNumber: 0},
+        ],
+        num: 5,
+      },
+      {
+        hints: [
+          {is: 5, result: false, turnNumber: 0},
+          {is: 'D', result: true, turnNumber: 0},
+        ],
+        num: 4,
+        possibleCards: [
+          {value: 'D4', weight: 1},
+          {value: 'X4', weight: 1},
+        ],
+      },
+      {
+        hints: [{is: 5, result: true, turnNumber: 0}],
+        num: 5,
+        possibleCards: [
+          {value: 'D5', weight: 1},
+          {value: 'X5', weight: 1},
+        ],
+      },
+    ])
+  })
+})

@@ -1,4 +1,4 @@
-service: websocket-example
+service: wanabi-service
 
 plugins:
   - serverless-plugin-common-excludes
@@ -11,8 +11,7 @@ plugins:
 
 custom:
   APIG_ENDPOINT:
-    dev: http://localhost:3001
-    # dev: 'http://localhost:3000/dev'
+    dev: http://wanabihost:3001
     prod:
       Fn::Join:
         - ""
@@ -48,7 +47,8 @@ custom:
 
 provider:
   name: aws
-  # region: eu-north-1
+  region: eu-north-1
+  profile: ts
   # runtime: nodejs10.x
   # stage: ${opt:stage,'dev'}
 
@@ -132,9 +132,9 @@ resources:
         TimeToLiveSpecification:
           AttributeName: ttl
           Enabled: true
-      ProvisionedThroughput:
-        ReadCapacityUnits: 1
-        WriteCapacityUnits: 1
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
     GamesTable:
       Type: AWS::DynamoDB::Table
       Properties:
@@ -151,6 +151,6 @@ resources:
         TimeToLiveSpecification:
           AttributeName: ttl
           Enabled: true
-      ProvisionedThroughput:
-        ReadCapacityUnits: 1
-        WriteCapacityUnits: 1
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1

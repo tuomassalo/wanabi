@@ -36,7 +36,7 @@ function countPossibleCards(possibleCards: Card[]): PossibleCard[] {
 
   const possibleCardCounts: {card: Card; count: number}[] = []
   for (const pc of possibleCards) {
-    const pcc = possibleCardCounts.find(c => c.card.looksLike(pc))
+    const pcc = possibleCardCounts.find(c => c.card.equals(pc))
     if (pcc) {
       pcc.count++
     } else {
@@ -102,9 +102,12 @@ export function demystify(myHand: MaskedCard[], revealedCards: Card[]): MaskedCa
           didRevealMore = true
           // if the card has now been fully revealed, move it to `revealedCards`.
           if (handCard.color && handCard.num) {
-            revealedCards.push(new Card(handCard[k]))
+            // console.warn('REVEALED', handCard.color, handCard.num)
+
+            const c = new Card({color: handCard.color, num: handCard.num})
+            revealedCards.push(c)
             unrevealedCards.splice(
-              unrevealedCards.findIndex(u => u.looksLike(handCard[k])),
+              unrevealedCards.findIndex(u => u.equals(c)),
               1,
             )
           }
@@ -195,7 +198,7 @@ export function demystify(myHand: MaskedCard[], revealedCards: Card[]): MaskedCa
       const take = (availableCards: Card[], p: Card): {nowAvailableCards: Card[]; taken: Card} => {
         const nowAvailableCards = [...availableCards] // make a copy
         const taken = nowAvailableCards.splice(
-          nowAvailableCards.findIndex(u => u.looksLike(p)),
+          nowAvailableCards.findIndex(u => u.equals(p)),
           1,
         )[0]
         return {nowAvailableCards, taken}
@@ -225,7 +228,7 @@ export function demystify(myHand: MaskedCard[], revealedCards: Card[]): MaskedCa
         // console.warn('looping', c.possibleCards)
 
         for (const p of expandPossibleCards(c.possibleCards).filter((p: Card) =>
-          availableCards.find(u => u.looksLike(p)),
+          availableCards.find(u => u.equals(p)),
         )) {
           // console.warn('TAKING', p)
           const {nowAvailableCards, taken} = take(availableCards, p)

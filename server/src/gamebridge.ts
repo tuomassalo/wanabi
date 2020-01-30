@@ -9,7 +9,7 @@ const apig = new AWS.ApiGatewayManagementApi({
   endpoint: process.env.APIG_ENDPOINT,
   sslEnabled: false,
 })
-const dynamodb = new AWS.DynamoDB.DocumentClient({endpoint: 'http://localhost:8000'})
+const dynamodb = new AWS.DynamoDB.DocumentClient({endpoint: 'http://wanabihost:8000'})
 
 const connectionTable = 'WanabiConnections'
 const gameTable = 'WanabiGames'

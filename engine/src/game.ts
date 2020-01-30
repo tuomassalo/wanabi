@@ -293,6 +293,7 @@ export class Turn extends BaseTurn {
         nextTurn.action = {...actionParams, card: card.toJSON()}
       } else if (actionParams.type === 'DISCARD') {
         nextTurn.discardPile.add(card)
+        if (nextTurn.hintCount < 9) nextTurn.hintCount++
         nextTurn.action = {...actionParams, card: card.toJSON()}
       }
     }

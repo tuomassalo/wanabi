@@ -8,7 +8,7 @@ export class WebSocketClient extends EventEmitter {
   queue: {action: string; data: any}[] = []
   constructor() {
     super()
-    const endpoint = 'ws://localhost:3001'
+    const endpoint = 'ws://wanabihost:13001'
     this.websocket = new WebSocket(endpoint)
 
     this.websocket.onclose = ({wasClean, code, reason}) => {

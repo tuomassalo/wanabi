@@ -26,6 +26,38 @@ function createTestGame() {
   return g
 }
 
+describe('Hints', () => {
+  it('should accumulate when discarding but have a max of 9', () => {
+    const g = createTestGame()
+    expect(g.getState(g.players[0].id).hintCount).toEqual(9)
+    // use two hints
+    g.act(g.players[0].id, {type: 'HINT', toPlayerIdx: 1, is: 1})
+    g.act(g.players[1].id, {type: 'HINT', toPlayerIdx: 0, is: 1})
+    expect(g.getState(g.players[0].id).hintCount).toEqual(7)
+    g.act(g.players[0].id, {type: 'DISCARD', cardIdx: 0})
+    g.act(g.players[1].id, {type: 'DISCARD', cardIdx: 0})
+    expect(g.getState(g.players[0].id).hintCount).toEqual(9)
+    g.act(g.players[0].id, {type: 'DISCARD', cardIdx: 0})
+    expect(g.getState(g.players[0].id).hintCount).toEqual(9)
+  })
+  it('should run out', () => {
+    const g = createTestGame()
+    g.act(g.players[0].id, {type: 'HINT', toPlayerIdx: 1, is: 1})
+    g.act(g.players[1].id, {type: 'HINT', toPlayerIdx: 0, is: 1})
+    g.act(g.players[0].id, {type: 'HINT', toPlayerIdx: 1, is: 1})
+    g.act(g.players[1].id, {type: 'HINT', toPlayerIdx: 0, is: 1})
+    g.act(g.players[0].id, {type: 'HINT', toPlayerIdx: 1, is: 1})
+    g.act(g.players[1].id, {type: 'HINT', toPlayerIdx: 0, is: 1})
+    g.act(g.players[0].id, {type: 'HINT', toPlayerIdx: 1, is: 1})
+    g.act(g.players[1].id, {type: 'HINT', toPlayerIdx: 0, is: 1})
+    expect(g.getState(g.players[0].id).hintCount).toEqual(1)
+    g.act(g.players[0].id, {type: 'HINT', toPlayerIdx: 1, is: 1})
+    expect(g.getState(g.players[0].id).hintCount).toEqual(0)
+
+    expect(() => g.act(g.players[1].id, {type: 'HINT', toPlayerIdx: 0, is: 1})).toThrow('NO_HINTS_LEFT')
+  })
+})
+
 describe('An ongoing game', () => {
   it('should have proper state after 2*6 turns, before hinting', () => {
     const g = createTestGame()
@@ -104,7 +136,7 @@ describe('An ongoing game', () => {
       {
         hints: [
           {turnNumber: 12, is: 5, result: false},
-          {turnNumber: 14, is: 'B', result: false},
+          {turnNumber: 14, is: 'B', result: true}, // NB! Is really 'X', but looks truhty as 'B'
         ],
       },
     ])
@@ -165,15 +197,13 @@ describe('An ongoing game', () => {
       {
         hints: [
           {turnNumber: 12, is: 5, result: false},
-          {turnNumber: 14, is: 'B', result: false},
+          {turnNumber: 14, is: 'B', result: true}, // really an 'X'
           {turnNumber: 16, is: 2, result: true},
         ],
         num: 2,
         possibleCards: [
-          {value: 'A2', weight: 1},
-          {value: 'C2', weight: 2},
-          {value: 'D2', weight: 2},
-          {value: 'E2', weight: 2},
+          {value: 'B2', weight: 1},
+          {value: 'X2', weight: 1},
         ],
       },
     ])
