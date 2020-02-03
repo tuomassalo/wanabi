@@ -8,7 +8,7 @@ import WOtherHandActionButtons from './WOtherHandActionButtons'
 
 import {Card} from 'wanabi-engine/dist/card'
 
-export default class WOtherHand extends React.Component<{cards: Card[]; playerIdx: number}> {
+export default class WOtherHand extends React.Component<{cards: Card[]; playerIdx: number; hintsAvailable: boolean}> {
   render() {
     return (
       <div className="WOtherHand">
@@ -19,7 +19,7 @@ export default class WOtherHand extends React.Component<{cards: Card[]; playerId
             <WHints hints={c.hints} />
           </div>
         ))}
-        <WOtherHandActionButtons playerIdx={this.props.playerIdx} />
+        <WOtherHandActionButtons playerIdx={this.props.playerIdx} hintsAvailable={this.props.hintsAvailable} />
       </div>
     )
   }

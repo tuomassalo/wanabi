@@ -10,7 +10,6 @@ import WOtherHand from './WOtherHand'
 import {WebSocketClient} from './websocketclient'
 import * as engine from 'wanabi-engine'
 import {Card} from 'wanabi-engine/dist/card'
-
 declare const wsclient: WebSocketClient
 
 export default class WGame extends React.Component<{currentTurn: engine.MaskedTurn}> {
@@ -32,31 +31,41 @@ export default class WGame extends React.Component<{currentTurn: engine.MaskedTu
       inTurn,
       turnNumber,
     } = this.props.currentTurn
-    const className = status === 'RUNNING' ? (players[inTurn].isMe ? 'WGame-myturn' : '') : 'WGame-gameover'
+    let gameClasses = 'WGame'
+    if (status === 'RUNNING') {
+      if (players[inTurn].isMe) {
+        gameClasses += ' WGame-myturn'
+      }
+    } else if (status === 'GAMEOVER') {
+      gameClasses += 'WGame-gameover'
+    } else {
+      // finished
+      gameClasses += 'WGame-finished'
+    }
     return (
       <div>
         <div className="WHeader">
           <span>
-            Vuoro: <em>{turnNumber}</em>
+            Turn: <em>{turnNumber}</em>
           </span>
 
           <span>
-            Pakassa kortteja: <em>{stockSize}</em>
+            Stock: <em>{stockSize}</em>
           </span>
 
           <span>
-            Vihjeitä: <em>{hintCount}</em>
+            Hints: <em>{hintCount}</em>
           </span>
 
           <span>
-            Haavoja: <em>{woundCount}</em>
+            Wounds: <em>{woundCount}</em>
           </span>
 
           <span style={turnsLeft ? {} : {display: 'none'}}>
-            Vuoroja jäljellä: <em>{turnsLeft}</em>
+            Turns left: <em>{turnsLeft}</em>
           </span>
         </div>
-        <div className={`WGame ${className}`}>
+        <div className={gameClasses}>
           <div className="clearfix">
             <WDiscardPile discardPile={discardPile} />
             <WTable table={table} />
@@ -70,7 +79,7 @@ export default class WGame extends React.Component<{currentTurn: engine.MaskedTu
               {p.isMe ? (
                 <WMyHand cards={p.hand.cards} />
               ) : (
-                <WOtherHand cards={p.hand.cards as Card[]} playerIdx={p.idx} />
+                <WOtherHand cards={p.hand.cards as Card[]} playerIdx={p.idx} hintsAvailable={hintCount > 0} />
               )}
             </div>
           ))}
