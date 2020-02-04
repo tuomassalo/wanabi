@@ -122,11 +122,13 @@ export function demystify(myHand: MaskedCard[], revealedCards: Card[]): MaskedCa
     // remove old list, if any
     delete handCard.possibleCards
 
+    // console.warn('cPC 0', possibleCards)
+
     if (!(handCard.color && handCard.num) && possibleCards.length <= 10) {
       // aggregate
-      // console.warn('cPC 1', possibleCards)
 
       const pc = countPossibleCards(possibleCards)
+      // console.warn('cPC 1', pc)
       if (pc.length) handCard.possibleCards = pc
     }
 
@@ -163,6 +165,11 @@ export function demystify(myHand: MaskedCard[], revealedCards: Card[]): MaskedCa
     //   - HOW?
 
     function guess(myHand: MaskedCard[], unrevealedCards: Card[]): boolean {
+      // console.warn(
+      //   'GUESS',
+      //   myHand.map(c => c.possibleCards),
+      // )
+
       let didRevealMore = false
 
       // NB! `myHand.length + 4` is based on a wild guess. It might be incorrect for some setups.
@@ -240,16 +247,24 @@ export function demystify(myHand: MaskedCard[], revealedCards: Card[]): MaskedCa
       guessCard(0, [], unrevealedCards)
 
       // console.warn('pS', possibleSolutions)
+      // console.warn(
+      //   'GUESS 2',
+      //   myHand.map(c => c.possibleCards),
+      // )
 
       for (const idx of range(cardsWithFewSolutions.length)) {
         const handCard = myHand[cardsWithFewSolutions[idx].handIdx]
-        // console.warn('cPC 2', possibleSolutions.length)
 
         const possibleCards = countPossibleCards(possibleSolutions.map(s => s[idx]))
+        // console.warn('cPC 2', possibleSolutions.length, possibleCards)
         didRevealMore = addKnownBits(handCard, expandPossibleCards(possibleCards)) || didRevealMore
       }
 
-      // TODO
+      // console.warn(
+      //   'GUESS RET',
+      //   myHand.map(c => c.possibleCards),
+      // )
+
       return didRevealMore
     }
 

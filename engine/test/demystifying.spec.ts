@@ -373,4 +373,52 @@ describe('more cases', () => {
       },
     ])
   })
+  fit('fractional possibleCards: if only a single A2 is left, but its probability is twice than a 1, dont show A2 as weight:2', () => {
+    expect(
+      dem(
+        hand(
+          {hints: [{is: 3, result: false}, {is: 1}]},
+          {hints: [{is: 3, result: false}]},
+          {hints: [{is: 3, result: false}]},
+          // {hints: [{is: 3, result: false}]},
+          // {hints: [{is: 3}]},
+        ),
+        revealedCards(
+          [
+            'A1 A1    A2    A3 A3 A4 A4 A5',
+            'B1 B1 B1 B2    B3 B3 B4 B4 B5',
+            'C1 C1    C2    C3    C4    C5',
+            'D1 D1 D1 D2 D2 D3 D3 D4 D4 D5',
+            'E1 E1 E1 E2 E2 E3 E3 E4 E4 E5',
+            'X1 X1 X1 X2 X2 X3 X3 X4    X5',
+          ].join(' '),
+        ),
+      ),
+    ).toEqual([
+      {
+        hints: jasmine.any(Array),
+        num: 1,
+        possibleCards: [
+          {value: 'A1', weight: 1},
+          {value: 'C1', weight: 1},
+        ],
+      },
+      {
+        hints: jasmine.any(Array),
+        // possibleCards: jasmine.any(Array),
+      },
+      {
+        hints: jasmine.any(Array),
+        // possibleCards: jasmine.any(Array),
+      },
+      // {
+      //   hints: jasmine.any(Array),
+      // },
+      // {
+      //   color: 'C',
+      //   hints: [{is: 3, result: true, turnNumber: 0}],
+      //   num: 3,
+      // },
+    ])
+  })
 })
