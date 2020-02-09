@@ -114,17 +114,47 @@ describe('An ongoing game', () => {
           {turnNumber: 12, is: 5, result: false},
           {turnNumber: 14, is: 'B', result: true},
         ],
-      },
-      {
-        hints: [
-          {turnNumber: 12, is: 5, result: false},
-          {turnNumber: 14, is: 'B', result: true},
+        possibleCards: [
+          {count: 1, prob: 1 / 13, value: 'B1'},
+          {count: 2, prob: 2 / 13, value: 'B2'},
+          {count: 1, prob: 1 / 13, value: 'B3'},
+          {count: 2, prob: 2 / 13, value: 'B4'},
+          {count: 1, prob: 1 / 13, value: 'X1'},
+          {count: 2, prob: 2 / 13, value: 'X2'},
+          {count: 2, prob: 2 / 13, value: 'X3'},
+          {count: 2, prob: 2 / 13, value: 'X4'},
         ],
       },
       {
         hints: [
           {turnNumber: 12, is: 5, result: false},
           {turnNumber: 14, is: 'B', result: true},
+        ],
+        possibleCards: [
+          {count: 1, prob: 1 / 13, value: 'B1'},
+          {count: 2, prob: 2 / 13, value: 'B2'},
+          {count: 1, prob: 1 / 13, value: 'B3'},
+          {count: 2, prob: 2 / 13, value: 'B4'},
+          {count: 1, prob: 1 / 13, value: 'X1'},
+          {count: 2, prob: 2 / 13, value: 'X2'},
+          {count: 2, prob: 2 / 13, value: 'X3'},
+          {count: 2, prob: 2 / 13, value: 'X4'},
+        ],
+      },
+      {
+        hints: [
+          {turnNumber: 12, is: 5, result: false},
+          {turnNumber: 14, is: 'B', result: true},
+        ],
+        possibleCards: [
+          {count: 1, prob: 1 / 13, value: 'B1'},
+          {count: 2, prob: 2 / 13, value: 'B2'},
+          {count: 1, prob: 1 / 13, value: 'B3'},
+          {count: 2, prob: 2 / 13, value: 'B4'},
+          {count: 1, prob: 1 / 13, value: 'X1'},
+          {count: 2, prob: 2 / 13, value: 'X2'},
+          {count: 2, prob: 2 / 13, value: 'X3'},
+          {count: 2, prob: 2 / 13, value: 'X4'},
         ],
       },
       {
@@ -137,6 +167,16 @@ describe('An ongoing game', () => {
         hints: [
           {turnNumber: 12, is: 5, result: false},
           {turnNumber: 14, is: 'B', result: true}, // NB! Is really 'X', but looks truhty as 'B'
+        ],
+        possibleCards: [
+          {count: 1, prob: 1 / 13, value: 'B1'},
+          {count: 2, prob: 2 / 13, value: 'B2'},
+          {count: 1, prob: 1 / 13, value: 'B3'},
+          {count: 2, prob: 2 / 13, value: 'B4'},
+          {count: 1, prob: 1 / 13, value: 'X1'},
+          {count: 2, prob: 2 / 13, value: 'X2'},
+          {count: 2, prob: 2 / 13, value: 'X3'},
+          {count: 2, prob: 2 / 13, value: 'X4'},
         ],
       },
     ])
@@ -155,12 +195,12 @@ describe('An ongoing game', () => {
           {turnNumber: 16, is: 2, result: false},
         ],
         possibleCards: [
-          {value: 'B1', weight: 1},
-          {value: 'B3', weight: 1},
-          {value: 'B4', weight: 2},
-          {value: 'X1', weight: 1},
-          {value: 'X3', weight: 2},
-          {value: 'X4', weight: 2},
+          {value: 'B1', prob: 1 / 9, count: 1},
+          {value: 'B3', prob: 1 / 9, count: 1},
+          {value: 'B4', prob: 2 / 9, count: 2},
+          {value: 'X1', prob: 1 / 9, count: 1},
+          {value: 'X3', prob: 2 / 9, count: 2},
+          {value: 'X4', prob: 2 / 9, count: 2},
         ],
       },
       {
@@ -171,8 +211,8 @@ describe('An ongoing game', () => {
           {turnNumber: 16, is: 2, result: true},
         ],
         possibleCards: [
-          {value: 'B2', weight: 1},
-          {value: 'X2', weight: 1},
+          {value: 'B2', prob: 1 / 2, count: 2},
+          {value: 'X2', prob: 1 / 2, count: 2},
         ],
       },
       {
@@ -183,8 +223,8 @@ describe('An ongoing game', () => {
           {turnNumber: 16, is: 2, result: true},
         ],
         possibleCards: [
-          {value: 'B2', weight: 1},
-          {value: 'X2', weight: 1},
+          {value: 'B2', prob: 1 / 2, count: 2},
+          {value: 'X2', prob: 1 / 2, count: 2},
         ],
       },
       {
@@ -202,8 +242,8 @@ describe('An ongoing game', () => {
         ],
         num: 2,
         possibleCards: [
-          {value: 'B2', weight: 1},
-          {value: 'X2', weight: 1},
+          {value: 'B2', prob: 1 / 2, count: 2},
+          {value: 'X2', prob: 1 / 2, count: 2},
         ],
       },
     ])

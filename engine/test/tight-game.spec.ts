@@ -10,6 +10,9 @@ describe('A tight three-player game', () => {
       g.act(g.players[0].id, {type: 'PLAY', cardIdx: 0})
       g.act(g.players[1].id, {type: 'DISCARD', cardIdx: 0})
     }
+    // console.warn(g.getState(g.players[1].id).discardPile.sort())
+    // console.warn(g.getState(g.players[1].id).players[1].hand.map(hc => (hc as any).possibleCards))
+
     expect(g.getState(g.players[1].id)).toEqual({
       gameId: jasmine.any(String),
       timestamp: jasmine.any(String),
@@ -19,11 +22,11 @@ describe('A tight three-player game', () => {
       hintCount: 9,
       woundCount: 0,
       table: {
-        A: 'A1,A2,A3,A4,A5'.split(','),
-        B: 'B1,B2,B3,B4,B5'.split(','),
-        C: 'C1,C2,C3,C4,C5'.split(','),
-        D: 'D1,D2,D3,D4,D5'.split(','),
-        E: 'E1,E2,E3,E4'.split(','),
+        A: 'A1 A2 A3 A4 A5'.split(' '),
+        B: 'B1 B2 B3 B4 B5'.split(' '),
+        C: 'C1 C2 C3 C4 C5'.split(' '),
+        D: 'D1 D2 D3 D4 D5'.split(' '),
+        E: 'E1 E2 E3 E4'.split(' '),
         X: [],
       },
       turnNumber: 48,
@@ -71,7 +74,14 @@ describe('A tight three-player game', () => {
       timestamp: jasmine.any(String),
       action: jasmine.any(Object),
       stockSize: 0,
-      discardPile: 'A4,A3,A2,A1,A1,B4,B3,B2,B1,B1,C4,C3,C2,C1,C1,D4,D3,D2,D1,D1,E4,E3,E2,E1,E1'.split(','),
+      discardPile: `
+      A1 A1 A2 A3 A4
+      B1 B1 B2 B3 B4
+      C1 C1 C2 C3 C4
+      D1 D1 D2 D3 D4
+      E1 E1 E2 E3 E4`
+        .trim()
+        .split(/\s+/),
       hintCount: 9,
       woundCount: 0,
       table: {
@@ -110,50 +120,50 @@ describe('A tight three-player game', () => {
               color: 'X',
               hints: [],
               possibleCards: [
-                {value: 'X1', weight: 2},
-                {value: 'X2', weight: 1},
-                {value: 'X3', weight: 1},
-                {value: 'X4', weight: 1},
+                {value: 'X1', prob: 2 / 5, count: 2},
+                {value: 'X2', prob: 1 / 5, count: 1},
+                {value: 'X3', prob: 1 / 5, count: 1},
+                {value: 'X4', prob: 1 / 5, count: 1},
               ],
             },
             {
               color: 'X',
               hints: [],
               possibleCards: [
-                {value: 'X1', weight: 2},
-                {value: 'X2', weight: 1},
-                {value: 'X3', weight: 1},
-                {value: 'X4', weight: 1},
+                {value: 'X1', prob: 2 / 5, count: 2},
+                {value: 'X2', prob: 1 / 5, count: 1},
+                {value: 'X3', prob: 1 / 5, count: 1},
+                {value: 'X4', prob: 1 / 5, count: 1},
               ],
             },
             {
               color: 'X',
               hints: [],
               possibleCards: [
-                {value: 'X1', weight: 2},
-                {value: 'X2', weight: 1},
-                {value: 'X3', weight: 1},
-                {value: 'X4', weight: 1},
+                {value: 'X1', prob: 2 / 5, count: 2},
+                {value: 'X2', prob: 1 / 5, count: 1},
+                {value: 'X3', prob: 1 / 5, count: 1},
+                {value: 'X4', prob: 1 / 5, count: 1},
               ],
             },
             {
               color: 'X',
               hints: [],
               possibleCards: [
-                {value: 'X1', weight: 2},
-                {value: 'X2', weight: 1},
-                {value: 'X3', weight: 1},
-                {value: 'X4', weight: 1},
+                {value: 'X1', prob: 2 / 5, count: 2},
+                {value: 'X2', prob: 1 / 5, count: 1},
+                {value: 'X3', prob: 1 / 5, count: 1},
+                {value: 'X4', prob: 1 / 5, count: 1},
               ],
             },
             {
               color: 'X',
               hints: [],
               possibleCards: [
-                {value: 'X1', weight: 2},
-                {value: 'X2', weight: 1},
-                {value: 'X3', weight: 1},
-                {value: 'X4', weight: 1},
+                {value: 'X1', prob: 2 / 5, count: 2},
+                {value: 'X2', prob: 1 / 5, count: 1},
+                {value: 'X3', prob: 1 / 5, count: 1},
+                {value: 'X4', prob: 1 / 5, count: 1},
               ],
             },
           ],

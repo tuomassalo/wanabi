@@ -5,7 +5,8 @@ export type TNum = 1 | 2 | 3 | 4 | 5
 
 export interface TPossibleCardState {
   value: TCardValueState
-  weight: number // 1..3
+  prob: number // < 1
+  count: number // the number of unreveled cards with this value, that is: 1, 2 or 3
 }
 
 export interface TCardState {
@@ -126,12 +127,14 @@ export class MaskedCard {
 }
 
 export class PossibleCard extends BaseCard {
-  weight: number
+  prob: number
+  count: number
   constructor(pc: TPossibleCardState) {
     super(pc.value)
-    this.weight = pc.weight
+    this.prob = pc.prob
+    this.count = pc.count
   }
   toJSON(): TPossibleCardState {
-    return {value: this.value, weight: this.weight}
+    return {value: this.value, prob: this.prob, count: this.count}
   }
 }
