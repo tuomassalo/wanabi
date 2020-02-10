@@ -2,60 +2,120 @@ import {createTightGame, knownCard} from './helpers'
 
 describe('A tight three-player game', () => {
   const g = createTightGame()
-  // console.warn('HAND0', g.getState(g.players[1].id).players[0].hand)
-  // console.warn('HAND1', g.getState(g.players[0].id).players[1].hand)
   it('should have proper state after 2*24 turns', () => {
     // p0 always plays the oldest card from hand, p1 always discards
     for (let i = 1; i <= 24; i++) {
       g.act(g.players[0].id, {type: 'PLAY', cardIdx: 0})
       g.act(g.players[1].id, {type: 'DISCARD', cardIdx: 0})
     }
-    // console.warn(g.getState(g.players[1].id).discardPile.sort())
-    // console.warn(g.getState(g.players[1].id).players[1].hand.map(hc => (hc as any).possibleCards))
 
     expect(g.getState(g.players[1].id)).toEqual({
+      action: {card: 'E1', cardIdx: 0, type: 'DISCARD'},
+      discardPile: `
+          A4 A3 A2 A1 A1
+          B4 B3 B2 B1 B1
+          C4 C3 C2 C1 C1
+          D4 D3 D2 D1 D1
+          E4 E3 E2 E1
+        `
+        .trim()
+        .split(/\s+/),
       gameId: jasmine.any(String),
-      timestamp: jasmine.any(String),
-      action: jasmine.any(Object),
-      stockSize: 60 - 2 * 5 - 2 * 24, // === 2
-      discardPile: Array(24).fill(knownCard()),
       hintCount: 9,
-      woundCount: 0,
-      table: {
-        A: 'A1 A2 A3 A4 A5'.split(' '),
-        B: 'B1 B2 B3 B4 B5'.split(' '),
-        C: 'C1 C2 C3 C4 C5'.split(' '),
-        D: 'D1 D2 D3 D4 D5'.split(' '),
-        E: 'E1 E2 E3 E4'.split(' '),
-        X: [],
-      },
-      turnNumber: 48,
       inTurn: 0,
-      turnsLeft: null,
-      score: 24,
-      status: 'RUNNING',
       players: [
         {
-          name: 'Jekyll',
+          hand: [
+            {color: 'E', hints: [], num: 5},
+            {color: 'X', hints: [], num: 1},
+            {color: 'X', hints: [], num: 2},
+            {color: 'X', hints: [], num: 3},
+            {color: 'X', hints: [], num: 4},
+          ],
           idx: 0,
           isConnected: true,
           isMe: false,
-          hand: [
-            {color: 'E', num: 5, hints: []},
-            {color: 'X', num: 1, hints: []},
-            {color: 'X', num: 2, hints: []},
-            {color: 'X', num: 3, hints: []},
-            {color: 'X', num: 4, hints: []},
-          ],
+          name: 'Jekyll',
         },
         {
-          name: 'Hyde',
+          hand: [
+            {
+              hints: [],
+              possibleCards: [
+                {count: 1, prob: 21 / 155, value: 'E1'},
+                {count: 2, prob: 10 / 31, value: 'X1'},
+                {count: 1, prob: 21 / 155, value: 'X2'},
+                {count: 1, prob: 21 / 155, value: 'X3'},
+                {count: 1, prob: 21 / 155, value: 'X4'},
+                {count: 1, prob: 21 / 155, value: 'X5'},
+              ],
+            },
+            {
+              hints: [],
+              possibleCards: [
+                {count: 1, prob: 21 / 155, value: 'E1'},
+                {count: 2, prob: 10 / 31, value: 'X1'},
+                {count: 1, prob: 21 / 155, value: 'X2'},
+                {count: 1, prob: 21 / 155, value: 'X3'},
+                {count: 1, prob: 21 / 155, value: 'X4'},
+                {count: 1, prob: 21 / 155, value: 'X5'},
+              ],
+            },
+            {
+              hints: [],
+              possibleCards: [
+                {count: 1, prob: 21 / 155, value: 'E1'},
+                {count: 2, prob: 10 / 31, value: 'X1'},
+                {count: 1, prob: 21 / 155, value: 'X2'},
+                {count: 1, prob: 21 / 155, value: 'X3'},
+                {count: 1, prob: 21 / 155, value: 'X4'},
+                {count: 1, prob: 21 / 155, value: 'X5'},
+              ],
+            },
+            {
+              hints: [],
+              possibleCards: [
+                {count: 1, prob: 21 / 155, value: 'E1'},
+                {count: 2, prob: 10 / 31, value: 'X1'},
+                {count: 1, prob: 21 / 155, value: 'X2'},
+                {count: 1, prob: 21 / 155, value: 'X3'},
+                {count: 1, prob: 21 / 155, value: 'X4'},
+                {count: 1, prob: 21 / 155, value: 'X5'},
+              ],
+            },
+            {
+              hints: [],
+              possibleCards: [
+                {count: 1, prob: 21 / 155, value: 'E1'},
+                {count: 2, prob: 10 / 31, value: 'X1'},
+                {count: 1, prob: 21 / 155, value: 'X2'},
+                {count: 1, prob: 21 / 155, value: 'X3'},
+                {count: 1, prob: 21 / 155, value: 'X4'},
+                {count: 1, prob: 21 / 155, value: 'X5'},
+              ],
+            },
+          ],
           idx: 1,
           isConnected: true,
           isMe: true,
-          hand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
+          name: 'Hyde',
         },
       ],
+      score: 24,
+      status: 'RUNNING',
+      stockSize: 2,
+      table: {
+        A: ['A1', 'A2', 'A3', 'A4', 'A5'],
+        B: ['B1', 'B2', 'B3', 'B4', 'B5'],
+        C: ['C1', 'C2', 'C3', 'C4', 'C5'],
+        D: ['D1', 'D2', 'D3', 'D4', 'D5'],
+        E: ['E1', 'E2', 'E3', 'E4'],
+        X: [],
+      },
+      timestamp: jasmine.any(String),
+      turnNumber: 48,
+      turnsLeft: null,
+      woundCount: 0,
     })
   })
   it('should not start countdown before the stock is emptied', () => {
@@ -75,11 +135,12 @@ describe('A tight three-player game', () => {
       action: jasmine.any(Object),
       stockSize: 0,
       discardPile: `
-      A1 A1 A2 A3 A4
-      B1 B1 B2 B3 B4
-      C1 C1 C2 C3 C4
-      D1 D1 D2 D3 D4
-      E1 E1 E2 E3 E4`
+          A4 A3 A2 A1 A1
+          B4 B3 B2 B1 B1
+          C4 C3 C2 C1 C1
+          D4 D3 D2 D1 D1
+          E4 E3 E2 E1 E1
+        `
         .trim()
         .split(/\s+/),
       hintCount: 9,
