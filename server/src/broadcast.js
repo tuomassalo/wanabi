@@ -4,7 +4,7 @@ const apig = new AWS.ApiGatewayManagementApi({
   sslEnabled: false,
   // paramValidation: false,
 })
-const dynamodb = new AWS.DynamoDB.DocumentClient({endpoint: 'http://wanabihost:8000'})
+const dynamodb = new AWS.DynamoDB.DocumentClient({endpoint: 'http://wanabihost:3003'})
 // const dynamodb = require('serverless-dynamodb-client')
 
 // import * as dynamodb from 'serverless-dynamodb-client'

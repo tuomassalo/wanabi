@@ -1,7 +1,7 @@
 import * as AWS from 'aws-sdk'
 import * as gamebridge from './gamebridge'
 
-const dynamodb = new AWS.DynamoDB.DocumentClient({endpoint: 'http://wanabihost:8000'})
+const dynamodb = new AWS.DynamoDB.DocumentClient({endpoint: 'http://wanabihost:3003'})
 
 const connectionTable = 'WanabiConnections'
 

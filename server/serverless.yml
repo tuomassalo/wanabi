@@ -32,6 +32,7 @@ custom:
     # see https://github.com/99xt/serverless-dynamodb-local/issues/167#issuecomment-440523793
     start:
       migrate: true
+      port: 3003
     #   seed: true
     # seed:
     #   dev:
