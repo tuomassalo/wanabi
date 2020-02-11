@@ -76,8 +76,8 @@ const exampleTurn: engine.TMaskedTurnState = {
           ],
           num: 2,
           possibleCards: [
-            {value: 'D2', weight: 1},
-            {value: 'E2', weight: 2},
+            {value: 'D2', prob: 1 / 3, count: 1},
+            {value: 'E2', prob: 2 / 3, count: 2},
           ],
         },
         {
@@ -87,16 +87,16 @@ const exampleTurn: engine.TMaskedTurnState = {
           ],
           color: 'C',
           possibleCards: [
-            {value: 'C2', weight: 1},
-            {value: 'C3', weight: 2},
+            {value: 'C2', prob: 1 / 3, count: 1},
+            {value: 'C3', prob: 2 / 3, count: 2},
           ],
         },
         {
           hints: [{turnNumber: 1, is: 'C', result: true}],
           possibleCards: [
-            {value: 'C2', weight: 1},
-            {value: 'C3', weight: 2},
-            {value: 'X3', weight: 2},
+            {value: 'C2', prob: 1 / 5, count: 1},
+            {value: 'C3', prob: 2 / 5, count: 2},
+            {value: 'X3', prob: 2 / 5, count: 2},
           ],
         },
         {hints: []},

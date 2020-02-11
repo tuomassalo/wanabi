@@ -1,12 +1,14 @@
 import React from 'react'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 
-import {MaskedCard} from 'wanabi-engine/dist/card'
+import {MaskedCard, Card} from 'wanabi-engine/dist/card'
 
 export default class WMysteryCard extends React.Component<{card: MaskedCard}> {
   render() {
     const {color, num, possibleCards} = this.props.card
-    const allPossibleCards = (possibleCards || []).flatMap(pc => Array(pc.weight).fill(pc))
+    const allPossibleCards: {card: Card; prob: number}[] = (possibleCards || []).flatMap(pc =>
+      Array(pc.count).fill({card: Card.fromValueString(pc.value), prob: pc.prob / pc.count}),
+    )
     if (allPossibleCards.length > 1 && allPossibleCards.length < 10) {
       // if (num) {
       //   // we know the number, but there are different possible colors. Create a gradient to show them all
@@ -22,8 +24,8 @@ export default class WMysteryCard extends React.Component<{card: MaskedCard}> {
         <div className={allPossibleCards.length > 4 ? 'WUpToNinePossibleCards' : 'WUpToFourPossibleCards'}>
           {/* NB: bogus index, might break animations */}
           {allPossibleCards.map((pc, idx) => (
-            <div key={idx} className={`WCard WColor-${pc.color}`}>
-              {pc.num}
+            <div key={idx} className={`WCard WColor-${pc.card.color}`}>
+              {pc.card.num}
             </div>
           ))}
         </div>
