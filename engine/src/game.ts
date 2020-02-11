@@ -38,9 +38,12 @@ interface TResolvedPlayActionState extends TPlayActionParams {
 interface TResolvedDiscardActionState extends TDiscardActionParams {
   card: TCardValueState
 }
-interface TResolvedHintActionState extends THintActionParams {}
+interface TResolvedHintActionState extends THintActionParams {
+  // for convenience
+  toPlayerName: string
+}
 
-type TResolvedActionState =
+export type TResolvedActionState =
   | TResolvedPlayActionState
   | TResolvedDiscardActionState
   | TResolvedHintActionState
@@ -267,7 +270,7 @@ export class Turn extends BaseTurn {
 
       hintee.hand.addHint({turnNumber: nextTurn.turnNumber, is: actionParams.is})
 
-      nextTurn.action = actionParams
+      nextTurn.action = {...actionParams, toPlayerName: hintee.name}
     } else {
       const card = me.hand.take(actionParams.cardIdx, nextTurn.stock)
 

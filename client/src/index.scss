@@ -92,11 +92,13 @@ body {
 }
 
 div.WPlayer {
-  background: #ddd;
+  float: left;
   padding: 0 0 0 50px;
+  margin-top: $cardHeight/14;
+  margin-right: $cardWidth/10;
   border-radius: $cardWidth/5;
   border: 10px solid #ddd;
-  margin-top: $cardHeight/14;
+  background: #ddd;
   h3 {
     position: absolute;
     transform-origin: 0 0;
@@ -157,6 +159,7 @@ div.WPlayer {
     width: 30px;
     height: 30px;
     margin: 3px;
+    border: 0;
   }
 }
 
@@ -165,6 +168,9 @@ div.WPlayer {
   margin-bottom: 4px;
   input {
     width: 100%;
+    height: 2.5em;
+    margin-bottom: 3px;
+    border: 0;
   }
 }
 
@@ -258,5 +264,22 @@ div.WTable {
     line-height: $cardHeight / 2.4;
     font-size: 7/12 * $cardHeight / 2.4;
     margin: $cardWidth / 40;
+  }
+}
+
+div.WLatestAction {
+  display: block !important;
+  text-align: center;
+  .WCard {
+    display: inline-block;
+    width: $cardWidth / 4.5;
+    height: $cardHeight / 4.5;
+    line-height: $cardHeight / 4.5;
+    font-size: 7/12 * $cardHeight / 4.5;
+    margin: $cardWidth / 40;
+  }
+  .WHint {
+    display: inline-block;
+    float: none;
   }
 }

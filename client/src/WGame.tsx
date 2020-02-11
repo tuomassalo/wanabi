@@ -10,6 +10,7 @@ import WOtherHand from './WOtherHand'
 import {WebSocketClient} from './websocketclient'
 import * as engine from 'wanabi-engine'
 import {Card} from 'wanabi-engine/dist/card'
+import {TResolvedActionState} from 'wanabi-engine/dist/game'
 declare const wsclient: WebSocketClient
 
 export default class WGame extends React.Component<{currentTurn: engine.MaskedTurn}> {
@@ -20,7 +21,9 @@ export default class WGame extends React.Component<{currentTurn: engine.MaskedTu
   render() {
     // const currentPlayerCount = this.props.currentTurn.players.length
     const {
+      action,
       status,
+      score,
       players,
       table,
       stockSize,
@@ -42,6 +45,9 @@ export default class WGame extends React.Component<{currentTurn: engine.MaskedTu
       // finished
       gameClasses += 'WGame-finished'
     }
+
+    const latestAction: Map<number, TResolvedActionState> = new Map()
+    latestAction.set((players.length + inTurn - 1) % players.length, action)
     return (
       <div>
         <div className="WHeader">
@@ -61,6 +67,10 @@ export default class WGame extends React.Component<{currentTurn: engine.MaskedTu
             Wounds: <em>{woundCount}</em>
           </span>
 
+          <span>
+            Score: <em>{score}</em>
+          </span>
+
           <span style={turnsLeft ? {} : {display: 'none'}}>
             Turns left: <em>{turnsLeft}</em>
           </span>
@@ -77,9 +87,14 @@ export default class WGame extends React.Component<{currentTurn: engine.MaskedTu
                 {p.isConnected ? '' : ' 🔌 '}
               </h3>
               {p.isMe ? (
-                <WMyHand cards={p.hand.cards} />
+                <WMyHand cards={p.hand.cards} latestAction={latestAction.get(p.idx)} />
               ) : (
-                <WOtherHand cards={p.hand.cards as Card[]} playerIdx={p.idx} hintsAvailable={hintCount > 0} />
+                <WOtherHand
+                  cards={p.hand.cards as Card[]}
+                  playerIdx={p.idx}
+                  hintsAvailable={hintCount > 0}
+                  latestAction={latestAction.get(p.idx)}
+                />
               )}
             </div>
           ))}
