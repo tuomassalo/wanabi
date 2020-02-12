@@ -20,6 +20,13 @@ export class Table {
     // NB: why does fromEntries need `as`
     return Object.fromEntries(Object.entries(this.table).map(([c, pile]) => [c, pile.toJSON()])) as TTableState
   }
+  has(card: Card) {
+    return this.table[card.color].size >= card.num
+  }
+  // returns whether the card could be successfully played
+  isPlayable(card: Card) {
+    return this.table[card.color].size === card.num - 1
+  }
   // returns whether the card was successfully played
   play(card: Card): boolean {
     const colorPile = this.table[card.color]

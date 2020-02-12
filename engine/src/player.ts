@@ -1,6 +1,9 @@
 import {Hand, MaskedHand} from './hand'
 import {TCardState, TMaskedCardState, Card, MaskedCard} from './card'
 import {demystify} from './demystifier'
+import {resolveActionability} from './actionability-resolver'
+import {Table} from './table'
+import {Pile} from './pile'
 
 export type TPlayerId = string
 
@@ -65,13 +68,18 @@ export class MaskedPlayer {
     this.isMe = p.isMe
     this.isConnected = p.isConnected
   }
-  static meFromPlayer(p: Player, revealedCards: Card[]): MaskedPlayer {
+  static meFromPlayer(p: Player, revealedCards: Card[], table: Table, discardPile: Pile): MaskedPlayer {
     return new MaskedPlayer({
       ...p,
-      hand: demystify(
-        // remove the actual values of each card
-        p.hand.cards.map(c => new MaskedCard({hints: c.hints})),
+      hand: resolveActionability(
+        demystify(
+          // remove the actual values of each card
+          p.hand.cards.map(c => new MaskedCard({hints: c.hints})),
+          revealedCards,
+        ),
         revealedCards,
+        table,
+        discardPile,
       ),
       isMe: true,
     })

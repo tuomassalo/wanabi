@@ -193,37 +193,13 @@ export class Turn extends BaseTurn {
                   .filter(player => player.idx !== p.idx)
                   .flatMap(player => player.hand.cards.map(hc => new Card(hc))),
               ].flat(),
+              this.table,
+              this.discardPile,
             ).toJSON()
           : MaskedPlayer.otherFromPlayer(p).toJSON(),
       ),
     }
   }
-
-  // for (const p of nextTurn.players) {
-  //   const handCards = p.hand.cards
-  //   p.hand.cards =
-  //     demystify(
-  //       handCards,
-  //       // nextTurn.table,
-  //       [
-  //         // discard pile
-  //         nextTurn.discardPile.cards,
-  //         // table
-  //         Object.values(nextTurn.table.table).flatMap(p => p.cards),
-  //         // hands of other players
-  //         nextTurn.players
-  //           .filter(player => player.idx !== p.idx)
-  //           .flatMap(player => player.hand.cards.map(hc => new Card(hc.color, hc.num))),
-  //       ].flat(),
-  //     ),
-  //   )
-  // }
-
-  // toJSON() {
-  //   return {
-  //     ...JSON.parse(JSON.stringify(this)),
-  //   }
-  // }
 
   // ACTIONS
   playNext(playerId: string, actionParams: TActionParams) {

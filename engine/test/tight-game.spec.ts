@@ -38,63 +38,17 @@ describe('A tight three-player game', () => {
           name: 'Jekyll',
         },
         {
-          hand: [
-            {
-              hints: [],
-              possibleCards: [
-                {count: 1, prob: 21 / 155, value: 'E1'},
-                {count: 2, prob: 10 / 31, value: 'X1'},
-                {count: 1, prob: 21 / 155, value: 'X2'},
-                {count: 1, prob: 21 / 155, value: 'X3'},
-                {count: 1, prob: 21 / 155, value: 'X4'},
-                {count: 1, prob: 21 / 155, value: 'X5'},
-              ],
-            },
-            {
-              hints: [],
-              possibleCards: [
-                {count: 1, prob: 21 / 155, value: 'E1'},
-                {count: 2, prob: 10 / 31, value: 'X1'},
-                {count: 1, prob: 21 / 155, value: 'X2'},
-                {count: 1, prob: 21 / 155, value: 'X3'},
-                {count: 1, prob: 21 / 155, value: 'X4'},
-                {count: 1, prob: 21 / 155, value: 'X5'},
-              ],
-            },
-            {
-              hints: [],
-              possibleCards: [
-                {count: 1, prob: 21 / 155, value: 'E1'},
-                {count: 2, prob: 10 / 31, value: 'X1'},
-                {count: 1, prob: 21 / 155, value: 'X2'},
-                {count: 1, prob: 21 / 155, value: 'X3'},
-                {count: 1, prob: 21 / 155, value: 'X4'},
-                {count: 1, prob: 21 / 155, value: 'X5'},
-              ],
-            },
-            {
-              hints: [],
-              possibleCards: [
-                {count: 1, prob: 21 / 155, value: 'E1'},
-                {count: 2, prob: 10 / 31, value: 'X1'},
-                {count: 1, prob: 21 / 155, value: 'X2'},
-                {count: 1, prob: 21 / 155, value: 'X3'},
-                {count: 1, prob: 21 / 155, value: 'X4'},
-                {count: 1, prob: 21 / 155, value: 'X5'},
-              ],
-            },
-            {
-              hints: [],
-              possibleCards: [
-                {count: 1, prob: 21 / 155, value: 'E1'},
-                {count: 2, prob: 10 / 31, value: 'X1'},
-                {count: 1, prob: 21 / 155, value: 'X2'},
-                {count: 1, prob: 21 / 155, value: 'X3'},
-                {count: 1, prob: 21 / 155, value: 'X4'},
-                {count: 1, prob: 21 / 155, value: 'X5'},
-              ],
-            },
-          ],
+          hand: Array(5).fill({
+            hints: [],
+            possibleCards: [
+              {count: 1, prob: 21 / 155, value: 'E1', actionability: 'DISCARDABLE'},
+              {count: 2, prob: 10 / 31, value: 'X1', actionability: 'PLAYABLE'},
+              {count: 1, prob: 21 / 155, value: 'X2', actionability: 'UNPLAYABLE'},
+              {count: 1, prob: 21 / 155, value: 'X3', actionability: 'UNPLAYABLE'},
+              {count: 1, prob: 21 / 155, value: 'X4', actionability: 'UNPLAYABLE'},
+              {count: 1, prob: 21 / 155, value: 'X5', actionability: 'UNDISCARDABLE'},
+            ],
+          }),
           idx: 1,
           isConnected: true,
           isMe: true,
@@ -132,7 +86,7 @@ describe('A tight three-player game', () => {
     expect(g.getState(g.players[1].id)).toEqual({
       gameId: jasmine.any(String),
       timestamp: jasmine.any(String),
-      action: jasmine.any(Object),
+      action: {card: 'E1', cardIdx: 0, type: 'DISCARD'},
       stockSize: 0,
       discardPile: `
           A4 A3 A2 A1 A1
@@ -176,58 +130,16 @@ describe('A tight three-player game', () => {
           idx: 1,
           isConnected: true,
           isMe: true,
-          hand: [
-            {
-              color: 'X',
-              hints: [],
-              possibleCards: [
-                {value: 'X1', prob: 2 / 5, count: 2},
-                {value: 'X2', prob: 1 / 5, count: 1},
-                {value: 'X3', prob: 1 / 5, count: 1},
-                {value: 'X4', prob: 1 / 5, count: 1},
-              ],
-            },
-            {
-              color: 'X',
-              hints: [],
-              possibleCards: [
-                {value: 'X1', prob: 2 / 5, count: 2},
-                {value: 'X2', prob: 1 / 5, count: 1},
-                {value: 'X3', prob: 1 / 5, count: 1},
-                {value: 'X4', prob: 1 / 5, count: 1},
-              ],
-            },
-            {
-              color: 'X',
-              hints: [],
-              possibleCards: [
-                {value: 'X1', prob: 2 / 5, count: 2},
-                {value: 'X2', prob: 1 / 5, count: 1},
-                {value: 'X3', prob: 1 / 5, count: 1},
-                {value: 'X4', prob: 1 / 5, count: 1},
-              ],
-            },
-            {
-              color: 'X',
-              hints: [],
-              possibleCards: [
-                {value: 'X1', prob: 2 / 5, count: 2},
-                {value: 'X2', prob: 1 / 5, count: 1},
-                {value: 'X3', prob: 1 / 5, count: 1},
-                {value: 'X4', prob: 1 / 5, count: 1},
-              ],
-            },
-            {
-              color: 'X',
-              hints: [],
-              possibleCards: [
-                {value: 'X1', prob: 2 / 5, count: 2},
-                {value: 'X2', prob: 1 / 5, count: 1},
-                {value: 'X3', prob: 1 / 5, count: 1},
-                {value: 'X4', prob: 1 / 5, count: 1},
-              ],
-            },
-          ],
+          hand: Array(5).fill({
+            color: 'X',
+            hints: [],
+            possibleCards: [
+              {value: 'X1', prob: 2 / 5, count: 2, actionability: 'PLAYABLE'},
+              {value: 'X2', prob: 1 / 5, count: 1, actionability: 'UNPLAYABLE'},
+              {value: 'X3', prob: 1 / 5, count: 1, actionability: 'UNPLAYABLE'},
+              {value: 'X4', prob: 1 / 5, count: 1, actionability: 'UNPLAYABLE'},
+            ],
+          }),
           name: 'Hyde',
         },
       ],

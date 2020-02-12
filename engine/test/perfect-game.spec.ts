@@ -55,7 +55,7 @@ describe('A perfect two-player game without any hints or discards', () => {
     expect(g.getState(g.players[1].id)).toEqual({
       gameId: jasmine.any(String),
       timestamp: jasmine.any(String),
-      action: {type: 'PLAY', cardIdx: 0, card: 'A1'},
+      action: {type: 'PLAY', cardIdx: 0, card: 'A1', success: true},
       stockSize: 49,
       discardPile: [],
       hintCount: 9,

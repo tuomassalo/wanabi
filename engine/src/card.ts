@@ -3,10 +3,13 @@ import {SyntaxError} from './errors'
 export type TColor = 'A' | 'B' | 'C' | 'D' | 'E' | 'X'
 export type TNum = 1 | 2 | 3 | 4 | 5
 
+export type TActionability = 'PLAYABLE' | 'UNPLAYABLE' | 'DISCARDABLE' | 'UNDISCARDABLE'
+
 export interface TPossibleCardState {
   value: TCardValueState
   prob: number // < 1
   count: number // the number of unreveled cards with this value, that is: 1, 2 or 3
+  actionability?: TActionability
 }
 
 export interface TCardState {
@@ -20,7 +23,7 @@ export interface TMaskedCardState {
   num?: TNum
   hints?: THintResultState[]
   possibleCards?: TPossibleCardState[]
-  // actionability?: 'PLAYABLE' | 'UNPLAYABLE' | 'DISCARDABLE' | 'UNDISCARDABLE'
+  actionability?: TActionability
 }
 
 export type TCardValueState = string
@@ -108,17 +111,23 @@ export class MaskedCard {
   color?: TColor
   num?: TNum
   possibleCards?: PossibleCard[]
+  actionability?: TActionability
   hints: THintResultState[] = []
   constructor(c: TMaskedCardState) {
     this.color = c.color
     this.num = c.num
+    this.actionability = c.actionability
     if (c.possibleCards) this.possibleCards = c.possibleCards.map(pc => new PossibleCard(pc))
     this.hints = c.hints || []
+  }
+  get value() {
+    return this.color && this.num ? this.color + this.num : undefined
   }
   toJSON(): TMaskedCardState {
     return {
       color: this.color,
       num: this.num,
+      actionability: this.actionability,
       possibleCards:
         this.possibleCards && this.possibleCards.length ? this.possibleCards.map(pc => pc.toJSON()) : undefined,
       hints: this.hints,
@@ -129,12 +138,14 @@ export class MaskedCard {
 export class PossibleCard extends BaseCard {
   prob: number
   count: number
+  actionability?: TActionability
   constructor(pc: TPossibleCardState) {
     super(pc.value)
     this.prob = pc.prob
     this.count = pc.count
+    this.actionability = pc.actionability
   }
   toJSON(): TPossibleCardState {
-    return {value: this.value, prob: this.prob, count: this.count}
+    return {value: this.value, prob: this.prob, count: this.count, actionability: this.actionability}
   }
 }
