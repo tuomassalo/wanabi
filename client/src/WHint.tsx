@@ -1,7 +1,7 @@
 import React from 'react'
 import {THintResultState} from 'wanabi-engine/dist/card'
 
-export default class WHint extends React.Component<{hint: THintResultState}> {
+export default class WHint extends React.Component<{hint: THintResultState; highlight?: boolean}> {
   // startGame = () => {
   //   wsclient.startGame({gameId: this.props.currentTurn.gameId})
   // }
@@ -9,7 +9,7 @@ export default class WHint extends React.Component<{hint: THintResultState}> {
   render() {
     const h = this.props.hint
     return (
-      <div className={`WHint WHint-${h.result}`}>
+      <div className={`WHint WHint-${h.result} ${this.props.highlight ? 'WIsLatestAction' : ''}`}>
         {typeof h.is === 'number' ? <div>{h.is}</div> : <div className={`WColor-${h.is}`}>&nbsp;</div>}
       </div>
     )

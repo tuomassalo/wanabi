@@ -10,7 +10,6 @@ import WOtherHand from './WOtherHand'
 import {WebSocketClient} from './websocketclient'
 import * as engine from 'wanabi-engine'
 import {Card} from 'wanabi-engine/dist/card'
-import {TResolvedActionState} from 'wanabi-engine/dist/game'
 declare const wsclient: WebSocketClient
 
 export default class WGame extends React.Component<{currentTurn: engine.MaskedTurn}> {
@@ -46,8 +45,6 @@ export default class WGame extends React.Component<{currentTurn: engine.MaskedTu
       gameClasses += 'WGame-finished'
     }
 
-    const latestAction: Map<number, TResolvedActionState> = new Map()
-    latestAction.set((players.length + inTurn - 1) % players.length, action)
     return (
       <div>
         <div className="WHeader">
@@ -77,27 +74,40 @@ export default class WGame extends React.Component<{currentTurn: engine.MaskedTu
         </div>
         <div className={gameClasses}>
           <div className="clearfix">
-            <WDiscardPile discardPile={discardPile} />
-            <WTable table={table} />
+            <WDiscardPile discardPile={discardPile} latestAction={action} />
+            <WTable table={table} latestAction={action} />
           </div>
-          {players.map(p => (
-            <div key={p.idx} className={`WPlayer ${p.idx === inTurn ? 'WPlayer-inturn' : ''}`}>
-              <h3>
-                {p.name}
-                {p.isConnected ? '' : ' 🔌 '}
-              </h3>
-              {p.isMe ? (
-                <WMyHand cards={p.hand.cards} latestAction={latestAction.get(p.idx)} />
-              ) : (
-                <WOtherHand
-                  cards={p.hand.cards as Card[]}
-                  playerIdx={p.idx}
-                  hintsAvailable={hintCount > 0}
-                  latestAction={latestAction.get(p.idx)}
-                />
-              )}
-            </div>
-          ))}
+          {players.map(p => {
+            const highlightedLastActionByThisPlayer =
+              p.idx === (players.length + inTurn - 1) % players.length ? action : undefined
+            const highlightLatestHint = action.type === 'HINT' && action.toPlayerIdx === p.idx
+
+            console.warn(p, {highlightLatestHint, highlightedLastActionByThisPlayer})
+
+            return (
+              <div key={p.idx} className={`WPlayer ${p.idx === inTurn ? 'WPlayer-inturn' : ''}`}>
+                <h3>
+                  {p.name}
+                  {p.isConnected ? '' : ' 🔌 '}
+                </h3>
+                {p.isMe ? (
+                  <WMyHand
+                    cards={p.hand.cards}
+                    highlightLatestHint={highlightLatestHint}
+                    latestAction={highlightedLastActionByThisPlayer}
+                  />
+                ) : (
+                  <WOtherHand
+                    cards={p.hand.cards as Card[]}
+                    playerIdx={p.idx}
+                    hintsAvailable={hintCount > 0}
+                    highlightLatestHint={highlightLatestHint}
+                    latestAction={highlightedLastActionByThisPlayer}
+                  />
+                )}
+              </div>
+            )
+          })}
         </div>
       </div>
     )

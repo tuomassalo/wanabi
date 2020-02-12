@@ -16,6 +16,7 @@ export default class WOtherHand extends React.Component<{
   playerIdx: number
   hintsAvailable: boolean
   latestAction?: TResolvedActionState
+  highlightLatestHint: boolean
 }> {
   render() {
     return (
@@ -24,7 +25,7 @@ export default class WOtherHand extends React.Component<{
         {this.props.cards.map((c, idx) => (
           <div key={idx}>
             <WCard key={Math.random()} card={c} />
-            <WHints hints={c.hints} />
+            <WHints hints={c.hints} highlightLatestHint={this.props.highlightLatestHint} />
           </div>
         ))}
         <WOtherHandActionButtons playerIdx={this.props.playerIdx} hintsAvailable={this.props.hintsAvailable} />

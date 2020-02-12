@@ -15,7 +15,11 @@ import {TGameId, TResolvedActionState} from 'wanabi-engine'
 declare const wsclient: WebSocketClient
 declare const gameId: TGameId
 
-export default class WMyHand extends React.Component<{cards: MaskedCard[]; latestAction?: TResolvedActionState}> {
+export default class WMyHand extends React.Component<{
+  cards: MaskedCard[]
+  latestAction?: TResolvedActionState
+  highlightLatestHint: boolean
+}> {
   // startGame = () => {
   //   wsclient.startGame({gameId: this.props.currentTurn.gameId})
   // }
@@ -27,7 +31,7 @@ export default class WMyHand extends React.Component<{cards: MaskedCard[]; lates
           <div key={idx}>
             <WMyCardActionButtons cardIdx={idx} />
             <WMysteryCard card={c} />
-            <WHints hints={c.hints} />
+            <WHints hints={c.hints} highlightLatestHint={this.props.highlightLatestHint} />
           </div>
         ))}
         <WLatestAction latestAction={this.props.latestAction} />

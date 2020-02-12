@@ -34,11 +34,12 @@ type TPlayableActionParams = TPlayActionParams | TDiscardActionParams | THintAct
 interface TResolvedStartActionState extends TStartActionParams {} // added by the constructor
 interface TResolvedPlayActionState extends TPlayActionParams {
   card: TCardValueState
+  success: boolean
 }
 interface TResolvedDiscardActionState extends TDiscardActionParams {
   card: TCardValueState
 }
-interface TResolvedHintActionState extends THintActionParams {
+export interface TResolvedHintActionState extends THintActionParams {
   // for convenience
   toPlayerName: string
 }
@@ -293,7 +294,7 @@ export class Turn extends BaseTurn {
             nextTurn.status = 'GAMEOVER'
           }
         }
-        nextTurn.action = {...actionParams, card: card.toJSON()}
+        nextTurn.action = {...actionParams, card: card.toJSON(), success}
       } else if (actionParams.type === 'DISCARD') {
         nextTurn.discardPile.add(card)
         if (nextTurn.hintCount < 9) nextTurn.hintCount++

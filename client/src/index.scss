@@ -283,3 +283,21 @@ div.WLatestAction {
     float: none;
   }
 }
+
+.WIsLatestAction {
+  // outline: 2px solid red;
+  animation: highlight 1000ms ease;
+  animation-iteration-count: 4;
+  outline: 10px solid transparent;
+}
+@keyframes highlight {
+  0% {
+    outline-color: transparent;
+  }
+  50% {
+    outline-color: orange;
+  }
+  100% {
+    outline-color: transparent;
+  }
+}

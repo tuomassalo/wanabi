@@ -17,6 +17,7 @@ export default class WLatestAction extends React.Component<{latestAction?: TReso
         return (
           <div className="WLatestAction">
             Played <WCard card={Card.fromValueString(action.card)} />
+            {action.success ? '' : ' 👎'}
           </div>
         )
       } else if (action.type === 'DISCARD') {
