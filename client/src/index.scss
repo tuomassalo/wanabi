@@ -67,6 +67,7 @@ div.WCard {
   text-align: center;
   line-height: $cardHeight;
   font-size: 7/12 * $cardHeight;
+  position: relative;
 }
 // used in hints and cards
 .WColor-A {
@@ -205,6 +206,7 @@ div.WPlayer {
 
 div.WUpToFourPossibleCards,
 div.WUpToNinePossibleCards {
+  position: relative;
   width: $cardWidth;
   height: $cardHeight;
   border: 1px solid #8888;
@@ -300,4 +302,39 @@ div.WLatestAction {
   100% {
     outline-color: transparent;
   }
+}
+
+.WCard-PLAYABLE::after,
+.WCard-UNPLAYABLE::after,
+.WCard-DISCARDABLE::after,
+.WCard-UNDISCARDABLE::after {
+  position: absolute;
+  font-size: 16px;
+  top: 14px;
+  right: 4px;
+  line-height: 0;
+  z-index: 2;
+}
+
+.WCard-PLAYABLE::after {
+  content: '▶';
+  color: green;
+}
+.WCard-DISCARDABLE::after {
+  content: '❌';
+}
+.WCard-UNDISCARDABLE::after {
+  content: '⭐';
+  text-shadow: black 0 0 2px;
+}
+
+.WUpToFourPossibleCards .WCard::after {
+  font-size: 12px;
+  top: 7px;
+  right: -2px;
+}
+.WUpToNinePossibleCards .WCard::after {
+  font-size: 10px;
+  top: 6px;
+  right: -2px;
 }
