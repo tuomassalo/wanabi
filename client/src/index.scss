@@ -5,7 +5,7 @@ $colorA: red;
 $colorB: lightgreen;
 $colorC: lightblue;
 $colorD: yellow;
-$colorE: #ffe;
+$colorE: #fffff3;
 
 * {
   box-sizing: border-box;
@@ -14,8 +14,7 @@ $colorE: #ffe;
 html,
 body,
 #root,
-.App,
-.App > div {
+.App {
   height: 100%;
 }
 
@@ -288,19 +287,19 @@ div.WLatestAction {
 
 .WIsLatestAction {
   // outline: 2px solid red;
-  animation: highlight 1000ms ease;
-  animation-iteration-count: 4;
+  animation: highlight 800ms ease;
+  animation-iteration-count: 5;
   outline: 10px solid transparent;
 }
 @keyframes highlight {
   0% {
-    outline-color: transparent;
+    box-shadow: none;
   }
   50% {
-    outline-color: orange;
+    box-shadow: 0px 0px 4px 6px orange;
   }
   100% {
-    outline-color: transparent;
+    box-shadow: none;
   }
 }
 

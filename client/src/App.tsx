@@ -108,6 +108,9 @@ const exampleTurn: engine.TMaskedTurnState = {
 interface CommonState {
   messages: engine.WebsocketServerMessage[]
 }
+interface LoadingState extends CommonState {
+  phase: 'LOADING'
+}
 interface InMenuState extends CommonState {
   phase: 'IN_MENU'
   games: engine.MaskedTurn[]
@@ -116,7 +119,7 @@ interface InGameState extends CommonState {
   phase: 'IN_GAME'
   currentTurn: engine.MaskedTurn
 }
-type AppState = InMenuState | InGameState
+type AppState = LoadingState | InMenuState | InGameState
 
 export default class App extends React.Component<{}, AppState> {
   wsclient: WebSocketClient
@@ -124,7 +127,7 @@ export default class App extends React.Component<{}, AppState> {
   constructor(props: any) {
     super(props)
     this.wsclient = new WebSocketClient()
-    this.state = {messages: [], phase: 'IN_MENU', games: []}
+    this.state = {messages: [], phase: 'LOADING'}
 
     if (0) {
       this.state = {
@@ -178,6 +181,9 @@ export default class App extends React.Component<{}, AppState> {
     this.getGamesState()
   }
   render() {
+    if (this.state.phase === 'LOADING') {
+      return <div></div>
+    }
     const phaseComponent =
       this.state.phase === 'IN_MENU' ? (
         <WMenu games={this.state.games} />

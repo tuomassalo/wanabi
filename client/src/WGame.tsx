@@ -82,7 +82,7 @@ export default class WGame extends React.Component<{currentTurn: engine.MaskedTu
               p.idx === (players.length + inTurn - 1) % players.length ? action : undefined
             const highlightLatestHint = action.type === 'HINT' && action.toPlayerIdx === p.idx
 
-            console.warn(p, {highlightLatestHint, highlightedLastActionByThisPlayer})
+            // console.warn(p, {highlightLatestHint, highlightedLastActionByThisPlayer})
 
             return (
               <div key={p.idx} className={`WPlayer ${p.idx === inTurn ? 'WPlayer-inturn' : ''}`}>
