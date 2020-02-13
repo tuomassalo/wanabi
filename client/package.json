@@ -25,7 +25,7 @@
   "scripts": {
     "start": "PORT=3002 REACT_APP_WS_ENDPOINT=ws://wanabihost:13001 react-scripts start",
     "build": "react-scripts build",
-    "test": "jest --run-in-band",
+    "test": "REACT_APP_WS_ENDPOINT=ws://wanabihost:13001 jest --run-in-band",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
