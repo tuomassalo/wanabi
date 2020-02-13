@@ -2,14 +2,13 @@ import {EventEmitter} from 'events'
 import * as game from 'wanabi-engine'
 
 export class WebSocketClient extends EventEmitter {
-  // messages: string[] = []
   websocket: WebSocket
   opened = false
   queue: {action: string; data: any}[] = []
   constructor() {
     super()
-    const endpoint = 'ws://wanabihost:13001'
-    this.websocket = new WebSocket(endpoint)
+    // const endpoint = 'ws://wanabihost:13001'
+    this.websocket = new WebSocket(process.env.REACT_APP_WS_ENDPOINT as string)
 
     this.websocket.onclose = ({wasClean, code, reason}) => {
       this.emit('closing', 'CLOSE', {wasClean, code, reason})

@@ -1,13 +1,10 @@
 const AWS = require('aws-sdk')
+import * as dynamodbClient from 'serverless-dynamodb-client'
 const apig = new AWS.ApiGatewayManagementApi({
   endpoint: process.env.APIG_ENDPOINT,
-  sslEnabled: false,
-  // paramValidation: false,
+  sslEnabled: process.env.APIG_ENDPOINT?.startsWith('https://'),
 })
-const dynamodb = new AWS.DynamoDB.DocumentClient({endpoint: 'http://wanabihost:3003'})
-// const dynamodb = require('serverless-dynamodb-client')
-
-// import * as dynamodb from 'serverless-dynamodb-client'
+const dynamodb = dynamodbClient.doc
 
 const connectionTable = 'WanabiConnections' // process.env.CONNECTIONS_TABLE
 

@@ -1,7 +1,8 @@
-import * as AWS from 'aws-sdk'
+import {DocumentClient} from 'aws-sdk/lib/dynamodb/document_client'
+import * as dynamodbClient from 'serverless-dynamodb-client'
 import * as gamebridge from './gamebridge'
 
-const dynamodb = new AWS.DynamoDB.DocumentClient({endpoint: 'http://wanabihost:3003'})
+const dynamodb: DocumentClient = dynamodbClient.doc
 
 const connectionTable = 'WanabiConnections'
 
