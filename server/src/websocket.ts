@@ -13,7 +13,14 @@ export const handler = async function(event: any, context: any) {
     body,
     requestContext: {connectionId, routeKey},
   } = event
-  console.log(`EVENT: ${event.requestContext.routeKey} ${connectionId}`)
+  console.log(`EVENT: ${event.requestContext.routeKey} ${connectionId}`, body, connectionId, routeKey)
+
+  // quick workaround for prod
+  let routeKey2
+  try {
+    routeKey2 = JSON.parse(body).action
+  } catch (e) {}
+
   try {
     switch (routeKey) {
       case '$connect':
@@ -38,9 +45,9 @@ export const handler = async function(event: any, context: any) {
 
       case '$default':
       default:
-        console.warn('DEFAULT', {routeKey, connectionId, body})
+        console.warn('DEFAULT', {routeKey, routeKey2, connectionId, body})
 
-        await gamebridge[routeKey](JSON.parse(body).data, connectionId)
+        await gamebridge[routeKey2 || routeKey](JSON.parse(body).data, connectionId)
     }
   } catch (e) {
     console.warn('ERROR', e)
