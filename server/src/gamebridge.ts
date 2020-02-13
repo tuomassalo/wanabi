@@ -7,7 +7,7 @@ type TConnectionId = string
 
 const apig = new AWS.ApiGatewayManagementApi({
   endpoint: process.env.APIG_ENDPOINT,
-  sslEnabled: process.env.APIG_ENDPOINT?.startsWith('https://'),
+  sslEnabled: !process.env.APIG_ENDPOINT?.startsWith('http://'),
 })
 
 const dynamodb: DocumentClient = dynamodbClient.doc
@@ -54,7 +54,7 @@ async function sendGamesState(toConnections: TConnectionId[]) {
     }
   }
 
-  console.warn('sending game state to ', ...toConnections)
+  console.warn('sending game state to', ...toConnections)
 
   await Promise.all(
     toConnections.map(cId => {

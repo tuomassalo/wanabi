@@ -2,7 +2,7 @@ const AWS = require('aws-sdk')
 import * as dynamodbClient from 'serverless-dynamodb-client'
 const apig = new AWS.ApiGatewayManagementApi({
   endpoint: process.env.APIG_ENDPOINT,
-  sslEnabled: process.env.APIG_ENDPOINT?.startsWith('https://'),
+  sslEnabled: !process.env.APIG_ENDPOINT?.startsWith('http://'),
 })
 const dynamodb = dynamodbClient.doc
 

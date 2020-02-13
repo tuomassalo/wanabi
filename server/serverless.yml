@@ -50,13 +50,7 @@ provider:
   name: aws
   region: eu-north-1
   profile: ts
-  # runtime: nodejs10.x
-  # stage: ${opt:stage,'dev'}
-
-  # If you use a lower runtime (e.g. nodejs8.10), you have to bundle your own
-  # 'aws-sdk', as ApiGatewayManagementApi was not introduced until
-  # aws-sdk@2.379.0. See https://github.com/aws/aws-sdk-js/issues/2520#issuecomment-476723105
-  # for details.
+  stage: ${opt:stage,'dev'}
   runtime: nodejs12.x
 
   environment:
@@ -71,13 +65,26 @@ provider:
   iamRoleStatements:
     - Effect: Allow
       Action:
-        - dynamodb:DeleteItem
-        - dynamodb:GetItem
+        - dynamodb:Query
         - dynamodb:Scan
+        - dynamodb:GetItem
         - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
       Resource:
         Fn::GetAtt:
           - ConnectionsTable
+          - Arn
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource:
+        Fn::GetAtt:
           - GamesTable
           - Arn
 
@@ -108,14 +115,17 @@ functions:
             # for more details on API Gateway mappings.
             identitySource:
               - 'route.request.header.X-Forwarded-Proto'
+          cors: true
 
       - websocket:
           # Handles all unrouted messages
           route: $default
+          cors: true
 
       - websocket:
           # Handles disconnect messages
           route: $disconnect
+          cors: true
 
 resources:
   Resources:
@@ -126,7 +136,7 @@ resources:
         AttributeDefinitions:
           - AttributeName: connectionId
             AttributeType: S
-        BillingMode: PAY_PER_REQUEST
+        # BillingMode: PAY_PER_REQUEST
         KeySchema:
           - AttributeName: connectionId
             KeyType: HASH
@@ -145,7 +155,7 @@ resources:
         AttributeDefinitions:
           - AttributeName: gameId
             AttributeType: S
-        BillingMode: PAY_PER_REQUEST
+        # BillingMode: PAY_PER_REQUEST
         KeySchema:
           - AttributeName: gameId
             KeyType: HASH
