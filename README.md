@@ -49,10 +49,8 @@ npm run localbroadcast
 
 ### Deploy
 
-[TODO!]
-
 ```
-# Deploy to AWS first
-npm run sls -- deploy
+
+`./deploy.sh`
 
 ```
