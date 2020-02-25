@@ -129,7 +129,7 @@ export default class App extends React.Component<{}, AppState> {
     this.wsclient = new WebSocketClient()
     this.state = {messages: [], phase: 'LOADING'}
 
-    if (0) {
+    if (1) {
       this.state = {
         phase: 'IN_GAME',
         currentTurn: new engine.MaskedTurn(exampleTurn),
@@ -177,8 +177,63 @@ export default class App extends React.Component<{}, AppState> {
 
   getGamesState = () => this.wsclient.getGamesState({})
   // getGameState = () =>     this.wsclient.getGameState({})
-  componentDidMount() {
+  async componentDidMount() {
     this.getGamesState()
+
+    const consumedCardIdx = 3
+    const playerIdx = 0
+
+    const createGhost = (cardIdx: number) => {
+      const orig = document.getElementById(`card-${playerIdx}-${cardIdx}`) as HTMLDivElement
+      console.warn(111, orig)
+      const clone = orig.cloneNode(true) as HTMLDivElement
+      clone.classList.add('WCard-ghost')
+      const cloneBounds = orig.getBoundingClientRect()
+      clone.style.width = cloneBounds.width + 'px'
+      clone.style.height = cloneBounds.height + 'px'
+      clone.style.left = cloneBounds.left + document.documentElement.scrollLeft + 'px'
+      clone.style.top = cloneBounds.top + document.documentElement.scrollTop + 'px'
+      orig.style.visibility = 'hidden'
+
+      return {clone, cloneBounds}
+    }
+
+    const findNextDiscardBounds = () => {
+      const tmp = document.createElement('div')
+      tmp.className = 'WCard'
+      tmp.textContent = '0'
+      const pile = document.querySelector('.WDiscardPile') as Element
+      pile.appendChild(tmp)
+      const b = tmp.getBoundingClientRect()
+      console.warn({b})
+      tmp.remove()
+      return b
+    }
+
+    // move to discard pile
+    const dstBounds = findNextDiscardBounds()
+    const {clone, cloneBounds} = createGhost(consumedCardIdx)
+    document.documentElement.style.setProperty('--movecardScaleEnd', `${dstBounds.width / cloneBounds.width}`)
+    document.documentElement.style.setProperty('--movecardTranslateXEnd', `${dstBounds.left - cloneBounds.left}px`)
+    document.documentElement.style.setProperty('--movecardTranslateYEnd', `${dstBounds.top - cloneBounds.top}px`)
+    document.body.appendChild(clone)
+
+    await new Promise(r => clone.addEventListener('animationend', r, false))
+
+    // Old card has been moved now.
+
+    const cardElems = [0, 1, 2, 3, 4]
+      .map(idx => document.getElementById(`card-${playerIdx}-${idx}`))
+      .filter(el => el) as HTMLElement[]
+    const movingCards = cardElems.filter((el, idx) => idx > consumedCardIdx)
+    if (movingCards.length) {
+      const cardDstOffsetX = cardElems[0].getBoundingClientRect().left - cardElems[1].getBoundingClientRect().left
+      document.documentElement.style.setProperty('--cardDstOffsetX', `${cardDstOffsetX}px`)
+      for (const c of movingCards) {
+        c.classList.add('WCard-slide-left')
+      }
+      await new Promise(r => movingCards[0].addEventListener('animationend', r, false))
+    }
   }
   render() {
     if (this.state.phase === 'LOADING') {

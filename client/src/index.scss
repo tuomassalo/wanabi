@@ -337,3 +337,30 @@ div.WLatestAction {
   top: 6px;
   right: -2px;
 }
+
+// animations
+.WCard-ghost {
+  position: absolute;
+  animation: play-or-discard-card 1000ms ease forwards;
+  transform-origin: 0 0;
+}
+@keyframes play-or-discard-card {
+  from {
+    transform: translate(0 0) scale(1);
+  }
+  to {
+    transform: translate(var(--movecardTranslateXEnd), var(--movecardTranslateYEnd)) scale(var(--movecardScaleEnd));
+  }
+}
+
+.WCard-slide-left {
+  animation: slide-card-left 1000ms ease forwards;
+}
+@keyframes slide-card-left {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(var(--cardDstOffsetX));
+  }
+}

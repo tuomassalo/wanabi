@@ -23,7 +23,7 @@ export default class WOtherHand extends React.Component<{
       <div className="WOtherHand">
         {/* NB: bogus index, might break animations */}
         {this.props.cards.map((c, idx) => (
-          <div key={idx}>
+          <div id={`card-${this.props.playerIdx}-${idx}`} key={idx}>
             <WCard key={Math.random()} card={c} />
             <WHints hints={c.hints} highlightLatestHint={this.props.highlightLatestHint} />
           </div>
