@@ -33,46 +33,41 @@ export default class WGame extends React.Component<{currentTurn: engine.MaskedTu
       inTurn,
       turnNumber,
     } = this.props.currentTurn
-    let gameClasses = 'WGame'
+    let gameStatusClass: string = ''
     if (status === 'RUNNING') {
       if (players[inTurn].isMe) {
-        gameClasses += ' WGame-myturn'
+        gameStatusClass = ' WGameStatus-myturn'
       }
     } else if (status === 'GAMEOVER') {
-      gameClasses += 'WGame-gameover'
+      gameStatusClass = ' WGameStatus-gameover'
     } else {
       // finished
-      gameClasses += 'WGame-finished'
+      gameStatusClass = ' WGameStatus-finished'
     }
 
     return (
-      <div>
+      <div className={gameStatusClass}>
         <div className="WHeader">
           <span>
             Turn: <em>{turnNumber}</em>
           </span>
-
           <span>
             Stock: <em>{stockSize}</em>
           </span>
-
           <span>
             Hints: <em>{hintCount}</em>
           </span>
-
           <span>
             Wounds: <em>{woundCount}</em>
           </span>
-
           <span>
             Score: <em>{score}</em>
           </span>
-
           <span style={turnsLeft ? {} : {display: 'none'}}>
             Turns left: <em>{turnsLeft}</em>
           </span>
         </div>
-        <div className={gameClasses}>
+        <div className="WGame">
           <div className="clearfix">
             <WDiscardPile discardPile={discardPile} latestAction={action} />
             <WTable table={table} latestAction={action} />
@@ -93,6 +88,7 @@ export default class WGame extends React.Component<{currentTurn: engine.MaskedTu
                 {p.isMe ? (
                   <WMyHand
                     cards={p.hand.cards}
+                    playerIdx={p.idx}
                     highlightLatestHint={highlightLatestHint}
                     latestAction={highlightedLastActionByThisPlayer}
                   />

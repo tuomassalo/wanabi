@@ -7,6 +7,7 @@ import WWaiting from './WWaiting'
 import WGame from './WGame'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import WMenu from './WMenu'
+import {AllColors, TColor, Card} from 'wanabi-engine/dist/card'
 
 declare const wsclient: WebSocketClient
 
@@ -129,7 +130,7 @@ export default class App extends React.Component<{}, AppState> {
     this.wsclient = new WebSocketClient()
     this.state = {messages: [], phase: 'LOADING'}
 
-    if (1) {
+    if (0) {
       this.state = {
         phase: 'IN_GAME',
         currentTurn: new engine.MaskedTurn(exampleTurn),
@@ -137,18 +138,24 @@ export default class App extends React.Component<{}, AppState> {
       }
       ;(window as any).gameId = '123'
     } else
-      this.wsclient.on('msg', (data: engine.WebsocketServerMessage) => {
+      this.wsclient.on('msg', async (data: engine.WebsocketServerMessage) => {
         // console.warn('MSG', data)
 
         if (data.msg === 'M_GamesState') {
-          const currentTurn = data.games.find(t => t.players.some(p => p.isMe))
+          const currentTurnRaw = data.games.find(t => t.players.some(p => p.isMe))
 
-          if (currentTurn) {
+          if (currentTurnRaw) {
+            const currentTurn = new engine.MaskedTurn(currentTurnRaw)
+            // only do animation on turn change, not when joining or if someone disconnects/reconnects
+            if (this.state.phase === 'IN_GAME' && currentTurn.turnNumber === this.state.currentTurn.turnNumber + 1) {
+              // do some animation before changing state
+              await this.animate(currentTurn.action, this.state.currentTurn.inTurn)
+            }
             this.setState(
               (state): AppState => {
                 return {
                   phase: 'IN_GAME',
-                  currentTurn: new engine.MaskedTurn(currentTurn),
+                  currentTurn,
                   messages: [...state.messages, data],
                 }
               },
@@ -177,25 +184,81 @@ export default class App extends React.Component<{}, AppState> {
 
   getGamesState = () => this.wsclient.getGamesState({})
   // getGameState = () =>     this.wsclient.getGameState({})
-  async componentDidMount() {
+
+  componentDidMount() {
     this.getGamesState()
+  }
+  async animate(action: engine.TResolvedActionState, playerIdx: number) {
+    // only animate plays and discards
+    if (!(action.type === 'PLAY' || action.type === 'DISCARD')) return
 
-    const consumedCardIdx = 3
-    const playerIdx = 0
+    const playedCard = new Card(action.card)
 
-    const createGhost = (cardIdx: number) => {
-      const orig = document.getElementById(`card-${playerIdx}-${cardIdx}`) as HTMLDivElement
-      console.warn(111, orig)
-      const clone = orig.cloneNode(true) as HTMLDivElement
-      clone.classList.add('WCard-ghost')
-      const cloneBounds = orig.getBoundingClientRect()
-      clone.style.width = cloneBounds.width + 'px'
-      clone.style.height = cloneBounds.height + 'px'
-      clone.style.left = cloneBounds.left + document.documentElement.scrollLeft + 'px'
-      clone.style.top = cloneBounds.top + document.documentElement.scrollTop + 'px'
+    const waitForAnimation = async (elem: HTMLElement) => {
+      await new Promise(r => {
+        // setTimeout(r, 2000)
+        elem.addEventListener('animationend', r, {once: true})
+      })
+      // await new Promise(r => elem.addEventListener('animationend', r, false))
+    }
+
+    const createGhost = async (cardIdx: number) => {
+      const orig = document.querySelector(
+        `#card-${playerIdx}-${cardIdx} > .WCard, #card-${playerIdx}-${cardIdx} > .WMysteryCard`,
+      ) as HTMLDivElement
+      const ghostBounds = orig.getBoundingClientRect()
+
+      console.warn(ghostBounds.left, ghostBounds.top)
+
+      const ghostCard = orig.cloneNode(true) as HTMLDivElement
+      const ghost = document.createElement('div')
+      ghost.appendChild(ghostCard)
+      document.body.appendChild(ghost)
       orig.style.visibility = 'hidden'
 
-      return {clone, cloneBounds}
+      ghost.style.width = ghostBounds.width + 'px'
+      ghost.style.height = ghostBounds.height + 'px'
+      ghost.style.left = ghostBounds.left + document.documentElement.scrollLeft + 'px'
+      ghost.style.top = ghostBounds.top + document.documentElement.scrollTop + 'px'
+
+      // const orig = orig.querySelector('.WCard') as HTMLElement
+
+      // if the card is not known yet, "flip" the clone first
+      if (1 && !(orig.classList.contains('WColor-' + playedCard.color) && orig.textContent === '' + playedCard.num)) {
+        // const ghost = ghost.querySelector('.WCard') as HTMLElement
+        // first part of the flip
+        ghost.classList.add('WCard-flip-1')
+        console.warn(1)
+
+        await waitForAnimation(ghostCard)
+        console.warn(2)
+        ghost.classList.remove('WCard-flip-1')
+
+        // Now the ghost has been flipped 90 degrees, so it's invisible. Add information.
+        ghostCard.className = `WCard WColor-${playedCard.color}`
+        ghostCard.textContent = '' + playedCard.num
+
+        ghostCard.classList.add('WCard')
+        ghostCard.classList.add('WColor-' + playedCard.color)
+        ghostCard.textContent = '' + playedCard.num
+
+        // Is this wait needed?
+        // console.warn(3)
+        // ghost.style.visibility = 'hidden'
+        // await new Promise(r => setTimeout(r, 50))
+        // ghost.style.visibility = 'visible'
+        // console.warn(4)
+
+        // second part of the flip
+        ghost.classList.add('WCard-flip-2')
+        console.warn(5)
+        await waitForAnimation(ghostCard)
+        console.warn(6)
+        ghost.classList.remove('WCard-flip-2')
+      }
+
+      ghost.classList.add('WCard-ghost')
+      return {orig, ghost, ghostBounds}
     }
 
     const findNextDiscardBounds = () => {
@@ -205,34 +268,51 @@ export default class App extends React.Component<{}, AppState> {
       const pile = document.querySelector('.WDiscardPile') as Element
       pile.appendChild(tmp)
       const b = tmp.getBoundingClientRect()
-      console.warn({b})
       tmp.remove()
       return b
     }
 
-    // move to discard pile
-    const dstBounds = findNextDiscardBounds()
-    const {clone, cloneBounds} = createGhost(consumedCardIdx)
-    document.documentElement.style.setProperty('--movecardScaleEnd', `${dstBounds.width / cloneBounds.width}`)
-    document.documentElement.style.setProperty('--movecardTranslateXEnd', `${dstBounds.left - cloneBounds.left}px`)
-    document.documentElement.style.setProperty('--movecardTranslateYEnd', `${dstBounds.top - cloneBounds.top}px`)
-    document.body.appendChild(clone)
+    const findTablePileBounds = (color: TColor) => {
+      const pileIdx = AllColors.findIndex(c => c === color)
+      const pileEl = (document.querySelector('.WTable') as HTMLElement).childNodes[pileIdx] as HTMLElement
+      return pileEl.getBoundingClientRect()
+    }
 
-    await new Promise(r => clone.addEventListener('animationend', r, false))
+    // move to table or discard pile
+    const dstBounds =
+      action.type === 'PLAY' && action.success ? findTablePileBounds(playedCard.color) : findNextDiscardBounds()
+    const {orig, ghost, ghostBounds} = await createGhost(action.cardIdx)
+
+    document.documentElement.style.setProperty('--movecardScaleEnd', `${dstBounds.width / ghostBounds.width}`)
+    document.documentElement.style.setProperty('--movecardTranslateXEnd', `${dstBounds.left - ghostBounds.left}px`)
+    document.documentElement.style.setProperty('--movecardTranslateYEnd', `${dstBounds.top - ghostBounds.top}px`)
+    document.documentElement.style.setProperty(
+      '--movecardRotateEnd',
+      action.type === 'PLAY' && !action.success ? '1080deg' : '0deg',
+    )
+
+    await waitForAnimation(ghost)
 
     // Old card has been moved now.
 
     const cardElems = [0, 1, 2, 3, 4]
       .map(idx => document.getElementById(`card-${playerIdx}-${idx}`))
       .filter(el => el) as HTMLElement[]
-    const movingCards = cardElems.filter((el, idx) => idx > consumedCardIdx)
+    const movingCards = cardElems.filter((el, idx) => idx > action.cardIdx)
     if (movingCards.length) {
-      const cardDstOffsetX = cardElems[0].getBoundingClientRect().left - cardElems[1].getBoundingClientRect().left
-      document.documentElement.style.setProperty('--cardDstOffsetX', `${cardDstOffsetX}px`)
+      const cardDstOffsetXEnd = cardElems[0].getBoundingClientRect().left - cardElems[1].getBoundingClientRect().left
+      document.documentElement.style.setProperty('--cardDstOffsetXEnd', `${cardDstOffsetXEnd}px`)
       for (const c of movingCards) {
         c.classList.add('WCard-slide-left')
       }
-      await new Promise(r => movingCards[0].addEventListener('animationend', r, false))
+      await waitForAnimation(movingCards[0])
+    }
+
+    // cleanup
+    ghost.remove()
+    orig.style.visibility = 'visible'
+    for (const c of movingCards) {
+      c.classList.remove('WCard-slide-left')
     }
   }
   render() {

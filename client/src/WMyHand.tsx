@@ -17,6 +17,7 @@ declare const gameId: TGameId
 
 export default class WMyHand extends React.Component<{
   cards: MaskedCard[]
+  playerIdx: number
   latestAction?: TResolvedActionState
   highlightLatestHint: boolean
 }> {
@@ -28,7 +29,7 @@ export default class WMyHand extends React.Component<{
     return (
       <div className="WMyHand">
         {this.props.cards.map((c, idx) => (
-          <div key={idx}>
+          <div id={`card-${this.props.playerIdx}-${idx}`} key={idx}>
             <WMyCardActionButtons cardIdx={idx} />
             <WMysteryCard card={c} />
             <WHints hints={c.hints} highlightLatestHint={this.props.highlightLatestHint} />

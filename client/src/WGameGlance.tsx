@@ -26,9 +26,17 @@ export default class WGameGlance extends React.Component<{game: MaskedTurn}> {
     } else if (this.props.game.status === 'RUNNING') {
       status = <h4>Game is running... (turn {this.props.game.turnNumber})</h4>
       // no actions
+    } else if (this.props.game.status === 'GAMEOVER') {
+      status = <h4>GAME OVER</h4>
+    } else if (this.props.game.status === 'FINISHED') {
+      status = (
+        <h4>
+          FINISHED with {this.props.game.score} points and {this.props.game.woundCount} wound(s).
+        </h4>
+      )
     }
     return (
-      <div className="WGameGlance">
+      <div className={`WGameGlance WGameGlance-${this.props.game.status}`}>
         {status}
         Players: <WPlayerList turn={this.props.game} />
         {actionButtons}

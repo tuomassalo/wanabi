@@ -14,7 +14,8 @@ $colorE: #fffff3;
 html,
 body,
 #root,
-.App {
+.App,
+.App > * {
   height: 100%;
 }
 
@@ -44,9 +45,20 @@ div.WWaiting {
 }
 div.WGameGlance ul,
 div.WGameGlance li {
-  // display: inline;
+  display: inline;
   list-style: none;
-  // padding: 0 0 0 0.5em;
+  padding: 0;
+  margin: 0.2em;
+}
+div.WGameGlance li {
+  border-radius: 5px;
+  padding: 5px;
+  background: #bbb;
+  white-space: nowrap;
+}
+div.WGameGlance-GAMEOVER,
+div.WGameGlance-FINISHED {
+  background: #bbb8;
 }
 
 div.WMyHand,
@@ -86,6 +98,9 @@ div.WCard {
 }
 .WColor-X {
   background: linear-gradient(135deg, orange, yellow, green, cyan, blue, violet);
+}
+.WColor-undefined {
+  background: #ccc;
 }
 body {
   background: darkgreen;
@@ -179,8 +194,8 @@ div.WPlayer {
   display: none;
 }
 
-.WGame.WGame-myturn .WHintButtons,
-.WGame.WGame-myturn .WMyCardActionButtons {
+.WGameStatus-myturn .WHintButtons,
+.WGameStatus-myturn .WMyCardActionButtons {
   display: inherit;
 }
 
@@ -198,9 +213,6 @@ div.WPlayer {
 .WGame {
   padding: 10px;
   height: 100%;
-}
-.WGame-gameover {
-  background: red;
 }
 
 div.WUpToFourPossibleCards,
@@ -340,16 +352,17 @@ div.WLatestAction {
 
 // animations
 .WCard-ghost {
-  position: absolute;
+  position: absolute !important;
   animation: play-or-discard-card 1000ms ease forwards;
   transform-origin: 0 0;
 }
 @keyframes play-or-discard-card {
   from {
-    transform: translate(0 0) scale(1);
+    transform: rotate(0deg) translate(0 0) scale(1);
   }
   to {
-    transform: translate(var(--movecardTranslateXEnd), var(--movecardTranslateYEnd)) scale(var(--movecardScaleEnd));
+    transform: rotate(var(--movecardRotateEnd)) translate(var(--movecardTranslateXEnd), var(--movecardTranslateYEnd))
+      scale(var(--movecardScaleEnd));
   }
 }
 
@@ -361,6 +374,44 @@ div.WLatestAction {
     transform: translateX(0);
   }
   to {
-    transform: translateX(var(--cardDstOffsetX));
+    transform: translateX(var(--cardDstOffsetXEnd));
+  }
+}
+
+.WGameStatus-gameover {
+  background: red;
+}
+.WGameStatus-finished {
+  background: #8a8;
+  filter: saturate(70%);
+}
+
+.WCard-flip-1,
+.WCard-flip-2 {
+  perspective: 600px;
+  position: absolute !important;
+  transform-style: preserve-3d;
+  transform-origin: 50% 50% !important;
+}
+.WCard-flip-1 > div {
+  animation: flip-card-1 200ms ease forwards;
+}
+@keyframes flip-card-1 {
+  from {
+    transform: rotateY(0deg);
+  }
+  to {
+    transform: rotateY(90deg);
+  }
+}
+.WCard-flip-2 > div {
+  animation: flip-card-2 200ms ease forwards;
+}
+@keyframes flip-card-2 {
+  from {
+    transform: rotateY(270deg);
+  }
+  to {
+    transform: rotateY(360deg);
   }
 }

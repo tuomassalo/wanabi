@@ -30,7 +30,7 @@ export default class WMysteryCard extends React.Component<{card: MaskedCard}> {
         <div
           className={
             // `WCard-${this.props.card.actionability} ` +
-            allPossibleCards.length > 4 ? 'WUpToNinePossibleCards' : 'WUpToFourPossibleCards'
+            'WMysteryCard ' + (allPossibleCards.length > 4 ? 'WUpToNinePossibleCards' : 'WUpToFourPossibleCards')
           }
         >
           {/* NB: bogus index, might break animations */}
