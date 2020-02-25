@@ -358,11 +358,11 @@ div.WLatestAction {
 }
 @keyframes play-or-discard-card {
   from {
-    transform: rotate(0deg) translate(0 0) scale(1);
+    transform: translate(0 0) scale(1) rotate(0deg);
   }
   to {
-    transform: rotate(var(--movecardRotateEnd)) translate(var(--movecardTranslateXEnd), var(--movecardTranslateYEnd))
-      scale(var(--movecardScaleEnd));
+    transform: translate(var(--movecardTranslateXEnd), var(--movecardTranslateYEnd)) scale(var(--movecardScaleEnd))
+      rotate(var(--movecardRotateEnd));
   }
 }
 

@@ -257,7 +257,6 @@ export default class App extends React.Component<{}, AppState> {
         ghost.classList.remove('WCard-flip-2')
       }
 
-      ghost.classList.add('WCard-ghost')
       return {orig, ghost, ghostBounds}
     }
 
@@ -290,6 +289,10 @@ export default class App extends React.Component<{}, AppState> {
       '--movecardRotateEnd',
       action.type === 'PLAY' && !action.success ? '1080deg' : '0deg',
     )
+    ghost.classList.add('WCard-ghost')
+
+    // this is needed, otherwise animationend triggers immediately.
+    await new Promise(r => setTimeout(r, 1))
 
     await waitForAnimation(ghost)
 
