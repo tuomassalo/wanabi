@@ -1,4 +1,4 @@
-import {createTightGame, knownCard} from './helpers'
+import {createTightGame} from './helpers'
 
 describe('A tight three-player game', () => {
   const g = createTightGame()
@@ -149,6 +149,7 @@ describe('A tight three-player game', () => {
     g.act(g.players[0].id, {type: 'PLAY', cardIdx: 0})
     expect(g.getState(g.players[1].id)).toEqual(
       jasmine.objectContaining({
+        turnNumber: 51,
         stockSize: 0,
         turnsLeft: 1,
         status: 'RUNNING',
@@ -157,6 +158,7 @@ describe('A tight three-player game', () => {
     g.act(g.players[1].id, {type: 'DISCARD', cardIdx: 0})
     expect(g.getState(g.players[1].id)).toEqual(
       jasmine.objectContaining({
+        turnNumber: 52,
         stockSize: 0,
         turnsLeft: 0,
         status: 'FINISHED',

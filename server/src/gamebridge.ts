@@ -73,7 +73,9 @@ async function broadcastGamesState() {
 }
 async function updateGame(turn: engine.Turn, prevTimestamp: string) {
   const newData = JSON.parse(JSON.stringify(turn))
-  if (!newData.turnsLeft) delete newData.turnsLeft
+
+  // workaround: avoid setting null values to dynamodb
+  if (isNaN(newData.turnsLeft)) delete newData.turnsLeft
   delete newData.gameId // never changes
   const updateKeys = Object.keys(newData)
   const newDataWithColons = Object.fromEntries(updateKeys.map(k => [':' + k, newData[k]]))

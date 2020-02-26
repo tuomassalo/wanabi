@@ -1,6 +1,6 @@
 import {Pile} from './pile'
 import {Player, TPlayerId, TPlayerState, TMaskedPlayerState, MaskedPlayer} from './player'
-import {Card, TColor, TNum, AllColors, AllNums, TCardState, TCardValueState} from './card'
+import {Card, TColor, TNum, AllColors, AllNums, TCardValueState} from './card'
 import {Hand} from './hand'
 import {Table, TTableState} from './table'
 import {SyntaxError, GameError} from './errors'
