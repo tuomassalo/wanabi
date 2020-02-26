@@ -29,11 +29,13 @@ body {
   color: #ccc;
   text-align: center;
   padding-top: $cardHeight;
-  input.major {
-    display: block;
-    margin: auto;
-    font-size: 200%;
-  }
+}
+input.major {
+  display: block;
+  margin: 10px auto;
+  font-size: 150%;
+  border: 1px solid #ddd;
+  padding: 4px;
 }
 
 div.WGameGlance,
@@ -97,7 +99,7 @@ div.WCard {
   background-color: $colorE;
 }
 .WColor-X {
-  background: linear-gradient(135deg, orange, yellow, green, cyan, blue, violet);
+  background: linear-gradient(45deg, orange, yellow, rgb(0, 185, 0), cyan, rgb(93, 93, 255), violet);
 }
 .WColor-undefined {
   background: #ccc;
@@ -329,7 +331,8 @@ div.WLatestAction {
 
 .WCard-PLAYABLE::after {
   content: '▶';
-  color: green;
+  color: #0c0;
+  text-shadow: black 0 0 1px;
 }
 .WCard-DISCARDABLE::after {
   content: '❌';
