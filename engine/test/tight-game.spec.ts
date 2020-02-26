@@ -26,11 +26,11 @@ describe('A tight three-player game', () => {
       players: [
         {
           hand: [
-            {color: 'E', hints: [], num: 5},
-            {color: 'X', hints: [], num: 1},
-            {color: 'X', hints: [], num: 2},
-            {color: 'X', hints: [], num: 3},
-            {color: 'X', hints: [], num: 4},
+            {color: 'E', hints: [], num: 5, actionability: 'PLAYABLE'},
+            {color: 'X', hints: [], num: 1, actionability: 'PLAYABLE'},
+            {color: 'X', hints: [], num: 2, actionability: 'UNPLAYABLE'},
+            {color: 'X', hints: [], num: 3, actionability: 'UNPLAYABLE'},
+            {color: 'X', hints: [], num: 4, actionability: 'UNPLAYABLE'},
           ],
           idx: 0,
           isConnected: true,
@@ -115,11 +115,11 @@ describe('A tight three-player game', () => {
       players: [
         {
           hand: [
-            {color: 'X', hints: [], num: 1},
-            {color: 'X', hints: [], num: 2},
-            {color: 'X', hints: [], num: 3},
-            {color: 'X', hints: [], num: 4},
-            {color: 'X', hints: [], num: 5},
+            {color: 'X', hints: [], num: 1, actionability: 'PLAYABLE'},
+            {color: 'X', hints: [], num: 2, actionability: 'UNPLAYABLE'},
+            {color: 'X', hints: [], num: 3, actionability: 'UNPLAYABLE'},
+            {color: 'X', hints: [], num: 4, actionability: 'UNPLAYABLE'},
+            {color: 'X', hints: [], num: 5, actionability: 'UNDISCARDABLE'},
           ],
           idx: 0,
           isConnected: true,

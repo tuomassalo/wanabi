@@ -171,6 +171,19 @@ export class Turn extends BaseTurn {
 
   getState(forPlayerId: TPlayerId): TMaskedTurnState {
     const isOutsider = !this.players.some(p => p.id === forPlayerId)
+
+    const getRevealedCards = (forPlayerIdx: number) =>
+      [
+        // discard pile
+        this.discardPile.cards,
+        // table
+        Object.values(this.table.table).flatMap(p => p.cards),
+        // hands of other players
+        this.players
+          .filter(player => player.idx !== forPlayerIdx)
+          .flatMap(player => player.hand.cards.map(hc => new Card(hc))),
+      ].flat()
+
     return {
       ...JSON.parse(JSON.stringify(this)),
       stock: undefined,
@@ -181,22 +194,8 @@ export class Turn extends BaseTurn {
         isOutsider
           ? MaskedPlayer.outsiderFromPlayer(p)
           : p.id === forPlayerId
-          ? MaskedPlayer.meFromPlayer(
-              p,
-              [
-                // discard pile
-                this.discardPile.cards,
-                // table
-                Object.values(this.table.table).flatMap(p => p.cards),
-                // hands of other players
-                this.players
-                  .filter(player => player.idx !== p.idx)
-                  .flatMap(player => player.hand.cards.map(hc => new Card(hc))),
-              ].flat(),
-              this.table,
-              this.discardPile,
-            ).toJSON()
-          : MaskedPlayer.otherFromPlayer(p).toJSON(),
+          ? MaskedPlayer.meFromPlayer(p, getRevealedCards(p.idx), this.table, this.discardPile).toJSON()
+          : MaskedPlayer.otherFromPlayer(p, getRevealedCards(p.idx), this.table, this.discardPile).toJSON(),
       ),
     }
   }

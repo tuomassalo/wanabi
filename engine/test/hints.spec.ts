@@ -100,6 +100,16 @@ describe('An ongoing game', () => {
       {hints: [{turnNumber: 12, is: 5, result: false}]},
       {hints: [{turnNumber: 12, is: 5, result: false}]},
     ])
+
+    // the hints received by p1 are also visible to p0
+    expect(g.getState(g.players[0].id).players[1].hand).toEqual([
+      {color: 'B', num: 1, actionability: 'PLAYABLE', hints: [{turnNumber: 12, is: 5, result: false}]},
+      {color: 'B', num: 2, actionability: 'UNPLAYABLE', hints: [{turnNumber: 12, is: 5, result: false}]},
+      {color: 'B', num: 2, actionability: 'UNPLAYABLE', hints: [{turnNumber: 12, is: 5, result: false}]},
+      {color: 'D', num: 4, actionability: 'UNPLAYABLE', hints: [{turnNumber: 12, is: 5, result: false}]},
+      {color: 'X', num: 2, actionability: 'UNPLAYABLE', hints: [{turnNumber: 12, is: 5, result: false}]},
+    ])
+
     // we are not interested in the results here
     g.act(g.players[1].id, {type: 'HINT', toPlayerIdx: 0, is: 1})
 

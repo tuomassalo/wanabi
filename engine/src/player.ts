@@ -84,10 +84,15 @@ export class MaskedPlayer {
       isMe: true,
     })
   }
-  static otherFromPlayer(p: Player): MaskedPlayer {
+  static otherFromPlayer(p: Player, revealedCards: Card[], table: Table, discardPile: Pile): MaskedPlayer {
     return new MaskedPlayer({
       ...p,
-      hand: p.hand.toJSON(),
+      hand: resolveActionability(
+        p.hand.cards.map(c => new MaskedCard({color: c.color, num: c.num, hints: c.hints})),
+        revealedCards,
+        table,
+        discardPile,
+      ),
       isMe: false,
     })
   }
