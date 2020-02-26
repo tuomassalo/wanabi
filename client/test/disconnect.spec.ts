@@ -2,7 +2,8 @@ import {WebSocketClient} from '../src/websocketclient'
 
 let ws1: WebSocketClient, ws2: WebSocketClient
 
-beforeAll(() => {
+beforeAll(async () => {
+  await new Promise(r => setTimeout(r, 100)) // fix obscure race when running all tests
   ws1 = new WebSocketClient()
   ws2 = new WebSocketClient()
 })

@@ -6,7 +6,8 @@ jasmine.DEFAULT_TIMEOUT_INTERVAL = 30000
 let gameId: string
 let ws1: WebSocketClient, ws2: WebSocketClient, ws3: WebSocketClient
 
-beforeAll(() => {
+beforeAll(async () => {
+  await new Promise(r => setTimeout(r, 100)) // fix obscure race when running all tests
   ws1 = new WebSocketClient()
   ws2 = new WebSocketClient()
   ws3 = new WebSocketClient()
@@ -136,11 +137,11 @@ test('startGame', done => {
             },
             {
               hand: [
-                {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
-                {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
-                {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
-                {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
-                {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
+                {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
+                {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
+                {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
+                {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
+                {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
               ],
               idx: 1,
               isConnected: true,
@@ -188,11 +189,11 @@ test('act', done => {
             },
             {
               hand: [
-                {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
-                {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
-                {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
-                {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
-                {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
+                {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
+                {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
+                {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
+                {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
+                {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
               ],
               idx: 1,
               isConnected: true,
@@ -228,11 +229,11 @@ test('act', done => {
           players: [
             {
               hand: [
-                {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
-                {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
-                {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
-                {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
-                {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
+                {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
+                {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
+                {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
+                {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
+                {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
               ],
               idx: 0,
               isConnected: true,
@@ -331,11 +332,11 @@ test('An "outsider" can join a game if someone disconnects', async done => {
   expect((await waitMsg()).games[0].players).toEqual([
     {
       hand: [
-        {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
-        {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
-        {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
-        {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
-        {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
+        {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
+        {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
+        {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
+        {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
+        {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
       ],
       idx: 0,
       isConnected: true,
