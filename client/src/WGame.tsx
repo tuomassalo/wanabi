@@ -9,7 +9,6 @@ import WMyHand from './WMyHand'
 import WOtherHand from './WOtherHand'
 import {WebSocketClient} from './websocketclient'
 import * as engine from 'wanabi-engine'
-import {Card} from 'wanabi-engine/dist/card'
 declare const wsclient: WebSocketClient
 
 export default class WGame extends React.Component<{currentTurn: engine.MaskedTurn}> {
@@ -94,7 +93,7 @@ export default class WGame extends React.Component<{currentTurn: engine.MaskedTu
                   />
                 ) : (
                   <WOtherHand
-                    cards={p.hand.cards as Card[]}
+                    cards={p.hand.cards}
                     playerIdx={p.idx}
                     hintsAvailable={hintCount > 0}
                     highlightLatestHint={highlightLatestHint}

@@ -15,7 +15,12 @@ export default class WWaiting extends React.Component<{currentTurn: MaskedTurn}>
     const currentPlayerCount = this.props.currentTurn.players.length
     const startButton =
       currentPlayerCount > 1 ? (
-        <input type="button" value={`Start a ${currentPlayerCount} player game`} onClick={this.startGame} />
+        <input
+          className="major"
+          type="button"
+          value={`Start a ${currentPlayerCount} player game`}
+          onClick={this.startGame}
+        />
       ) : (
         ''
       )

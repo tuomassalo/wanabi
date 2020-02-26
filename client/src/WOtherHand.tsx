@@ -8,11 +8,11 @@ import WLatestAction from './WLatestAction'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import WOtherHandActionButtons from './WOtherHandActionButtons'
 
-import {Card} from 'wanabi-engine/dist/card'
+import {MaskedCard, Card} from 'wanabi-engine/dist/card'
 import {TResolvedActionState} from 'wanabi-engine'
 
 export default class WOtherHand extends React.Component<{
-  cards: Card[]
+  cards: MaskedCard[]
   playerIdx: number
   hintsAvailable: boolean
   latestAction?: TResolvedActionState
@@ -24,7 +24,7 @@ export default class WOtherHand extends React.Component<{
         {/* NB: bogus index, might break animations */}
         {this.props.cards.map((c, idx) => (
           <div id={`card-${this.props.playerIdx}-${idx}`} key={idx}>
-            <WCard key={Math.random()} card={c} />
+            <WCard key={Math.random()} card={new Card(c.value as string)} actionability={c.actionability} />
             <WHints hints={c.hints} highlightLatestHint={this.props.highlightLatestHint} />
           </div>
         ))}
