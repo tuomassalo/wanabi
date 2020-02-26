@@ -19,6 +19,7 @@ export default class WOtherHandActionButtons extends React.Component<{playerIdx:
         Give Hint:
         {AllColors.filter(c => c !== 'X').map(is => (
           <input
+            key={is}
             type="button"
             disabled={!this.props.hintsAvailable}
             className={`WColor-${is}`}
@@ -29,6 +30,7 @@ export default class WOtherHandActionButtons extends React.Component<{playerIdx:
         &nbsp; &nbsp;
         {[1, 2, 3, 4, 5].map(is => (
           <input
+            key={is}
             type="button"
             disabled={!this.props.hintsAvailable}
             value={is}
