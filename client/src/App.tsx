@@ -39,6 +39,7 @@ const exampleTurn: engine.TMaskedTurnState = {
       idx: 0,
       isConnected: true,
       isMe: false,
+      extraMysticalHand: [], // bogus
       hand: [
         {
           color: 'E',

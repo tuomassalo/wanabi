@@ -47,6 +47,11 @@ export default class WGame extends React.Component<{currentTurn: engine.MaskedTu
     return (
       <div className={gameStatusClass}>
         <div className="WHeader">
+          <span style={{float: 'right'}}>
+            <label>
+              <input type="checkbox" onClick={() => document.body.classList.toggle('mysteryview')} /> Mystery View
+            </label>
+          </span>
           <span>
             Turn: <em>{turnNumber}</em>
           </span>
@@ -94,6 +99,7 @@ export default class WGame extends React.Component<{currentTurn: engine.MaskedTu
                 ) : (
                   <WOtherHand
                     cards={p.hand.cards}
+                    extraMysticalHand={p.extraMysticalHand?.cards || []}
                     playerIdx={p.idx}
                     hintsAvailable={hintCount > 0}
                     highlightLatestHint={highlightLatestHint}

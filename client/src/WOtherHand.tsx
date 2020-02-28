@@ -2,6 +2,8 @@ import React from 'react'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import WCard from './WCard'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
+import WMysteryCard from './WMysteryCard'
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import WHints from './WHints'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import WLatestAction from './WLatestAction'
@@ -15,6 +17,7 @@ export default class WOtherHand extends React.Component<{
   cards: MaskedCard[]
   playerIdx: number
   hintsAvailable: boolean
+  extraMysticalHand: MaskedCard[]
   latestAction?: TResolvedActionState
   highlightLatestHint: boolean
 }> {
@@ -25,6 +28,7 @@ export default class WOtherHand extends React.Component<{
         {this.props.cards.map((c, idx) => (
           <div id={`card-${this.props.playerIdx}-${idx}`} key={idx}>
             <WCard key={Math.random()} card={new Card(c.value as string)} actionability={c.actionability} />
+            <WMysteryCard card={this.props.extraMysticalHand[idx]} />
             <WHints hints={c.hints} highlightLatestHint={this.props.highlightLatestHint} />
           </div>
         ))}
