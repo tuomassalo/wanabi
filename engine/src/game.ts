@@ -1,10 +1,12 @@
 import {Pile} from './pile'
 import {Player, TPlayerId, TPlayerState, TMaskedPlayerState, MaskedPlayer} from './player'
-import {Card, TColor, TNum, AllColors, AllNums, TCardValueState} from './card'
+import {Card, TColor, TNum, AllColors, AllNums, TCardValueState, MaskedCard, TMaskedCardState} from './card'
 import {Hand} from './hand'
 import {Table, TTableState} from './table'
 import {SyntaxError, GameError} from './errors'
 import {randomBytes} from 'crypto'
+import {resolveActionability} from './actionability-resolver'
+import {demystify} from './demystifier'
 
 type TGameStatus = 'WAITING_FOR_PLAYERS' | 'RUNNING' | 'GAMEOVER' | 'FINISHED'
 export type TGameId = string
@@ -169,20 +171,48 @@ export class Turn extends BaseTurn {
     return this.stock.cards.length
   }
 
-  getState(forPlayerId: TPlayerId): TMaskedTurnState {
-    const isOutsider = !this.players.some(p => p.id === forPlayerId)
-
-    const getRevealedCards = (forPlayerIdx: number) =>
+  _getPlayerStates(me: Player) {
+    // NB: this does not include own hand cards that are resolved
+    const getRevealedCards = (...excludePlayers: Player[]) =>
       [
         // discard pile
         this.discardPile.cards,
         // table
-        Object.values(this.table.table).flatMap(p => p.cards),
+        Object.values(this.table.table).flatMap(pile => pile.cards),
         // hands of other players
-        this.players
-          .filter(player => player.idx !== forPlayerIdx)
-          .flatMap(player => player.hand.cards.map(hc => new Card(hc))),
+        this.players.filter(p => !excludePlayers.includes(p)).flatMap(p => p.hand.cards.map(hc => new Card(hc))),
       ].flat()
+
+    const [myDemystifiedHand, myCardsRevealedToMe] = demystify(
+      me.hand.cards.map(c => new MaskedCard({hints: c.hints})),
+      getRevealedCards(me),
+    )
+
+    const demystifyOtherHand = (p: Player) => {
+      return demystify(
+        p.hand.cards.map(c => new MaskedCard({hints: c.hints})),
+        [...myCardsRevealedToMe, ...getRevealedCards(p, me)],
+      )[0]
+    }
+
+    return this.players.map(p =>
+      p === me
+        ? MaskedPlayer.meFromPlayer(p, resolveActionability(myDemystifiedHand, this.table, this.discardPile)).toJSON()
+        : MaskedPlayer.otherFromPlayer(
+            p,
+            resolveActionability(
+              p.hand.cards.map(c => new MaskedCard({color: c.color, num: c.num, hints: c.hints})),
+              this.table,
+              this.discardPile,
+            ),
+            resolveActionability(demystifyOtherHand(p), this.table, this.discardPile),
+          ).toJSON(),
+    )
+  }
+
+  getState(forPlayerId: TPlayerId): TMaskedTurnState {
+    const me = this.players.find(p => p.id === forPlayerId)
+    const isOutsider = !me
 
     return {
       ...JSON.parse(JSON.stringify(this)),
@@ -190,13 +220,9 @@ export class Turn extends BaseTurn {
       stockSize: this.stock.size,
       inTurn: this.inTurn,
       score: this.score,
-      players: this.players.map(p =>
-        isOutsider
-          ? MaskedPlayer.outsiderFromPlayer(p)
-          : p.id === forPlayerId
-          ? MaskedPlayer.meFromPlayer(p, getRevealedCards(p.idx), this.table, this.discardPile).toJSON()
-          : MaskedPlayer.otherFromPlayer(p, getRevealedCards(p.idx), this.table, this.discardPile).toJSON(),
-      ),
+      players: isOutsider
+        ? this.players.map(p => MaskedPlayer.outsiderFromPlayer(p))
+        : this._getPlayerStates(me as Player),
     }
   }
 
@@ -467,17 +493,17 @@ export class Game {
   // static deserialize(turns: TMaskedTurnState[]) {}
 
   // this returns information that is public for a player
-  getState(playerId: TPlayerId): TTurnState {
+  getState(playerId: TPlayerId): TMaskedTurnState {
     return this.getCompleteState(playerId).slice(-1)[0]
   }
   // this returns information that is public for a player
-  getCompleteState(playerId: TPlayerId): TTurnState[] {
+  getCompleteState(playerId: TPlayerId): TMaskedTurnState[] {
     // allow querying all games when they are still waiting for players
     if (!this.playersById[playerId] && this.currentTurn.status !== 'WAITING_FOR_PLAYERS') {
       throw new SyntaxError('INVALID_PLAYER_ID', playerId)
     }
 
-    const ret = JSON.parse(JSON.stringify(this.turns.map(t => t.getState(playerId)))) as TTurnState[]
+    const ret = JSON.parse(JSON.stringify(this.turns.map(t => t.getState(playerId)))) as TMaskedTurnState[]
 
     return ret
   }

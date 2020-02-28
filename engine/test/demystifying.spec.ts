@@ -12,7 +12,7 @@ interface CreateHandParam {
   hints?: CreateHint[]
 }
 function dem(myHand: MaskedCard[], revealedCards: Card[]): TMaskedCardState[] {
-  return JSON.parse(JSON.stringify(demystify(myHand, revealedCards))) as TMaskedCardState[]
+  return JSON.parse(JSON.stringify(demystify(myHand, revealedCards)[0])) as TMaskedCardState[]
 }
 
 function hand(...cards: CreateHandParam[]): MaskedCard[] {

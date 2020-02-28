@@ -15,14 +15,20 @@ export interface TPlayerState {
   isConnected: boolean
 }
 
-export interface TMaskedPlayerState {
+interface TBaseMaskedPlayerState {
   hand: TMaskedCardState[]
   idx: number
-  // id: string
   name: string
-  isMe: boolean
   isConnected: boolean
 }
+export interface TMeMaskedPlayerState extends TBaseMaskedPlayerState {
+  isMe: true
+}
+export interface TOtherMaskedPlayerState extends TBaseMaskedPlayerState {
+  isMe: false
+  extraMysticalHand: TMaskedCardState[]
+}
+export type TMaskedPlayerState = TMeMaskedPlayerState | TOtherMaskedPlayerState
 
 export class Player {
   name: string
@@ -60,6 +66,7 @@ export class MaskedPlayer {
   idx: number
   isMe: boolean
   isConnected: boolean
+  extraMysticalHand?: MaskedHand
   constructor(p: TMaskedPlayerState) {
     this.idx = p.idx
     this.name = p.name
@@ -67,33 +74,26 @@ export class MaskedPlayer {
     // this.id = p.id
     this.isMe = p.isMe
     this.isConnected = p.isConnected
+    if (!p.isMe) this.extraMysticalHand = new MaskedHand(p.extraMysticalHand)
   }
-  static meFromPlayer(p: Player, revealedCards: Card[], table: Table, discardPile: Pile): MaskedPlayer {
+  static meFromPlayer(p: Player, hand: TMaskedCardState[]): MaskedPlayer {
     return new MaskedPlayer({
       ...p,
-      hand: resolveActionability(
-        demystify(
-          // remove the actual values of each card
-          p.hand.cards.map(c => new MaskedCard({hints: c.hints})),
-          revealedCards,
-        ),
-        revealedCards,
-        table,
-        discardPile,
-      ),
+      hand,
       isMe: true,
     })
   }
-  static otherFromPlayer(p: Player, revealedCards: Card[], table: Table, discardPile: Pile): MaskedPlayer {
+  static otherFromPlayer(p: Player, hand: MaskedCard[], extraMysticalHand: TMaskedCardState[]): MaskedPlayer {
+    //
+    // hand.forEach((c, i) => {
+    //   c.possibleCards = demystifiedHand[i].possibleCards
+    // })
+
     return new MaskedPlayer({
       ...p,
-      hand: resolveActionability(
-        p.hand.cards.map(c => new MaskedCard({color: c.color, num: c.num, hints: c.hints})),
-        revealedCards,
-        table,
-        discardPile,
-      ),
+      hand,
       isMe: false,
+      extraMysticalHand,
     })
   }
   static outsiderFromPlayer(p: Player): MaskedPlayer {
@@ -101,15 +101,25 @@ export class MaskedPlayer {
       ...p,
       hand: [], // look, no hand(s)
       isMe: false,
+      extraMysticalHand: [],
     })
   }
   toJSON(): TMaskedPlayerState {
-    return {
-      name: this.name,
-      hand: this.hand.toJSON(),
-      idx: this.idx,
-      isMe: this.isMe,
-      isConnected: this.isConnected,
-    }
+    return this.isMe
+      ? {
+          name: this.name,
+          hand: this.hand.toJSON(),
+          idx: this.idx,
+          isMe: true,
+          isConnected: this.isConnected,
+        }
+      : {
+          name: this.name,
+          hand: this.hand.toJSON(),
+          idx: this.idx,
+          isMe: false,
+          isConnected: this.isConnected,
+          extraMysticalHand: (this.extraMysticalHand as MaskedHand).toJSON(),
+        }
   }
 }

@@ -52,6 +52,7 @@ describe('A new empty game', () => {
         },
         {
           hand: [],
+          extraMysticalHand: [],
           idx: 1,
           isConnected: true,
           isMe: false,
@@ -86,6 +87,7 @@ describe('A new empty game', () => {
           name: 'Athos',
         },
         {
+          extraMysticalHand: jasmine.any(Array),
           hand: [knownCard(), knownCard(), knownCard(), knownCard(), knownCard()],
           idx: 1,
           isConnected: true,

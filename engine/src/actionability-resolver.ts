@@ -11,12 +11,7 @@ import {sum, range} from 'lodash'
 import {Table} from './table'
 import {Pile} from './pile'
 
-export function resolveActionability(
-  myHand: MaskedCard[],
-  revealedCards: Card[],
-  table: Table,
-  discardPile: Pile,
-): MaskedCard[] {
+export function resolveActionability(myHand: MaskedCard[], table: Table, discardPile: Pile): MaskedCard[] {
   // make a copy to prevent modifying the argument
   myHand = myHand.map(mc => new MaskedCard(mc.toJSON()))
 

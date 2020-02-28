@@ -1,4 +1,5 @@
 import {createTightGame} from './helpers'
+import {TColor, TNum} from '../src/card'
 
 describe('A tight three-player game', () => {
   const g = createTightGame()
@@ -8,6 +9,16 @@ describe('A tight three-player game', () => {
       g.act(g.players[0].id, {type: 'PLAY', cardIdx: 0})
       g.act(g.players[1].id, {type: 'DISCARD', cardIdx: 0})
     }
+
+    const possibleCards = [
+      {count: 1, prob: 1 / 12, value: 'E1', actionability: 'DISCARDABLE'},
+      {count: 1, prob: 1 / 12, value: 'E5', actionability: 'PLAYABLE'},
+      {count: 3, prob: 1 / 4, value: 'X1', actionability: 'PLAYABLE'},
+      {count: 2, prob: 1 / 6, value: 'X2', actionability: 'UNPLAYABLE'},
+      {count: 2, prob: 1 / 6, value: 'X3', actionability: 'UNPLAYABLE'},
+      {count: 2, prob: 1 / 6, value: 'X4', actionability: 'UNPLAYABLE'},
+      {count: 1, prob: 1 / 12, value: 'X5', actionability: 'UNDISCARDABLE'},
+    ]
 
     expect(g.getState(g.players[1].id)).toEqual({
       action: {card: 'E1', cardIdx: 0, type: 'DISCARD'},
@@ -25,6 +36,13 @@ describe('A tight three-player game', () => {
       inTurn: 0,
       players: [
         {
+          extraMysticalHand: [
+            {hints: [], possibleCards},
+            {hints: [], possibleCards},
+            {hints: [], possibleCards},
+            {hints: [], possibleCards},
+            {hints: [], possibleCards},
+          ],
           hand: [
             {color: 'E', hints: [], num: 5, actionability: 'PLAYABLE'},
             {color: 'X', hints: [], num: 1, actionability: 'PLAYABLE'},
@@ -83,6 +101,52 @@ describe('A tight three-player game', () => {
   })
   it('should start countdown when the stock is emptied', () => {
     g.act(g.players[1].id, {type: 'DISCARD', cardIdx: 0})
+
+    const possibleCards = [
+      {count: 1, prob: 1 / 5, value: 'X1', actionability: 'PLAYABLE'},
+      {count: 1, prob: 1 / 5, value: 'X2', actionability: 'UNPLAYABLE'},
+      {count: 1, prob: 1 / 5, value: 'X3', actionability: 'UNPLAYABLE'},
+      {count: 1, prob: 1 / 5, value: 'X4', actionability: 'UNPLAYABLE'},
+      {count: 1, prob: 1 / 5, value: 'X5', actionability: 'UNDISCARDABLE'},
+    ]
+
+    // p0 has X1..X5
+    expect(
+      g
+        .getState(g.players[1].id)
+        .players[0].hand.map(c => (c.color as TColor) + (c.num as TNum))
+        .join(','),
+    ).toEqual('X1,X2,X3,X4,X5')
+
+    // p1 has X4,X3,X2,X1,X1
+    expect(
+      g
+        .getState(g.players[0].id)
+        .players[1].hand.map(c => (c.color as TColor) + (c.num as TNum))
+        .join(','),
+    ).toEqual('X4,X3,X2,X1,X1')
+
+    // The stock is empty, so p0 knows their hand but not positions
+    expect(g.getState(g.players[0].id).players[0].hand.map(c => c.possibleCards)).toEqual(
+      Array(5).fill([
+        {actionability: 'PLAYABLE', count: 1, prob: 0.2, value: 'X1'},
+        {actionability: 'UNPLAYABLE', count: 1, prob: 0.2, value: 'X2'},
+        {actionability: 'UNPLAYABLE', count: 1, prob: 0.2, value: 'X3'},
+        {actionability: 'UNPLAYABLE', count: 1, prob: 0.2, value: 'X4'},
+        {actionability: 'UNDISCARDABLE', count: 1, prob: 0.2, value: 'X5'},
+      ]),
+    )
+
+    // So does p1
+    expect(g.getState(g.players[1].id).players[1].hand.map(c => c.possibleCards)).toEqual(
+      Array(5).fill([
+        {actionability: 'PLAYABLE', count: 2, prob: 0.4, value: 'X1'},
+        {actionability: 'UNPLAYABLE', count: 1, prob: 0.2, value: 'X2'},
+        {actionability: 'UNPLAYABLE', count: 1, prob: 0.2, value: 'X3'},
+        {actionability: 'UNPLAYABLE', count: 1, prob: 0.2, value: 'X4'},
+      ]),
+    )
+
     expect(g.getState(g.players[1].id)).toEqual({
       gameId: jasmine.any(String),
       timestamp: jasmine.any(String),
@@ -114,6 +178,13 @@ describe('A tight three-player game', () => {
       status: 'RUNNING',
       players: [
         {
+          extraMysticalHand: [
+            {hints: [], color: 'X', possibleCards},
+            {hints: [], color: 'X', possibleCards},
+            {hints: [], color: 'X', possibleCards},
+            {hints: [], color: 'X', possibleCards},
+            {hints: [], color: 'X', possibleCards},
+          ],
           hand: [
             {color: 'X', hints: [], num: 1, actionability: 'PLAYABLE'},
             {color: 'X', hints: [], num: 2, actionability: 'UNPLAYABLE'},

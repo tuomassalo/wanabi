@@ -36,6 +36,7 @@ describe('A three-player game without any moves', () => {
           isConnected: true,
           isMe: false,
           hand: [knownCard(), knownCard(), knownCard(), knownCard(), knownCard()],
+          extraMysticalHand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
         },
         {
           name: 'Louie',
@@ -43,6 +44,7 @@ describe('A three-player game without any moves', () => {
           isConnected: true,
           isMe: false,
           hand: [knownCard(), knownCard(), knownCard(), knownCard(), knownCard()],
+          extraMysticalHand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
         },
       ],
     })
@@ -93,6 +95,7 @@ describe('A three-player game with a custom deck', () => {
             {color: 'C', num: 1, hints: [], actionability: 'PLAYABLE'},
             {color: 'D', num: 5, hints: [], actionability: 'UNDISCARDABLE'},
           ],
+          extraMysticalHand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
         },
         {
           name: 'Louie',
@@ -106,6 +109,7 @@ describe('A three-player game with a custom deck', () => {
             {color: 'C', num: 1, hints: [], actionability: 'PLAYABLE'},
             {color: 'E', num: 3, hints: [], actionability: 'UNPLAYABLE'},
           ],
+          extraMysticalHand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
         },
       ],
     })

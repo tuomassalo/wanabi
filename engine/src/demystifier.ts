@@ -1,5 +1,5 @@
-import {Card, MaskedCard, TPossibleCardState, PossibleCard, TCardValueState} from './card'
-import {sum, range} from 'lodash'
+import {Card, MaskedCard, TPossibleCardState, PossibleCard, TCardValueState, TNum, TColor} from './card'
+import {sum, range, uniq, times} from 'lodash'
 
 interface CardWithFewSolutions {
   possibleCards: TPossibleCardState[]
@@ -33,7 +33,9 @@ const l = (cards: Card[]) => cards.map(c => c.toString()).join(',')
 
 // NB: modifies myHand entries: adds `possibleCards` and fills out `color` and `num`
 // export function demystify(myHand: MaskedCard[], table:Table, otherRevealedCards: Card[]): MaskedCard[] {
-export function demystify(myHand: MaskedCard[], revealedCards: Card[]): MaskedCard[] {
+export function demystify(myHand: MaskedCard[], revealedCards: Card[]): [MaskedCard[], Card[]] {
+  const cardsRevealedWithoutPosition: Card[] = []
+
   // make a copy to prevent modifying the argument
   myHand = myHand.map(mc => new MaskedCard(mc.toJSON()))
 
@@ -56,21 +58,6 @@ export function demystify(myHand: MaskedCard[], revealedCards: Card[]): MaskedCa
       1,
     )
   }
-
-  // // simple sum
-  // function normalizeWeights(possibleCards: PossibleCard[]): PossibleCard[] {
-  //   const possibleCardsByValue: {[value: string]: PossibleCard} = {}
-
-  //   for (const pc of possibleCards) {
-  //     if (possibleCardsByValue[pc.value]) {
-  //       possibleCardsByValue[pc.value].weight += pc.weight
-  //     } else {
-  //       possibleCardsByValue[pc.value] = pc
-  //     }
-  //   }
-  //   return Object.values(possibleCardsByValue).sort((a, b) => a.value.localeCompare(b.value))
-  //   // return Object.values(possibleCardsByValue).sort((a, b) => a.color.localeCompare(b.color) || a.num - b.num)
-  // }
 
   function countPossibleCards(possibleValues: TCardValueState[]): PossibleCard[] {
     // console.warn('cPC', possibleValues)
@@ -280,6 +267,13 @@ export function demystify(myHand: MaskedCard[], revealedCards: Card[]): MaskedCa
       didRevealMore = addKnownBits(handCard, possibleCards) || didRevealMore
     }
 
+    cardsRevealedWithoutPosition.length = 0
+    const allPossibleCardsInAllPossibleSolutions = uniq(possibleSolutions.map(ps => ps.map(c => c.value)).flat())
+    for (const cardValue of allPossibleCardsInAllPossibleSolutions) {
+      const cardValueFoundCount = Math.min(...possibleSolutions.map(ps => ps.filter(c => c.value === cardValue).length))
+      times(cardValueFoundCount, () => cardsRevealedWithoutPosition.push(new Card(cardValue)))
+    }
+
     // console.warn(
     //   'GUESS RET',
     //   myHand.map(c => c.possibleCards),
@@ -308,5 +302,10 @@ export function demystify(myHand: MaskedCard[], revealedCards: Card[]): MaskedCa
   //   }
   // }
 
-  return myHand
+  // Find fully revealed cards
+  const fullyRevealedCards = myHand
+    .filter(c => c.color && c.num)
+    .map(c => new Card({color: c.color as TColor, num: c.num as TNum}))
+
+  return [myHand, [...cardsRevealedWithoutPosition, ...fullyRevealedCards]]
 }

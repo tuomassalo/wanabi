@@ -46,6 +46,7 @@ describe('A perfect two-player game without any hints or discards', () => {
             {color: 'B', num: 3, hints: [], actionability: 'UNPLAYABLE'},
             {color: 'B', num: 5, hints: [], actionability: 'UNDISCARDABLE'},
           ],
+          extraMysticalHand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
         },
       ],
     })
@@ -79,6 +80,7 @@ describe('A perfect two-player game without any hints or discards', () => {
             {color: 'B', num: 4, hints: [], actionability: 'UNPLAYABLE'},
             {color: 'C', num: 1, hints: [], actionability: 'PLAYABLE'},
           ],
+          extraMysticalHand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
         },
         {
           name: 'Clyde',
@@ -123,6 +125,7 @@ describe('A perfect two-player game without any hints or discards', () => {
           isConnected: true,
           isMe: false,
           hand: [knownCard(), knownCard(), knownCard(), knownCard(), knownCard()],
+          extraMysticalHand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
         },
         {
           name: 'Clyde',
@@ -164,6 +167,7 @@ describe('A perfect two-player game without any hints or discards', () => {
           isConnected: true,
           isMe: false,
           hand: [knownCard(), knownCard(), knownCard(), knownCard(), knownCard()],
+          extraMysticalHand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
         },
         {
           name: 'Clyde',
