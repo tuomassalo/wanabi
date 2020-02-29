@@ -32,7 +32,7 @@ async function scan<I>(
   return Items as I[]
 }
 async function scanGames(scanParams = {}) {
-  return await scan<engine.TTurnState>(gameTable, scanParams)
+  return (await scan<engine.TTurnState>(gameTable, scanParams)).sort((a, b) => (a.timestamp > b.timestamp ? -1 : 1))
 }
 
 async function getAllConnections(): Promise<TConnectionId[]> {

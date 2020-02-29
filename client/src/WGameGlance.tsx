@@ -4,6 +4,18 @@ import {MaskedTurn} from 'wanabi-engine'
 import WPlayerList from './WPlayerList'
 import {WebSocketClient} from './websocketclient'
 import {promptPlayerName} from './helpers'
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import TimeAgo from 'react-timeago'
+// eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+//@ts-ignore
+import timeAgoStrings from 'react-timeago/lib/language-strings/en'
+// eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+//@ts-ignore
+import buildFormatter from 'react-timeago/lib/formatters/buildFormatter'
+
+const formatter = buildFormatter(timeAgoStrings)
+
 declare const wsclient: WebSocketClient
 
 export default class WGameGlance extends React.Component<{game: MaskedTurn}> {
@@ -37,6 +49,9 @@ export default class WGameGlance extends React.Component<{game: MaskedTurn}> {
     }
     return (
       <div className={`WGameGlance WGameGlance-${this.props.game.status}`}>
+        <span style={{float: 'right'}}>
+          <TimeAgo date={this.props.game.timestamp} formatter={formatter} />
+        </span>
         {status}
         Players: <WPlayerList turn={this.props.game} />
         {actionButtons}
