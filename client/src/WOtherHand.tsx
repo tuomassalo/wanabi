@@ -26,7 +26,7 @@ export default class WOtherHand extends React.Component<{
       <div className="WOtherHand">
         {/* NB: bogus index, might break animations */}
         {this.props.cards.map((c, idx) => (
-          <div id={`card-${this.props.playerIdx}-${idx}`} key={idx}>
+          <div className="WCardContainer" id={`card-${this.props.playerIdx}-${idx}`} key={idx}>
             <WCard key={Math.random()} card={new Card(c.value as string)} actionability={c.actionability} />
             <WMysteryCard card={this.props.extraMysticalHand[idx]} />
             <WHints hints={c.hints} highlightLatestHint={this.props.highlightLatestHint} />
