@@ -6,6 +6,7 @@
   "author": "",
   "license": "ISC",
   "scripts": {
+    "deploy": "npx serverless deploy --stage prod --force",
     "watch": "tsc --watch",
     "broadcast": "sls invoke --function broadcast --data '{ \"body\": \"Hello from server\" }'",
     "localbroadcast": "sls invoke local --function broadcast --data '{ \"body\": \"Hello from server\" }'",
