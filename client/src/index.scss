@@ -72,7 +72,7 @@ div.WOtherHand {
   }
 }
 div.WOtherHand {
-  body.mysteryview & > div {
+  body.mysteryview & > div.WCardContainer {
     > div:nth-child(1) {
       display: none;
     }
@@ -80,7 +80,7 @@ div.WOtherHand {
       display: inherit;
     }
   }
-  body:not(.mysteryview) & > div {
+  body:not(.mysteryview) & > div.WCardContainer {
     > div:nth-child(1) {
       display: inherit;
     }

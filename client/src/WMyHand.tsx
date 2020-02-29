@@ -29,7 +29,7 @@ export default class WMyHand extends React.Component<{
     return (
       <div className="WMyHand">
         {this.props.cards.map((c, idx) => (
-          <div id={`card-${this.props.playerIdx}-${idx}`} key={idx}>
+          <div className="WCardContainer" id={`card-${this.props.playerIdx}-${idx}`} key={idx}>
             <WMyCardActionButtons cardIdx={idx} />
             <WMysteryCard card={c} />
             <WHints hints={c.hints} highlightLatestHint={this.props.highlightLatestHint} />
