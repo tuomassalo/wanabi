@@ -25,6 +25,11 @@ body {
   margin: 0;
 }
 
+.WSpinner {
+  text-align: center;
+  padding-top: 90px;
+}
+
 .WMenu {
   color: #ccc;
   text-align: center;
@@ -44,6 +49,7 @@ div.WWaiting {
   margin: 20px;
   color: black;
   background-color: #ccc;
+  height: auto;
 }
 div.WGameGlance ul,
 div.WGameGlance li {

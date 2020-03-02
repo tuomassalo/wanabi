@@ -6,6 +6,9 @@ import WWaiting from './WWaiting'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import WGame from './WGame'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
+import Loader from 'react-loader-spinner'
+import 'react-loader-spinner/dist/loader/css/react-spinner-loader.css'
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import WMenu from './WMenu'
 import {AllColors, TColor, Card} from 'wanabi-engine/dist/card'
 
@@ -197,10 +200,8 @@ export default class App extends React.Component<{}, AppState> {
 
     const waitForAnimation = async (elem: HTMLElement) => {
       await new Promise(r => {
-        // setTimeout(r, 2000)
         elem.addEventListener('animationend', r, {once: true})
       })
-      // await new Promise(r => elem.addEventListener('animationend', r, false))
     }
 
     const createGhost = async (cardIdx: number) => {
@@ -208,8 +209,6 @@ export default class App extends React.Component<{}, AppState> {
         `#card-${playerIdx}-${cardIdx} > .WCard, #card-${playerIdx}-${cardIdx} > .WMysteryCard`,
       ) as HTMLDivElement
       const ghostBounds = orig.getBoundingClientRect()
-
-      console.warn(ghostBounds.left, ghostBounds.top)
 
       const ghostCard = orig.cloneNode(true) as HTMLDivElement
       const ghost = document.createElement('div')
@@ -222,17 +221,13 @@ export default class App extends React.Component<{}, AppState> {
       ghost.style.left = ghostBounds.left + document.documentElement.scrollLeft + 'px'
       ghost.style.top = ghostBounds.top + document.documentElement.scrollTop + 'px'
 
-      // const orig = orig.querySelector('.WCard') as HTMLElement
-
       // if the card is not known yet, "flip" the clone first
       if (1 && !(orig.classList.contains('WColor-' + playedCard.color) && orig.textContent === '' + playedCard.num)) {
         // const ghost = ghost.querySelector('.WCard') as HTMLElement
         // first part of the flip
         ghost.classList.add('WCard-flip-1')
-        console.warn(1)
 
         await waitForAnimation(ghostCard)
-        console.warn(2)
         ghost.classList.remove('WCard-flip-1')
 
         // Now the ghost has been flipped 90 degrees, so it's invisible. Add information.
@@ -243,18 +238,9 @@ export default class App extends React.Component<{}, AppState> {
         ghostCard.classList.add('WColor-' + playedCard.color)
         ghostCard.textContent = '' + playedCard.num
 
-        // Is this wait needed?
-        // console.warn(3)
-        // ghost.style.visibility = 'hidden'
-        // await new Promise(r => setTimeout(r, 50))
-        // ghost.style.visibility = 'visible'
-        // console.warn(4)
-
         // second part of the flip
         ghost.classList.add('WCard-flip-2')
-        console.warn(5)
         await waitForAnimation(ghostCard)
-        console.warn(6)
         ghost.classList.remove('WCard-flip-2')
       }
 
@@ -321,7 +307,11 @@ export default class App extends React.Component<{}, AppState> {
   }
   render() {
     if (this.state.phase === 'LOADING') {
-      return <div></div>
+      return (
+        <div className="WSpinner">
+          <Loader type="TailSpin" color="#fff5" height={100} width={100} />
+        </div>
+      )
     }
     const phaseComponent =
       this.state.phase === 'IN_MENU' ? (
