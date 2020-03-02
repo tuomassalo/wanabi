@@ -283,3 +283,149 @@ describe('Third three-player game', () => {
     })
   })
 })
+
+describe('A real game ending', () => {
+  const g = new Game({
+    from: 'SERIALIZED_TURNS',
+    turns: [
+      {
+        action: {card: 'A3', cardIdx: 0, success: true, type: 'PLAY'},
+        discardPile: [
+          'A4',
+          'B2',
+          'C3',
+          'E4',
+          'E3',
+          'D3',
+          'D4',
+          'E1',
+          'D1',
+          'D4',
+          'C4',
+          'E2',
+          'X3',
+          'D5',
+          'E1',
+          'C1',
+          'X2',
+          'X1',
+          'C4',
+          'D1',
+          'B1',
+          'A3',
+          'A1',
+          'C1',
+          'X1',
+          'B4',
+        ],
+        gameId: 'ac7942540dfbef26fc795eb6becb8e1c58cfc96a',
+        hintCount: 8,
+        players: [
+          {
+            hand: [
+              {
+                color: 'A',
+                hints: [
+                  {is: 1, result: false, turnNumber: 17},
+                  {is: 5, result: true, turnNumber: 19},
+                  {is: 3, result: false, turnNumber: 29},
+                  {is: 'C', result: false, turnNumber: 35},
+                  {is: 'D', result: false, turnNumber: 39},
+                  {is: 3, result: false, turnNumber: 43},
+                  {is: 'C', result: false, turnNumber: 55},
+                  {is: 'E', result: false, turnNumber: 57},
+                  {is: 'A', result: true, turnNumber: 75},
+                ],
+                num: 5,
+              },
+              {color: 'B', hints: [{is: 'A', result: false, turnNumber: 75}], num: 3},
+              {color: 'B', hints: [{is: 'A', result: false, turnNumber: 75}], num: 1},
+              {color: 'D', hints: [{is: 'A', result: false, turnNumber: 75}], num: 2},
+              {color: 'A', hints: [], num: 2},
+            ],
+            id: 'IufDncLagi0AbBg=',
+            idx: 0,
+            isConnected: true,
+            name: 'Essi',
+          },
+          {
+            hand: [
+              {
+                color: 'A',
+                hints: [
+                  {is: 4, result: true, turnNumber: 46},
+                  {is: 'A', result: true, turnNumber: 48},
+                  {is: 'E', result: false, turnNumber: 50},
+                  {is: 1, result: false, turnNumber: 62},
+                  {is: 5, result: false, turnNumber: 64},
+                  {is: 'C', result: false, turnNumber: 66},
+                ],
+                num: 4,
+              },
+              {color: 'C', hints: [], num: 2},
+              {color: 'A', hints: [], num: 1},
+              {color: 'X', hints: [], num: 4},
+              {color: 'C', hints: [], num: 5},
+            ],
+            id: 'Iuj_ocSqAi0CEog=',
+            idx: 1,
+            isConnected: true,
+            name: 'Tumeks',
+          },
+        ],
+        status: 'RUNNING',
+        stock: [],
+        table: {
+          A: ['A1', 'A2', 'A3'],
+          B: ['B1', 'B2', 'B3', 'B4', 'B5'],
+          C: ['C1', 'C2', 'C3'],
+          D: ['D1', 'D2', 'D3'],
+          E: ['E1', 'E2', 'E3', 'E4', 'E5'],
+          X: ['X1', 'X2', 'X3', 'X4', 'X5'],
+        },
+        timestamp: '2020-03-01T20:24:04.318Z',
+        turnNumber: 78,
+        turnsLeft: 2,
+        woundCount: 0,
+      },
+    ],
+  } as any)
+  it('shows correct extra mystical cards', () => {
+    expect(getExtraMysticalHand(g, 1, 0)).toEqual([
+      {
+        actionability: 'PLAYABLE',
+        color: 'A',
+        hints: jasmine.any(Array),
+        num: 4,
+      },
+      ...Array(4).fill({
+        actionability: 'DISCARDABLE',
+        hints: [],
+        possibleCards: [
+          {count: 1, prob: 1 / 4, value: 'A1'},
+          {count: 1, prob: 1 / 4, value: 'C2'},
+          {count: 1, prob: 1 / 4, value: 'C5'},
+          {count: 1, prob: 1 / 4, value: 'X4'},
+        ],
+      }),
+    ])
+    expect(getExtraMysticalHand(g, 0, 1)).toEqual([
+      {
+        actionability: 'UNDISCARDABLE',
+        color: 'A',
+        hints: jasmine.any(Array),
+        num: 5,
+      },
+      ...Array(3).fill({
+        actionability: 'DISCARDABLE',
+        hints: [{is: 'A', result: false, turnNumber: 75}],
+        possibleCards: [
+          {count: 1, prob: 0.3333333333333333, value: 'B1'},
+          {count: 1, prob: 0.3333333333333333, value: 'B3'},
+          {count: 1, prob: 0.3333333333333333, value: 'D2'},
+        ],
+      }),
+      {actionability: 'DISCARDABLE', color: 'A', hints: [], num: 2},
+    ])
+  })
+})

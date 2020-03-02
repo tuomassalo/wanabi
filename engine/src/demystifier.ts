@@ -1,5 +1,6 @@
 import {Card, MaskedCard, TPossibleCardState, PossibleCard, TCardValueState, TNum, TColor} from './card'
 import {sum, range, uniq, times} from 'lodash'
+import {GameError} from './errors'
 
 interface CardWithFewSolutions {
   possibleCards: TPossibleCardState[]
@@ -41,7 +42,8 @@ export function demystify(myHand: MaskedCard[], revealedCards: Card[]): [MaskedC
 
   // console.warn(
   //   'DEMYS',
-  //   revealedCards.map(c => c.toString()),
+  //   myHand,
+  //   revealedCards.map(c => c.value),
   // )
 
   // console.warn(
@@ -252,7 +254,11 @@ export function demystify(myHand: MaskedCard[], revealedCards: Card[]): [MaskedC
     // start recursive guesswork
     guessCard(0, [], unrevealedCards)
 
-    // console.warn('pS', possibleSolutions)
+    if (possibleSolutions.length === 0) {
+      throw new GameError('Integrity error: no possible solutions', [unrevealedCards, ...cardsWithFewSolutions])
+
+      // console.warn('pS', possibleSolutions)
+    }
     // console.warn(
     //   'GUESS 2',
     //   myHand.map(c => c.possibleCards),
@@ -267,8 +273,21 @@ export function demystify(myHand: MaskedCard[], revealedCards: Card[]): [MaskedC
       didRevealMore = addKnownBits(handCard, possibleCards) || didRevealMore
     }
 
+    // PROBLEM: if addKnownBits marks some cards fully known, the code below doesn't take that into account.
+    // SOLUTION: ignore possibleSolutions[][cardIdx] for any card that is now fully known
+    const fullyKnownCardIndices: Set<number> = new Set()
+    myHand.forEach((c, handIdx) => {
+      cardsWithFewSolutions.forEach((f, fewSolutionsIdx) => {
+        if (f.handIdx === handIdx && c.color && c.num) {
+          fullyKnownCardIndices.add(fewSolutionsIdx)
+        }
+      })
+    })
+
     cardsRevealedWithoutPosition.length = 0
-    const allPossibleCardsInAllPossibleSolutions = uniq(possibleSolutions.map(ps => ps.map(c => c.value)).flat())
+    const allPossibleCardsInAllPossibleSolutions = uniq(
+      possibleSolutions.map(ps => ps.filter((c, idx) => !fullyKnownCardIndices.has(idx)).map(c => c.value)).flat(),
+    )
     for (const cardValue of allPossibleCardsInAllPossibleSolutions) {
       const cardValueFoundCount = Math.min(...possibleSolutions.map(ps => ps.filter(c => c.value === cardValue).length))
       times(cardValueFoundCount, () => cardsRevealedWithoutPosition.push(new Card(cardValue)))

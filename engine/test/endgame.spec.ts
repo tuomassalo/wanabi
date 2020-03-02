@@ -1,4 +1,5 @@
 import {createTightGame} from './helpers'
+import {Game} from '../src/game'
 
 describe('A failed game', () => {
   const g = createTightGame()
