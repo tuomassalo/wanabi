@@ -63,7 +63,7 @@ test('joinGame', done => {
           hintCount: 9,
           inTurn: 0,
           players: [
-            {hand: [], idx: 0, isConnected: true, isMe: false, name: 'BOBBY_TABLES'},
+            {extraMysticalHand: [], hand: [], idx: 0, isConnected: true, isMe: false, name: 'BOBBY_TABLES'},
             {hand: [], idx: 1, isConnected: true, isMe: true, name: 'Beatrice'},
           ],
           score: 0,
@@ -104,6 +104,7 @@ test('startGame', done => {
               name: 'BOBBY_TABLES',
             },
             {
+              extraMysticalHand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
               hand: [
                 {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
                 {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},

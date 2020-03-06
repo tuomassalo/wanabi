@@ -64,7 +64,7 @@ test('getGamesState', done => {
           gameId: jasmine.any(String),
           hintCount: 9,
           inTurn: 0,
-          players: [{hand: [], idx: 0, isConnected: true, isMe: false, name: 'BOBBY_TABLES'}],
+          players: [{extraMysticalHand: [], hand: [], idx: 0, isConnected: true, isMe: false, name: 'BOBBY_TABLES'}],
           score: 0,
           status: 'WAITING_FOR_PLAYERS',
           stockSize: 0,
@@ -95,7 +95,7 @@ test('joinGame', done => {
           hintCount: 9,
           inTurn: 0,
           players: [
-            {hand: [], idx: 0, isConnected: true, isMe: false, name: 'BOBBY_TABLES'},
+            {extraMysticalHand: [], hand: [], idx: 0, isConnected: true, isMe: false, name: 'BOBBY_TABLES'},
             {hand: [], idx: 1, isConnected: true, isMe: true, name: 'Beatrice'},
           ],
           score: 0,
@@ -136,6 +136,7 @@ test('startGame', done => {
               name: 'BOBBY_TABLES',
             },
             {
+              extraMysticalHand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
               hand: [
                 {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
                 {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
@@ -188,6 +189,7 @@ test('act', done => {
               name: 'BOBBY_TABLES',
             },
             {
+              extraMysticalHand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
               hand: [
                 {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
                 {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
@@ -228,6 +230,7 @@ test('act', done => {
           inTurn: 1,
           players: [
             {
+              extraMysticalHand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
               hand: [
                 {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
                 {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
@@ -280,8 +283,8 @@ test('An outsider sees the started game, but cannot see any hands', done => {
           inTurn: 1,
           players: [
             // NB: no hands are shown
-            {hand: [], idx: 0, isConnected: true, isMe: false, name: 'BOBBY_TABLES'},
-            {hand: [], idx: 1, isConnected: true, isMe: false, name: 'Beatrice'},
+            {extraMysticalHand: [], hand: [], idx: 0, isConnected: true, isMe: false, name: 'BOBBY_TABLES'},
+            {extraMysticalHand: [], hand: [], idx: 1, isConnected: true, isMe: false, name: 'Beatrice'},
           ],
           score: 0,
           status: 'RUNNING',
@@ -318,12 +321,12 @@ test('An "outsider" can join a game if someone disconnects', async done => {
 
   await new Promise(r => setTimeout(r, 100))
   ws2.disconnect()
-  await new Promise(r => setTimeout(r, 100))
+  await new Promise(r => setTimeout(r, 1000))
 
   const msg = await waitMsg()
   expect(msg.games[0].players).toEqual([
-    {hand: [], idx: 0, isConnected: true, isMe: false, name: 'BOBBY_TABLES'},
-    {hand: [], idx: 1, isConnected: false, isMe: false, name: 'Beatrice'}, // NB: not connected!
+    {extraMysticalHand: [], hand: [], idx: 0, isConnected: true, isMe: false, name: 'BOBBY_TABLES'},
+    {extraMysticalHand: [], hand: [], idx: 1, isConnected: false, isMe: false, name: 'Beatrice'}, // NB: not connected!
   ])
 
   await new Promise(r => setTimeout(r, 100))
@@ -331,6 +334,7 @@ test('An "outsider" can join a game if someone disconnects', async done => {
 
   expect((await waitMsg()).games[0].players).toEqual([
     {
+      extraMysticalHand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
       hand: [
         {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
         {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
