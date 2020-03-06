@@ -72,6 +72,7 @@ export interface TBaseTurnState {
 }
 export interface TTurnState extends TBaseTurnState {
   players: TPlayerState[]
+  seed: string
   stock: TCardValueState[] // empty if is masked
 }
 export interface TMaskedTurnState extends TBaseTurnState {
@@ -144,11 +145,13 @@ abstract class BaseTurn {
 export class Turn extends BaseTurn {
   players: Player[]
   stock: Pile
+  seed: string
 
   constructor(t: TTurnState) {
     super(t)
     this.players = t.players.map(p => new Player(p))
     this.stock = new Pile(t.stock)
+    this.seed = t.seed
   }
   clone() {
     // make a deep copy
@@ -161,6 +164,7 @@ export class Turn extends BaseTurn {
   toJSON(): TTurnState {
     return {
       ...this,
+      seed: this.seed,
       stock: this.stock.toJSON(),
       discardPile: this.discardPile.toJSON(),
       table: this.table.toJSON(),
@@ -216,7 +220,8 @@ export class Turn extends BaseTurn {
 
     return {
       ...JSON.parse(JSON.stringify(this)),
-      stock: undefined,
+      stock: undefined, // remove ("mask" .stock)
+      seed: undefined, // remove ("mask" .seed)
       stockSize: this.stock.size,
       inTurn: this.inTurn,
       score: this.score,
@@ -357,10 +362,11 @@ export class Game {
     } else if (params.from === 'NEW_TEST_GAME') {
       // USED IN TESTS
       // set up a new game
+      const seed = randomBytes(20).toString('hex')
       let {playerNames, deck, discardPile, table} = params
       if (!deck) {
         deck = new Pile(deck || Card.getFullDeck())
-        deck.shuffle()
+        deck.shuffle(seed)
       }
 
       const handSize: number = Game.getHandSize(playerNames.length)
@@ -368,6 +374,7 @@ export class Game {
       this.turns = [
         new Turn({
           gameId: randomBytes(20).toString('hex'),
+          seed,
           table: new Table(table ? table.toJSON() : undefined).toJSON(),
           stock: deck.toJSON(),
           discardPile: (discardPile || new Pile([])).toJSON(),
@@ -426,6 +433,7 @@ export class Game {
       gameId: randomBytes(20).toString('hex'),
       table: new Table().toJSON(),
       stock: new Pile([]).toJSON(),
+      seed: randomBytes(20).toString('hex'),
       discardPile: new Pile([]).toJSON(),
       players: [
         new Player({
@@ -465,7 +473,7 @@ export class Game {
   }
   static startPendingGame(pendingGame: Turn): Game {
     pendingGame.stock = new Pile(Card.getFullDeck())
-    pendingGame.stock.shuffle()
+    pendingGame.stock.shuffle(pendingGame.gameId)
 
     const handSize: number = Game.getHandSize(pendingGame.players.length)
     for (let i = 0; i < handSize; i++) {

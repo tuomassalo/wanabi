@@ -14,12 +14,6 @@ export class Hand {
   toJSON(): THandState {
     return this.cards.map(c => c.serializeWithHints())
   }
-  shuffle() {
-    for (let i = this.cards.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1))
-      ;[this.cards[i], this.cards[j]] = [this.cards[j], this.cards[i]]
-    }
-  }
   dealOne(card: Card) {
     this.cards.push(card)
   }
