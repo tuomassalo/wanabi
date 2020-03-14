@@ -1,23 +1,68 @@
 import React from 'react'
-import {THintResultState} from 'wanabi-engine/dist/card'
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import WHint from './WHint'
+import {TRefinedHintResultState} from './refiner'
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import TooltipTrigger from 'react-popper-tooltip'
+import 'react-popper-tooltip/dist/styles.css'
 
-export default class WHints extends React.Component<{hints: THintResultState[]; highlightLatestHint: boolean}> {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const Tooltip = ({children, tooltip, hideArrow, ...props}: any) => (
+  <TooltipTrigger
+    {...props}
+    tooltip={({arrowRef, tooltipRef, getArrowProps, getTooltipProps, placement}) => (
+      <div
+        {...getTooltipProps({
+          ref: tooltipRef,
+          className: 'tooltip-container',
+        })}
+      >
+        {!hideArrow && (
+          <div
+            {...getArrowProps({
+              ref: arrowRef,
+              className: 'tooltip-arrow',
+              'data-placement': placement,
+            })}
+          />
+        )}
+        {tooltip}
+      </div>
+    )}
+  >
+    {({getTriggerProps, triggerRef}) => (
+      <span
+        {...getTriggerProps({
+          ref: triggerRef,
+          className: 'trigger',
+        })}
+      >
+        {children}
+      </span>
+    )}
+  </TooltipTrigger>
+)
+
+export default class WHints extends React.Component<{hints: TRefinedHintResultState[]; highlightLatestHint: boolean}> {
   // startGame = () => {
   //   wsclient.startGame({gameId: this.props.currentTurn.gameId})
   // }
 
   render() {
+    console.warn(111, this.props.hints)
+
     return (
       <div className="WHints clearfix">
         {this.props.hints.map((h, idx) => (
-          <WHint
-            hint={h}
+          <Tooltip
             key={h.turnNumber}
-            highlight={this.props.highlightLatestHint && idx === this.props.hints.length - 1}
-          />
+            tooltip={`Hinted by ${h.hinterName} on turn ${h.turnNumber} (${
+              h.turnsAgo > 1 ? `${h.turnsAgo} turns ago` : 'just now'
+            })`}
+          >
+            <WHint hint={h} highlight={this.props.highlightLatestHint && idx === this.props.hints.length - 1} />
+          </Tooltip>
         ))}
       </div>
     )

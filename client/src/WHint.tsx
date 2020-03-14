@@ -1,7 +1,18 @@
 import React from 'react'
-import {THintResultState} from 'wanabi-engine/dist/card'
+import {TRefinedHintResultState} from './refiner'
+import {TNum, TColor} from 'wanabi-engine/dist/card'
 
-export default class WHint extends React.Component<{hint: THintResultState; highlight?: boolean}> {
+// from https://www.npmjs.com/package/react-popper-tooltip#quick-start
+
+interface TRawHintResultState {
+  is: TNum | TColor
+  result: boolean
+}
+
+export default class WHint extends React.Component<{
+  hint: TRefinedHintResultState | TRawHintResultState
+  highlight?: boolean
+}> {
   // startGame = () => {
   //   wsclient.startGame({gameId: this.props.currentTurn.gameId})
   // }

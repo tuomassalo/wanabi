@@ -1,9 +1,10 @@
 import React from 'react'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 
-import {MaskedCard, Card, TActionability} from 'wanabi-engine/dist/card'
+import {Card, TActionability} from 'wanabi-engine/dist/card'
+import {TRefinedMaskedCardState} from './refiner'
 
-export default class WMysteryCard extends React.Component<{card: MaskedCard}> {
+export default class WMysteryCard extends React.Component<{card: TRefinedMaskedCardState}> {
   render() {
     const {color, num, possibleCards} = this.props.card
     const allPossibleCards: {card: Card; prob: number; actionability?: TActionability}[] = (

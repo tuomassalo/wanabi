@@ -9,6 +9,11 @@ import WMyHand from './WMyHand'
 import WOtherHand from './WOtherHand'
 import {WebSocketClient} from './websocketclient'
 import * as engine from 'wanabi-engine'
+import {refineCards} from './refiner'
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import WLatestAction from './WLatestAction'
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import WOtherHandActionButtons from './WOtherHandActionButtons'
 declare const wsclient: WebSocketClient
 
 export default class WGame extends React.Component<{currentTurn: engine.MaskedTurn}> {
@@ -77,11 +82,13 @@ export default class WGame extends React.Component<{currentTurn: engine.MaskedTu
             <WTable table={table} latestAction={action} />
           </div>
           {players.map(p => {
-            const highlightedLastActionByThisPlayer =
-              p.idx === (players.length + inTurn - 1) % players.length ? action : undefined
+            const getLatestActionIfByThisPlayer = () =>
+              p.idx === (players.length + inTurn - 1) % players.length ? (
+                <WLatestAction latestAction={action} />
+              ) : (
+                <span />
+              )
             const highlightLatestHint = action.type === 'HINT' && action.toPlayerIdx === p.idx
-
-            // console.warn(p, {highlightLatestHint, highlightedLastActionByThisPlayer})
 
             return (
               <div key={p.idx} className={`WPlayer ${p.idx === inTurn ? 'WPlayer-inturn' : ''}`}>
@@ -91,20 +98,25 @@ export default class WGame extends React.Component<{currentTurn: engine.MaskedTu
                 </h3>
                 {p.isMe ? (
                   <WMyHand
-                    cards={p.hand.cards}
+                    cards={refineCards(this.props.currentTurn, p.hand.cards)}
                     playerIdx={p.idx}
                     highlightLatestHint={highlightLatestHint}
-                    latestAction={highlightedLastActionByThisPlayer}
-                  />
+                  >
+                    {getLatestActionIfByThisPlayer()}
+                  </WMyHand>
                 ) : (
                   <WOtherHand
-                    cards={p.hand.cards}
-                    extraMysticalHand={p.extraMysticalHand?.cards || []}
+                    cards={refineCards(this.props.currentTurn, p.hand.cards)}
+                    extraMysticalHand={
+                      p.extraMysticalHand ? refineCards(this.props.currentTurn, p.extraMysticalHand.cards) : []
+                    }
                     playerIdx={p.idx}
                     hintsAvailable={hintCount > 0}
                     highlightLatestHint={highlightLatestHint}
-                    latestAction={highlightedLastActionByThisPlayer}
-                  />
+                  >
+                    <WOtherHandActionButtons playerIdx={p.idx} hintsAvailable={hintCount > 0} />
+                    {getLatestActionIfByThisPlayer()}
+                  </WOtherHand>
                 )}
               </div>
             )

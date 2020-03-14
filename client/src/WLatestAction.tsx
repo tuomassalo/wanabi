@@ -8,7 +8,7 @@ import {Card} from 'wanabi-engine/dist/card'
 
 // import {MaskedCard, Card} from 'wanabi-engine/dist/card'
 
-export default class WLatestAction extends React.Component<{latestAction?: TResolvedActionState}> {
+export default class WLatestAction extends React.Component<{latestAction: TResolvedActionState}> {
   render() {
     if (this.props.latestAction) {
       const action = this.props.latestAction
@@ -29,7 +29,7 @@ export default class WLatestAction extends React.Component<{latestAction?: TReso
       } else if (action.type === 'HINT') {
         return (
           <div className="WLatestAction">
-            Hinted {action.toPlayerName}: <WHint hint={{is: action.is, result: true, turnNumber: 0}} />
+            Hinted {action.toPlayerName}: <WHint hint={{is: action.is, result: true}} />
           </div>
         )
       }

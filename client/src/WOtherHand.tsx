@@ -5,20 +5,14 @@ import WCard from './WCard'
 import WMysteryCard from './WMysteryCard'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import WHints from './WHints'
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import WLatestAction from './WLatestAction'
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import WOtherHandActionButtons from './WOtherHandActionButtons'
-
-import {MaskedCard, Card} from 'wanabi-engine/dist/card'
-import {TResolvedActionState} from 'wanabi-engine'
+import {Card} from 'wanabi-engine/dist/card'
+import {TRefinedMaskedCardState} from './refiner'
 
 export default class WOtherHand extends React.Component<{
-  cards: MaskedCard[]
+  cards: TRefinedMaskedCardState[]
   playerIdx: number
   hintsAvailable: boolean
-  extraMysticalHand: MaskedCard[]
-  latestAction?: TResolvedActionState
+  extraMysticalHand: TRefinedMaskedCardState[]
   highlightLatestHint: boolean
 }> {
   render() {
@@ -32,8 +26,7 @@ export default class WOtherHand extends React.Component<{
             <WHints hints={c.hints} highlightLatestHint={this.props.highlightLatestHint} />
           </div>
         ))}
-        <WOtherHandActionButtons playerIdx={this.props.playerIdx} hintsAvailable={this.props.hintsAvailable} />
-        <WLatestAction latestAction={this.props.latestAction} />
+        {this.props.children}
       </div>
     )
   }

@@ -220,8 +220,8 @@ export class Turn extends BaseTurn {
 
     return {
       ...JSON.parse(JSON.stringify(this)),
-      stock: undefined, // remove ("mask" .stock)
-      seed: undefined, // remove ("mask" .seed)
+      stock: undefined, // remove ("mask") .stock
+      seed: undefined, // remove ("mask") .seed
       stockSize: this.stock.size,
       inTurn: this.inTurn,
       score: this.score,

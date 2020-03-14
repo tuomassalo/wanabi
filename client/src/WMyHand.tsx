@@ -1,24 +1,21 @@
 import React from 'react'
 
 import {WebSocketClient} from './websocketclient'
-import {MaskedCard} from 'wanabi-engine/dist/card'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import WMysteryCard from './WMysteryCard'
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import WLatestAction from './WLatestAction'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import WMyCardActionButtons from './WMyCardActionButtons'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import WHints from './WHints'
-import {TGameId, TResolvedActionState} from 'wanabi-engine'
+import {TGameId} from 'wanabi-engine'
+import {TRefinedMaskedCardState} from './refiner'
 
 declare const wsclient: WebSocketClient
 declare const gameId: TGameId
 
 export default class WMyHand extends React.Component<{
-  cards: MaskedCard[]
+  cards: TRefinedMaskedCardState[]
   playerIdx: number
-  latestAction?: TResolvedActionState
   highlightLatestHint: boolean
 }> {
   // startGame = () => {
@@ -35,7 +32,7 @@ export default class WMyHand extends React.Component<{
             <WHints hints={c.hints} highlightLatestHint={this.props.highlightLatestHint} />
           </div>
         ))}
-        <WLatestAction latestAction={this.props.latestAction} />
+        {this.props.children}
       </div>
     )
   }
