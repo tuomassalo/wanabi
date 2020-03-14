@@ -11,6 +11,7 @@ import 'react-popper-tooltip/dist/styles.css'
 const Tooltip = ({children, tooltip, hideArrow, ...props}: any) => (
   <TooltipTrigger
     {...props}
+    trigger={['click', 'hover']}
     tooltip={({arrowRef, tooltipRef, getArrowProps, getTooltipProps, placement}) => (
       <div
         {...getTooltipProps({
