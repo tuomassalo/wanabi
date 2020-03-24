@@ -134,6 +134,14 @@ export default class App extends React.Component<{}, AppState> {
     this.wsclient = new WebSocketClient()
     this.state = {messages: [], phase: 'LOADING'}
 
+    const myTurnSound = new Audio('myturn.mp3')
+
+    // user setting defaults
+    const defaults = {sound: '1'}
+    for (const [k, v] of Object.entries(defaults)) {
+      if (!localStorage.getItem(k)) localStorage.setItem(k, v)
+    }
+
     if (0) {
       this.state = {
         phase: 'IN_GAME',
@@ -150,8 +158,17 @@ export default class App extends React.Component<{}, AppState> {
 
           if (currentTurnRaw) {
             const currentTurn = new engine.MaskedTurn(currentTurnRaw)
-            // only do animation on turn change, not when joining or if someone disconnects/reconnects
+
+            // only do sound and animation on turn change, not when joining or if someone disconnects/reconnects
             if (this.state.phase === 'IN_GAME' && currentTurn.turnNumber === this.state.currentTurn.turnNumber + 1) {
+              // play a sound if it's my turn
+              if (
+                currentTurn.status === 'RUNNING' &&
+                currentTurn.players[currentTurn.inTurn].isMe &&
+                localStorage.getItem('sound') === '1'
+              )
+                myTurnSound.play()
+
               // do some animation before changing state
               await this.animate(currentTurn.action, this.state.currentTurn.inTurn)
             }

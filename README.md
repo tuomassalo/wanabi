@@ -40,6 +40,9 @@ sls dynamodb install
 
 npx tsc --watch
 
+# Run `socat` (for allowing local network to join)
+socat TCP-LISTEN:13001,fork TCP:127.0.0.1:3001
+
 # Start the serverless-offline services: api gateway and dynamodb
 npm run localbackend
 

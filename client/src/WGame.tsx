@@ -16,9 +16,26 @@ import WLatestAction from './WLatestAction'
 import WOtherHandActionButtons from './WOtherHandActionButtons'
 declare const wsclient: WebSocketClient
 
-export default class WGame extends React.Component<{currentTurn: engine.MaskedTurn}> {
+export default class WGame extends React.Component<{currentTurn: engine.MaskedTurn}, {soundChecked: boolean}> {
   startGame = () => {
     wsclient.startGame({gameId: this.props.currentTurn.gameId})
+  }
+
+  constructor(props: any) {
+    super(props)
+    this.state = {
+      soundChecked: localStorage.getItem('sound') === '1',
+    }
+  }
+
+  changeSoundChecked = () => {
+    if ((window.event as any).target.checked) {
+      this.setState({soundChecked: true})
+      localStorage.setItem('sound', '1')
+    } else {
+      this.setState({soundChecked: false})
+      localStorage.setItem('sound', '0')
+    }
   }
 
   render() {
@@ -55,6 +72,9 @@ export default class WGame extends React.Component<{currentTurn: engine.MaskedTu
           <span style={{float: 'right'}}>
             <label>
               <input type="checkbox" onClick={() => document.body.classList.toggle('mysteryview')} /> Mystery View
+            </label>
+            <label>
+              <input type="checkbox" checked={this.state.soundChecked} onChange={this.changeSoundChecked} /> Sound
             </label>
           </span>
           <span>

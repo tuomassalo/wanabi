@@ -51,8 +51,6 @@ export default class WHints extends React.Component<{hints: TRefinedHintResultSt
   // }
 
   render() {
-    console.warn(111, this.props.hints)
-
     return (
       <div className="WHints clearfix">
         {this.props.hints.map((h, idx) => (
