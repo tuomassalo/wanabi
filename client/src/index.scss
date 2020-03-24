@@ -230,6 +230,9 @@ div.WPlayer {
   background: white;
   padding: 10px;
 
+  span {
+    white-space: nowrap;
+  }
   em {
     font-style: normal;
     font-weight: bold;
