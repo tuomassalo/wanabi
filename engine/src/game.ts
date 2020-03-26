@@ -101,10 +101,18 @@ export interface WS_actParams {
   gameId: TGameId
   actionParams: TPlayableActionParams
 }
+export interface TMaskedGameState {
+  history: {
+    revealedStock: TCardValueState[]
+    playedActions: TPlayableActionParams[]
+  }
+  currentTurn: TMaskedTurnState
+}
+
 interface M_GamesState {
   msg: 'M_GamesState'
   timestamp: string
-  games: TMaskedTurnState[] // latest turn of each game
+  games: TMaskedGameState[] // latest turn and history of each game
 }
 // interface M_GameState {
 //   msg: 'M_GameState'
@@ -212,6 +220,16 @@ export class Turn extends BaseTurn {
             resolveActionability(demystifyOtherHand(p), this.table, this.discardPile),
           ).toJSON(),
     )
+  }
+
+  getGameState(forPlayerId: TPlayerId): TMaskedGameState {
+    return {
+      currentTurn: this.getState(forPlayerId),
+      history: {
+        revealedStock: [],
+        playedActions: [],
+      },
+    }
   }
 
   getState(forPlayerId: TPlayerId): TMaskedTurnState {
@@ -350,6 +368,13 @@ export interface TNewGameConstructor {
   table?: Table
 }
 // export interface TNewGameConstructor {from: 'FIRST_PLAYER', playerName: string}
+
+export class MaskedGame {
+  currentTurn: MaskedTurn
+  constructor(maskedGameState: TMaskedGameState) {
+    this.currentTurn = new MaskedTurn(maskedGameState.currentTurn)
+  }
+}
 
 export class Game {
   turns: Turn[] = []

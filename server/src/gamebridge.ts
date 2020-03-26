@@ -60,7 +60,7 @@ async function sendGamesState(toConnections: TConnectionId[]) {
     toConnections.map(cId => {
       const data: engine.WebsocketServerMessage = {
         msg: 'M_GamesState',
-        games: games.map(t => new engine.Turn(t).getState(cId)),
+        games: games.map(g => new engine.Turn(g).getGameState(cId)),
         timestamp: new Date().toISOString(),
       }
 

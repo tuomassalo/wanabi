@@ -118,7 +118,7 @@ interface LoadingState extends CommonState {
 }
 interface InMenuState extends CommonState {
   phase: 'IN_MENU'
-  games: engine.MaskedTurn[]
+  games: engine.MaskedGame[]
 }
 interface InGameState extends CommonState {
   phase: 'IN_GAME'
@@ -154,10 +154,11 @@ export default class App extends React.Component<{}, AppState> {
         // console.warn('MSG', data)
 
         if (data.msg === 'M_GamesState') {
-          const currentTurnRaw = data.games.find(t => t.players.some(p => p.isMe))
+          const activeGameState = data.games.find(t => t.currentTurn.players.some(p => p.isMe))
 
-          if (currentTurnRaw) {
-            const currentTurn = new engine.MaskedTurn(currentTurnRaw)
+          if (activeGameState) {
+            const activeGame = new engine.MaskedGame(activeGameState)
+            const currentTurn = activeGame.currentTurn
 
             // only do sound and animation on turn change, not when joining or if someone disconnects/reconnects
             if (this.state.phase === 'IN_GAME' && currentTurn.turnNumber === this.state.currentTurn.turnNumber + 1) {
@@ -187,7 +188,7 @@ export default class App extends React.Component<{}, AppState> {
               (state): AppState => {
                 return {
                   phase: 'IN_MENU',
-                  games: data.games.map(g => new engine.MaskedTurn(g)),
+                  games: data.games.map(g => new engine.MaskedGame(g)),
                   messages: [...state.messages, data],
                 }
               },

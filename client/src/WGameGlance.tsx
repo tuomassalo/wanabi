@@ -1,5 +1,5 @@
 import React from 'react'
-import {MaskedTurn} from 'wanabi-engine'
+import {MaskedGame} from 'wanabi-engine'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import WPlayerList from './WPlayerList'
 import {WebSocketClient} from './websocketclient'
@@ -18,42 +18,43 @@ const formatter = buildFormatter(timeAgoStrings)
 
 declare const wsclient: WebSocketClient
 
-export default class WGameGlance extends React.Component<{game: MaskedTurn}> {
+export default class WGameGlance extends React.Component<{game: MaskedGame}> {
   join = () => {
     const newPlayerName: string | undefined = promptPlayerName()
-    if (newPlayerName) wsclient.joinGame({gameId: this.props.game.gameId, newPlayerName})
+    if (newPlayerName) wsclient.joinGame({gameId: this.props.game.currentTurn.gameId, newPlayerName})
   }
   render() {
     let actionButtons = <div></div>
     let status = <div></div>
-    if (this.props.game.status === 'WAITING_FOR_PLAYERS') {
+    if (this.props.game.currentTurn.status === 'WAITING_FOR_PLAYERS') {
       status = <h4>Waiting for players...</h4>
-      if (this.props.game.players.length < 5) {
+      if (this.props.game.currentTurn.players.length < 5) {
         actionButtons = (
           <div>
             <input type="button" className="major" value="Join game" onClick={this.join} />
           </div>
         )
       }
-    } else if (this.props.game.status === 'RUNNING') {
-      status = <h4>Game is running... (turn {this.props.game.turnNumber})</h4>
+    } else if (this.props.game.currentTurn.status === 'RUNNING') {
+      status = <h4>Game is running... (turn {this.props.game.currentTurn.turnNumber})</h4>
       // no actions
-    } else if (this.props.game.status === 'GAMEOVER') {
+    } else if (this.props.game.currentTurn.status === 'GAMEOVER') {
       status = <h4>GAME OVER</h4>
-    } else if (this.props.game.status === 'FINISHED') {
+    } else if (this.props.game.currentTurn.status === 'FINISHED') {
       status = (
         <h4>
-          FINISHED with {this.props.game.score} points and {this.props.game.woundCount} wound(s).
+          FINISHED with {this.props.game.currentTurn.score} points and {this.props.game.currentTurn.woundCount}{' '}
+          wound(s).
         </h4>
       )
     }
     return (
-      <div className={`WGameGlance WGameGlance-${this.props.game.status}`}>
+      <div className={`WGameGlance WGameGlance-${this.props.game.currentTurn.status}`}>
         <span style={{float: 'right'}}>
-          <TimeAgo date={this.props.game.timestamp} formatter={formatter} />
+          <TimeAgo date={this.props.game.currentTurn.timestamp} formatter={formatter} />
         </span>
         {status}
-        Players: <WPlayerList turn={this.props.game} />
+        Players: <WPlayerList turn={this.props.game.currentTurn} />
         {actionButtons}
       </div>
     )
