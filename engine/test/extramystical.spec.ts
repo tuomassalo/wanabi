@@ -1,6 +1,6 @@
 import {Game} from '../src/game'
 
-import {createDeck, knownCard} from './helpers'
+import {createDeck} from './helpers'
 import {TOtherMaskedPlayerState} from '../src/player'
 import {TCardState} from '../src/card'
 
@@ -286,9 +286,9 @@ describe('Third three-player game', () => {
 
 describe('A real game ending', () => {
   const g = new Game({
-    from: 'SERIALIZED_TURNS',
-    turns: [
-      {
+    from: 'SERIALIZED_GAME',
+    game: {
+      turn0: {
         action: {card: 'A3', cardIdx: 0, success: true, type: 'PLAY'},
         discardPile: [
           'A4',
@@ -388,7 +388,8 @@ describe('A real game ending', () => {
         turnsLeft: 2,
         woundCount: 0,
       },
-    ],
+      playedActions: [],
+    },
   } as any)
   it('shows correct extra mystical cards', () => {
     expect(getExtraMysticalHand(g, 1, 0)).toEqual([

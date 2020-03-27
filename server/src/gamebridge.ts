@@ -71,11 +71,11 @@ async function sendGamesState(toConnections: TConnectionId[]) {
 async function broadcastGamesState() {
   return await sendGamesState(await getAllConnections())
 }
-async function updateGame(turn: engine.Turn, prevTimestamp: string) {
-  const newData = JSON.parse(JSON.stringify(turn))
+async function updateGame(game: engine.Game, prevTimestamp: string) {
+  const newData = JSON.parse(JSON.stringify(game)).turns.pop() as engine.TTurnState
 
   // workaround: avoid setting null values to dynamodb
-  if (isNaN(newData.turnsLeft)) delete newData.turnsLeft
+  if (isNaN(newData.turnsLeft as number)) delete newData.turnsLeft
   delete newData.gameId // never changes
   const updateKeys = Object.keys(newData)
   const newDataWithColons = Object.fromEntries(updateKeys.map(k => [':' + k, newData[k]]))
@@ -83,7 +83,7 @@ async function updateGame(turn: engine.Turn, prevTimestamp: string) {
   await dynamodb
     .update({
       TableName: gameTable,
-      Key: {gameId: turn.gameId},
+      Key: {gameId: game.currentTurn.gameId},
       UpdateExpression: 'SET ' + updateKeys.map(k => `#X_${k} = :${k}`).join(', '),
       ExpressionAttributeNames: {
         '#X_timestamp': 'timestamp',
@@ -150,7 +150,7 @@ export async function startGame({gameId}: engine.WS_startGameParams, connectionI
   const g = engine.Game.startPendingGame(pendingGameTurn)
 
   // save game status to db
-  await updateGame(g.currentTurn, pendingGameTurn.timestamp)
+  await updateGame(g, pendingGameTurn.timestamp)
 
   // send updated game state to all players
   await broadcastGamesState()
@@ -162,7 +162,7 @@ export async function act({gameId, actionParams}: engine.WS_actParams, connectio
   g.act(connectionId, actionParams)
 
   // save game status to db
-  await updateGame(g.currentTurn, prevTimestamp)
+  await updateGame(g, prevTimestamp)
 
   // send updated game state to all players
   await broadcastGamesState()
@@ -180,7 +180,7 @@ export async function rejoinGame({gameId, playerIdx}: engine.WS_rejoinGameParams
   game.players[playerIdx].id = connectionId
   game.players[playerIdx].isConnected = true
 
-  await updateGame(game.currentTurn, game.currentTurn.timestamp)
+  await updateGame(game, game.currentTurn.timestamp)
 
   // send updated game state to all players
   await broadcastGamesState()

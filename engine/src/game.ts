@@ -104,9 +104,13 @@ export interface WS_actParams {
 export interface TMaskedGameState {
   history: {
     revealedStock: TCardValueState[]
-    playedActions: TPlayableActionParams[]
+    playedActions: {timestamp: string; action: TResolvedActionState}[]
   }
   currentTurn: TMaskedTurnState
+}
+export interface TCompleteGameState {
+  turn0: TTurnState
+  playedActions: {timestamp: string; action: TResolvedActionState}[]
 }
 
 interface M_GamesState {
@@ -357,8 +361,8 @@ export class MaskedTurn extends BaseTurn {
 }
 
 export interface TExistingGameConstructor {
-  from: 'SERIALIZED_TURNS'
-  turns: TTurnState[]
+  from: 'SERIALIZED_GAME'
+  game: TCompleteGameState
 }
 export interface TNewGameConstructor {
   from: 'NEW_TEST_GAME'
@@ -381,9 +385,29 @@ export class Game {
   playersById: {[id: string]: Player}
 
   constructor(params: TNewGameConstructor | TExistingGameConstructor) {
-    if (params.from === 'SERIALIZED_TURNS') {
+    if (params.from === 'SERIALIZED_GAME') {
       // deserialize an ongoing game
-      this.turns = params.turns.map(t => new Turn(t))
+      this.turns = [new Turn(params.game.turn0)]
+      // Fill `this.turns` by "replaying" the game
+
+      const resolvedActionToActionParams = (a: TResolvedActionState): TActionParams => {
+        if (a.type === 'PLAY') {
+          return {type: a.type, cardIdx: a.cardIdx}
+        } else if (a.type === 'DISCARD') {
+          return {type: a.type, cardIdx: a.cardIdx}
+        } else if (a.type === 'HINT') {
+          return {type: a.type, toPlayerIdx: a.toPlayerIdx, is: a.is}
+        } else {
+          return {type: a.type} // START
+        }
+      }
+
+      for (const [turnNumber, {action, timestamp}] of params.game.playedActions.entries()) {
+        const actionParams = resolvedActionToActionParams(action)
+        if (actionParams.type !== 'START')
+          this.act(this.currentTurn.players[(turnNumber - 1) % this.currentTurn.players.length].id, actionParams)
+        this.currentTurn.timestamp = timestamp // fix timestamp
+      }
     } else if (params.from === 'NEW_TEST_GAME') {
       // USED IN TESTS
       // set up a new game
@@ -453,67 +477,83 @@ export class Game {
     return handSize
   }
 
-  static createPendingGame(firstPlayerName: string, firstPlayerId: TPlayerId): Turn {
-    return new Turn({
-      gameId: randomBytes(20).toString('hex'),
-      table: new Table().toJSON(),
-      stock: new Pile([]).toJSON(),
-      seed: randomBytes(20).toString('hex'),
-      discardPile: new Pile([]).toJSON(),
-      players: [
-        new Player({
-          name: firstPlayerName,
-          idx: 0,
-          hand: new Hand([]).toJSON(),
-          id: firstPlayerId,
-          isConnected: true,
-        }).toJSON(),
-      ], // no hand cards yet
-      hintCount: 9,
-      woundCount: 0,
-      turnNumber: 0,
-      turnsLeft: null,
-      status: 'WAITING_FOR_PLAYERS',
-      action: {type: 'START'},
-      score: 0,
-      stockSize: 0,
-      inTurn: 0,
-      timestamp: new Date().toISOString(),
+  static createPendingGame(firstPlayerName: string, firstPlayerId: TPlayerId): Game {
+    return new Game({
+      from: 'SERIALIZED_GAME',
+      game: {
+        turn0: {
+          gameId: randomBytes(20).toString('hex'),
+          table: new Table().toJSON(),
+          stock: new Pile([]).toJSON(),
+          seed: randomBytes(20).toString('hex'),
+          discardPile: new Pile([]).toJSON(),
+          players: [
+            new Player({
+              name: firstPlayerName,
+              idx: 0,
+              hand: new Hand([]).toJSON(),
+              id: firstPlayerId,
+              isConnected: true,
+            }).toJSON(),
+          ], // no hand cards yet
+          hintCount: 9,
+          woundCount: 0,
+          turnNumber: 0,
+          turnsLeft: null,
+          status: 'WAITING_FOR_PLAYERS',
+          action: {type: 'START'},
+          score: 0,
+          stockSize: 0,
+          inTurn: 0,
+          timestamp: new Date().toISOString(),
+        },
+        playedActions: [],
+      },
     })
   }
 
-  static joinPendingGame(pendingGame: Turn, newPlayerName: string, newPlayerId: TPlayerId): Turn {
-    if (pendingGame.players.length >= 5) throw new GameError('GAME_FULL')
+  static joinPendingGame(pendingGame: Game, newPlayerName: string, newPlayerId: TPlayerId): Game {
+    if (pendingGame.currentTurn.players.length >= 5) throw new GameError('GAME_FULL')
 
-    pendingGame.players.push(
+    pendingGame.currentTurn.players.push(
       new Player({
         name: newPlayerName,
-        idx: pendingGame.players.length,
+        idx: pendingGame.currentTurn.players.length,
         hand: new Hand([]).toJSON(),
         id: newPlayerId,
         isConnected: true,
       }),
     )
-    return pendingGame
+    return new Game({from: 'SERIALIZED_GAME', game: pendingGame.toJSON()})
   }
-  static startPendingGame(pendingGame: Turn): Game {
-    pendingGame.stock = new Pile(Card.getFullDeck())
-    pendingGame.stock.shuffle(pendingGame.gameId)
+  static startPendingGame(pendingGame: Game): Game {
+    const turn0 = pendingGame.turns[0]
+    turn0.stock = new Pile(Card.getFullDeck())
+    turn0.stock.shuffle(turn0.gameId)
 
-    const handSize: number = Game.getHandSize(pendingGame.players.length)
+    const handSize: number = Game.getHandSize(turn0.players.length)
     for (let i = 0; i < handSize; i++) {
-      for (let p = 0; p < pendingGame.players.length; p++) {
-        pendingGame.players[p].hand.dealOne(pendingGame.stock.drawOne())
+      for (let p = 0; p < turn0.players.length; p++) {
+        turn0.players[p].hand.dealOne(turn0.stock.drawOne())
       }
     }
-    pendingGame.status = 'RUNNING'
+    turn0.status = 'RUNNING'
 
-    return new Game({from: 'SERIALIZED_TURNS', turns: JSON.parse(JSON.stringify([pendingGame]))})
+    return new Game({from: 'SERIALIZED_GAME', game: pendingGame.toJSON()})
   }
 
-  toJSON() {
-    return {turns: this.turns}
+  // returns complete game
+  toJSON(): TCompleteGameState {
+    return {
+      turn0: this.turns[0].toJSON(),
+      playedActions: this.turns.map(t => ({action: t.action, timestamp: t.timestamp})),
+    }
   }
+  // getMaskedGame() {
+  //   return {
+
+  //   }
+  // }
 
   act(playerId: TPlayerId, actionParams: TPlayableActionParams) {
     // console.warn('ACT', {playerId, actionParams})

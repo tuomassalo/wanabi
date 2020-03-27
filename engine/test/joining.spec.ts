@@ -3,7 +3,7 @@ import {Game, Turn} from '../src/game'
 import {knownCard} from './helpers'
 
 describe('A new empty game', () => {
-  let pg: Turn, pg2: Turn
+  let pg: Game, pg2: Game
   it('should look emptyish with only one player', () => {
     pg = Game.createPendingGame('Athos', 'bogus_id_athos')
     expect(pg.getState(pg.players[0].id)).toEqual({
