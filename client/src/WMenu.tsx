@@ -16,7 +16,7 @@ export default class WMenu extends React.Component<{games: MaskedGame[]}> {
     return (
       <div className="WMenu">
         {this.props.games.map(g => (
-          <WGameGlance key={g.currentTurn.gameId} game={g} />
+          <WGameGlance key={g.gameId} game={g} />
         ))}
         <input type="button" className="major" onClick={this.createGame} value="Create a new game" />
       </div>

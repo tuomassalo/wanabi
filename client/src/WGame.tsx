@@ -16,9 +16,12 @@ import WLatestAction from './WLatestAction'
 import WOtherHandActionButtons from './WOtherHandActionButtons'
 declare const wsclient: WebSocketClient
 
-export default class WGame extends React.Component<{currentTurn: engine.MaskedTurn}, {soundChecked: boolean}> {
+export default class WGame extends React.Component<
+  {gameId: engine.TGameId; currentTurn: engine.MaskedTurn},
+  {soundChecked: boolean}
+> {
   startGame = () => {
-    wsclient.startGame({gameId: this.props.currentTurn.gameId})
+    wsclient.startGame({gameId: this.props.gameId})
   }
 
   constructor(props: any) {

@@ -6,12 +6,12 @@ describe('A new empty game', () => {
   let pg: Game, pg2: Game
   it('should look emptyish with only one player', () => {
     pg = Game.createPendingGame('Athos', 'bogus_id_athos')
-    expect(pg.getState(pg.players[0].id)).toEqual({
+    expect(pg.getTurnState(pg.players[0].id)).toEqual({
       action: {
         type: 'START',
       },
       discardPile: [],
-      gameId: jasmine.any(String),
+      // gameId: jasmine.any(String),
       hintCount: 9,
       inTurn: 0,
       players: [
@@ -25,7 +25,7 @@ describe('A new empty game', () => {
       ],
       score: 0,
       status: 'WAITING_FOR_PLAYERS',
-      stock: undefined,
+      // stock: undefined,
       stockSize: 0,
       table: {A: [], B: [], C: [], D: [], E: [], X: []},
       timestamp: jasmine.any(String),
@@ -36,10 +36,10 @@ describe('A new empty game', () => {
   })
   it('should accept more players', () => {
     pg2 = Game.joinPendingGame(pg, 'Porthos', 'bogus_id_porthos')
-    expect(pg2.getState(pg2.players[0].id)).toEqual({
+    expect(pg2.getTurnState(pg2.players[0].id)).toEqual({
       action: {type: 'START'},
       discardPile: [],
-      gameId: jasmine.any(String),
+      // gameId: jasmine.any(String),
       hintCount: 9,
       inTurn: 0,
       players: [
@@ -61,7 +61,7 @@ describe('A new empty game', () => {
       ],
       score: 0,
       status: 'WAITING_FOR_PLAYERS',
-      stock: undefined,
+      // stock: undefined,
       stockSize: 0,
       table: {A: [], B: [], C: [], D: [], E: [], X: []},
       timestamp: jasmine.any(String),
@@ -72,10 +72,10 @@ describe('A new empty game', () => {
   })
   it('should start when starting it', () => {
     const g = Game.startPendingGame(pg2)
-    expect(g.getState(g.players[0].id)).toEqual({
+    expect(g.getTurnState(g.players[0].id)).toEqual({
       action: {type: 'START'},
       discardPile: [],
-      gameId: jasmine.any(String),
+      // gameId: jasmine.any(String),
       hintCount: 9,
       inTurn: 0,
       players: [

@@ -20,7 +20,7 @@ describe('A tight three-player game', () => {
       {count: 1, prob: 1 / 12, value: 'X5', actionability: 'UNDISCARDABLE'},
     ]
 
-    expect(g.getState(g.players[1].id)).toEqual({
+    expect(g.getTurnState(g.players[1].id)).toEqual({
       action: {card: 'E1', cardIdx: 0, type: 'DISCARD'},
       discardPile: `
           A4 A3 A2 A1 A1
@@ -31,7 +31,7 @@ describe('A tight three-player game', () => {
         `
         .trim()
         .split(/\s+/),
-      gameId: jasmine.any(String),
+      // gameId: jasmine.any(String),
       hintCount: 9,
       inTurn: 0,
       players: [
@@ -92,7 +92,7 @@ describe('A tight three-player game', () => {
   })
   it('should not start countdown before the stock is emptied', () => {
     g.act(g.players[0].id, {type: 'PLAY', cardIdx: 0})
-    expect(g.getState(g.players[1].id)).toEqual(
+    expect(g.getTurnState(g.players[1].id)).toEqual(
       jasmine.objectContaining({
         stockSize: 1,
         turnsLeft: null,
@@ -113,7 +113,7 @@ describe('A tight three-player game', () => {
     // p0 has X1..X5
     expect(
       g
-        .getState(g.players[1].id)
+        .getTurnState(g.players[1].id)
         .players[0].hand.map(c => (c.color as TColor) + (c.num as TNum))
         .join(','),
     ).toEqual('X1,X2,X3,X4,X5')
@@ -121,13 +121,13 @@ describe('A tight three-player game', () => {
     // p1 has X4,X3,X2,X1,X1
     expect(
       g
-        .getState(g.players[0].id)
+        .getTurnState(g.players[0].id)
         .players[1].hand.map(c => (c.color as TColor) + (c.num as TNum))
         .join(','),
     ).toEqual('X4,X3,X2,X1,X1')
 
     // The stock is empty, so p0 knows their hand but not positions
-    expect(g.getState(g.players[0].id).players[0].hand.map(c => c.possibleCards)).toEqual(
+    expect(g.getTurnState(g.players[0].id).players[0].hand.map(c => c.possibleCards)).toEqual(
       Array(5).fill([
         {actionability: 'PLAYABLE', count: 1, prob: 0.2, value: 'X1'},
         {actionability: 'UNPLAYABLE', count: 1, prob: 0.2, value: 'X2'},
@@ -138,7 +138,7 @@ describe('A tight three-player game', () => {
     )
 
     // So does p1
-    expect(g.getState(g.players[1].id).players[1].hand.map(c => c.possibleCards)).toEqual(
+    expect(g.getTurnState(g.players[1].id).players[1].hand.map(c => c.possibleCards)).toEqual(
       Array(5).fill([
         {actionability: 'PLAYABLE', count: 2, prob: 0.4, value: 'X1'},
         {actionability: 'UNPLAYABLE', count: 1, prob: 0.2, value: 'X2'},
@@ -147,8 +147,8 @@ describe('A tight three-player game', () => {
       ]),
     )
 
-    expect(g.getState(g.players[1].id)).toEqual({
-      gameId: jasmine.any(String),
+    expect(g.getTurnState(g.players[1].id)).toEqual({
+      // gameId: jasmine.any(String),
       timestamp: jasmine.any(String),
       action: {card: 'E1', cardIdx: 0, type: 'DISCARD'},
       stockSize: 0,
@@ -218,7 +218,7 @@ describe('A tight three-player game', () => {
   })
   it('should change to FINISHED when out of turns', () => {
     g.act(g.players[0].id, {type: 'PLAY', cardIdx: 0})
-    expect(g.getState(g.players[1].id)).toEqual(
+    expect(g.getTurnState(g.players[1].id)).toEqual(
       jasmine.objectContaining({
         turnNumber: 51,
         stockSize: 0,
@@ -227,7 +227,7 @@ describe('A tight three-player game', () => {
       }),
     )
     g.act(g.players[1].id, {type: 'DISCARD', cardIdx: 0})
-    expect(g.getState(g.players[1].id)).toEqual(
+    expect(g.getTurnState(g.players[1].id)).toEqual(
       jasmine.objectContaining({
         turnNumber: 52,
         stockSize: 0,

@@ -21,7 +21,7 @@ declare const wsclient: WebSocketClient
 export default class WGameGlance extends React.Component<{game: MaskedGame}> {
   join = () => {
     const newPlayerName: string | undefined = promptPlayerName()
-    if (newPlayerName) wsclient.joinGame({gameId: this.props.game.currentTurn.gameId, newPlayerName})
+    if (newPlayerName) wsclient.joinGame({gameId: this.props.game.gameId, newPlayerName})
   }
   render() {
     let actionButtons = <div></div>
@@ -54,7 +54,7 @@ export default class WGameGlance extends React.Component<{game: MaskedGame}> {
           <TimeAgo date={this.props.game.currentTurn.timestamp} formatter={formatter} />
         </span>
         {status}
-        Players: <WPlayerList turn={this.props.game.currentTurn} />
+        Players: <WPlayerList gameId={this.props.game.gameId} turn={this.props.game.currentTurn} />
         {actionButtons}
       </div>
     )

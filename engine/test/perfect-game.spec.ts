@@ -12,8 +12,8 @@ describe('A perfect two-player game without any hints or discards', () => {
     ),
   })
   it('should have correct setup', () => {
-    expect(g.getState(g.players[0].id)).toEqual({
-      gameId: jasmine.any(String),
+    expect(g.getTurnState(g.players[0].id)).toEqual({
+      // gameId: jasmine.any(String),
       timestamp: jasmine.any(String),
       action: {type: 'START'},
       stockSize: 50,
@@ -53,8 +53,8 @@ describe('A perfect two-player game without any hints or discards', () => {
   })
   it('should properly alter state after playing a card', () => {
     g.act(g.players[0].id, {type: 'PLAY', cardIdx: 0})
-    expect(g.getState(g.players[1].id)).toEqual({
-      gameId: jasmine.any(String),
+    expect(g.getTurnState(g.players[1].id)).toEqual({
+      // gameId: jasmine.any(String),
       timestamp: jasmine.any(String),
       action: {type: 'PLAY', cardIdx: 0, card: 'A1', success: true},
       stockSize: 49,
@@ -97,8 +97,8 @@ describe('A perfect two-player game without any hints or discards', () => {
     for (let i = 1; i <= 28; i++) {
       g.act(g.players[i % 2].id, {type: 'PLAY', cardIdx: 0})
     }
-    expect(g.getState(g.players[1].id)).toEqual({
-      gameId: jasmine.any(String),
+    expect(g.getTurnState(g.players[1].id)).toEqual({
+      // gameId: jasmine.any(String),
       timestamp: jasmine.any(String),
       action: jasmine.any(Object),
       stockSize: 21,
@@ -139,8 +139,8 @@ describe('A perfect two-player game without any hints or discards', () => {
   })
   it('should finish after the last card has been played', () => {
     g.act(g.players[1].id, {type: 'PLAY', cardIdx: 0})
-    expect(g.getState(g.players[1].id)).toEqual({
-      gameId: jasmine.any(String),
+    expect(g.getTurnState(g.players[1].id)).toEqual({
+      // gameId: jasmine.any(String),
       timestamp: jasmine.any(String),
       action: jasmine.any(Object),
       stockSize: 20,

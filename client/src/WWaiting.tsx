@@ -1,14 +1,14 @@
 import React from 'react'
-import {MaskedTurn} from 'wanabi-engine'
+import {MaskedTurn, TGameId} from 'wanabi-engine'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import WPlayerList from './WPlayerList'
 import {WebSocketClient} from './websocketclient'
 
 declare const wsclient: WebSocketClient
 
-export default class WWaiting extends React.Component<{currentTurn: MaskedTurn}> {
+export default class WWaiting extends React.Component<{gameId: TGameId; currentTurn: MaskedTurn}> {
   startGame = () => {
-    wsclient.startGame({gameId: this.props.currentTurn.gameId})
+    wsclient.startGame({gameId: this.props.gameId})
   }
 
   render() {
@@ -27,7 +27,7 @@ export default class WWaiting extends React.Component<{currentTurn: MaskedTurn}>
     return (
       <div className="WWaiting">
         <h3>Waiting for players...</h3>
-        Players: <WPlayerList turn={this.props.currentTurn} />
+        Players: <WPlayerList gameId={this.props.gameId} turn={this.props.currentTurn} />
         {startButton}
       </div>
     )

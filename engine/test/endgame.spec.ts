@@ -8,10 +8,10 @@ describe('A failed game', () => {
     for (let i = 1; i <= 3; i++) {
       g.act(g.players[0].id, {type: 'DISCARD', cardIdx: 0})
       g.act(g.players[1].id, {type: 'PLAY', cardIdx: 0})
-      expect(g.getState(g.players[1].id).woundCount).toEqual(i)
+      expect(g.getTurnState(g.players[1].id).woundCount).toEqual(i)
     }
 
     // now GAMEOVER
-    expect(g.getState(g.players[1].id).status).toEqual('GAMEOVER')
+    expect(g.getTurnState(g.players[1].id).status).toEqual('GAMEOVER')
   })
 })

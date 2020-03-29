@@ -13,7 +13,7 @@ function newGame(deck: string) {
 }
 
 function getExtraMysticalHand(g, ofPlayerIdx: number, asSeenByPlayerIdx: number) {
-  return ((g.getState(g.players[asSeenByPlayerIdx].id).players[ofPlayerIdx] as unknown) as TOtherMaskedPlayerState)
+  return ((g.getTurnState(g.players[asSeenByPlayerIdx].id).players[ofPlayerIdx] as unknown) as TOtherMaskedPlayerState)
     .extraMysticalHand
 }
 
@@ -99,9 +99,9 @@ describe('A three-player game', () => {
     // p0 discards a card, gets X5
     g.act(g.players[0].id, {type: 'DISCARD', cardIdx: 0})
 
-    expect((g.getState(g.players[1].id).players[0].hand as TCardState[]).map(c => c.color + c.num).join(',')).toEqual(
-      'B1,C1,D1,E1,X5',
-    )
+    expect(
+      (g.getTurnState(g.players[1].id).players[0].hand as TCardState[]).map(c => c.color + c.num).join(','),
+    ).toEqual('B1,C1,D1,E1,X5')
 
     // p0 still sees X5 as one option for p2's first card
     expect(getExtraMysticalHand(g, 2, 0)[0].possibleCards).toEqual([
@@ -122,7 +122,7 @@ describe('A three-player game', () => {
     g.act(g.players[2].id, {type: 'HINT', toPlayerIdx: 0, is: 'A'})
 
     // Now p0 knows they have A5/X5, and they see p2's A5, so it must be X5.
-    expect(g.getState(g.players[0].id).players[0].hand[4]).toEqual({
+    expect(g.getTurnState(g.players[0].id).players[0].hand[4]).toEqual({
       actionability: 'UNDISCARDABLE',
       color: 'X',
       num: 5,
@@ -161,7 +161,7 @@ describe('Another three-player game', () => {
     // p2 knows they have a 5.
     expect(
       g
-        .getState(g.players[0].id)
+        .getTurnState(g.players[0].id)
         .players[0].hand.slice(0, 2)
         .map(c => c.possibleCards),
     ).toEqual([
@@ -229,7 +229,7 @@ describe('Third three-player game', () => {
     // Now, p0 knows they have D2/E2/E2 or D2/D2/E2 in some order.
     expect(
       g
-        .getState(g.players[0].id)
+        .getTurnState(g.players[0].id)
         .players[0].hand.slice(0, 3)
         .map(c => c.possibleCards),
     ).toEqual([
