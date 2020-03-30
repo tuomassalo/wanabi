@@ -11,7 +11,6 @@ describe('A new empty game', () => {
         type: 'START',
       },
       discardPile: [],
-      // gameId: jasmine.any(String),
       hintCount: 9,
       inTurn: 0,
       playerHandViews: [
@@ -22,8 +21,7 @@ describe('A new empty game', () => {
       ],
       score: 0,
       status: 'WAITING_FOR_PLAYERS',
-      // stock: undefined,
-      stockSize: 0,
+      stockSize: 60,
       table: {A: [], B: [], C: [], D: [], E: [], X: []},
       timestamp: jasmine.any(String),
       turnNumber: 0,
@@ -36,7 +34,6 @@ describe('A new empty game', () => {
     expect(pg2.getTurnState(pg2.players[0].id)).toEqual({
       action: {type: 'START'},
       discardPile: [],
-      // gameId: jasmine.any(String),
       hintCount: 9,
       inTurn: 0,
       playerHandViews: [
@@ -52,8 +49,7 @@ describe('A new empty game', () => {
       ],
       score: 0,
       status: 'WAITING_FOR_PLAYERS',
-      // stock: undefined,
-      stockSize: 0,
+      stockSize: 60,
       table: {A: [], B: [], C: [], D: [], E: [], X: []},
       timestamp: jasmine.any(String),
       turnNumber: 0,
@@ -66,7 +62,6 @@ describe('A new empty game', () => {
     expect(g.getTurnState(g.players[0].id)).toEqual({
       action: {type: 'START'},
       discardPile: [],
-      // gameId: jasmine.any(String),
       hintCount: 9,
       inTurn: 0,
       playerHandViews: [

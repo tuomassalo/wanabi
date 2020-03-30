@@ -1,27 +1,15 @@
-import {Hand, MaskedHand} from './hand'
-import {TCardState, TMaskedCardState, Card, MaskedCard} from './card'
-import {demystify} from './demystifier'
-import {resolveActionability} from './actionability-resolver'
-import {Table} from './table'
-import {Pile} from './pile'
+import {MaskedHand} from './hand'
+import {TMaskedCardState, MaskedCard} from './card'
 
 export type TPlayerId = string
 
-export interface TMaskedPlayerState {
+export interface TPlayerState {
   idx: number
   name: string
   isConnected: boolean
-}
-export interface TPlayerState extends TMaskedPlayerState {
   id: TPlayerId // NB: might be redacted
 }
 
-// export interface TMaskedPlayerState {
-//   idx: number
-//   name: string
-//   isConnected: boolean
-//   isMe: boolean
-// }
 export interface TMePlayerHandViewState {
   isMe: true
   hand: TMaskedCardState[]

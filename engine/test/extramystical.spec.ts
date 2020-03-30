@@ -289,6 +289,7 @@ describe('A real game ending', () => {
   const g = new Game({
     from: 'SERIALIZED_GAME',
     game: {
+      initialDeck: [], // bogus
       turn0: {
         action: {card: 'A3', cardIdx: 0, success: true, type: 'PLAY'},
         discardPile: [

@@ -1,9 +1,9 @@
 import {Pile} from './pile'
-import {Player, TPlayerId, TPlayerState, TPlayerHandViewState, PlayerHandView, TMaskedPlayerState} from './player'
-import {Card, TColor, TNum, AllColors, AllNums, TCardValueState, MaskedCard, TMaskedCardState} from './card'
+import {Player, TPlayerId, TPlayerState, TPlayerHandViewState, PlayerHandView} from './player'
+import {Card, TColor, TNum, AllColors, AllNums, TCardValueState, MaskedCard} from './card'
 import {Hand, THandState} from './hand'
 import {Table, TTableState} from './table'
-import {SyntaxError, GameError} from './errors'
+import {GameError} from './errors'
 import {randomBytes} from 'crypto'
 import {resolveActionability} from './actionability-resolver'
 import {demystify} from './demystifier'
@@ -44,6 +44,7 @@ interface TResolvedDiscardActionState extends TDiscardActionParams {
 export interface TResolvedHintActionState extends THintActionParams {
   // for convenience
   toPlayerName: string
+  matches: boolean[] // which cards (indices) match the hint
 }
 
 export type TResolvedActionState =
@@ -52,11 +53,8 @@ export type TResolvedActionState =
   | TResolvedHintActionState
   | TResolvedStartActionState
 
-// type TMaskedPlayerState = TMaskedMePlayerState | TMaskedOtherPlayerState
-
 //  json object
 export interface TBaseTurnState {
-  // gameId: TGameId
   status: TGameStatus
   action: TResolvedActionState
   score: number
@@ -72,7 +70,6 @@ export interface TBaseTurnState {
 }
 export interface TTurnState extends TBaseTurnState {
   completePlayerHands: THandState[]
-  seed: string
   stock: TCardValueState[] // empty if is masked
 }
 export interface TMaskedTurnState extends TBaseTurnState {
@@ -107,11 +104,13 @@ export interface TMaskedGameState {
     playedActions: {timestamp: string; action: TResolvedActionState}[]
   }
   gameId: TGameId
-  players: TMaskedPlayerState[]
+  players: (TPlayerState | TPlayerState)[]
   currentTurn: TMaskedTurnState
 }
 export interface TCompleteGameState {
   turn0: TTurnState
+  seed: string
+  initialDeck: TCardValueState[]
   gameId: TGameId
   playedActions: {timestamp: string; action: TResolvedActionState}[]
   players: TPlayerState[]
@@ -132,7 +131,6 @@ export interface M_GamesState {
 export type WebsocketServerMessage = M_GamesState // | M_GameState
 
 abstract class BaseTurn {
-  // gameId: TGameId
   status: TGameStatus
   action: TResolvedActionState
   discardPile: Pile
@@ -144,8 +142,7 @@ abstract class BaseTurn {
   timestamp: string // ISO string
   _players: Player[]
 
-  constructor(t: TBaseTurnState, players: TMaskedPlayerState[]) {
-    // this.gameId = t.gameId
+  constructor(t: TBaseTurnState, players: TPlayerState[]) {
     this.status = t.status
     this.action = t.action
     this.discardPile = new Pile(t.discardPile.map(c => Card.fromValueString(c)))
@@ -156,7 +153,7 @@ abstract class BaseTurn {
     this.turnsLeft = typeof t.turnsLeft !== 'undefined' ? t.turnsLeft : null
     this.timestamp = t.timestamp || new Date().toISOString()
 
-    this._players = players.map(p => new Player({id: '[REDACTED]', ...p}))
+    this._players = players.map(p => new Player(p))
   }
   get score() {
     return this.table.getScore()
@@ -165,13 +162,11 @@ abstract class BaseTurn {
 export class Turn extends BaseTurn {
   completePlayerHands: Hand[]
   stock: Pile
-  seed: string
 
-  constructor(t: TTurnState, players: TMaskedPlayerState[]) {
+  constructor(t: TTurnState, players: TPlayerState[]) {
     super(t, players)
     this.completePlayerHands = t.completePlayerHands.map(p => new Hand(p))
     this.stock = new Pile(t.stock)
-    this.seed = t.seed
   }
   clone() {
     // make a deep copy
@@ -184,7 +179,6 @@ export class Turn extends BaseTurn {
   toJSON(): TTurnState {
     return {
       ...this,
-      seed: this.seed,
       stock: this.stock.toJSON(),
       discardPile: this.discardPile.toJSON(),
       table: this.table.toJSON(),
@@ -242,17 +236,6 @@ export class Turn extends BaseTurn {
     )
   }
 
-  // getGameState(forPlayerId: TPlayerId): TMaskedGameState {
-  //   return {
-  //     gameId: this.gameId
-  //     currentTurn: this.getState(forPlayerId),
-  //     history: {
-  //       revealedStock: [],
-  //       playedActions: [],
-  //     },
-  //   }
-  // }
-
   getState(forPlayerId: TPlayerId): TMaskedTurnState {
     const me = this._players.find(p => p.id === forPlayerId)
     const isOutsider = !me
@@ -264,7 +247,6 @@ export class Turn extends BaseTurn {
         _players: undefined,
         completePlayerHands: undefined,
         stock: undefined,
-        seed: undefined,
         ///
         stockSize: this.stock.size,
         inTurn: this.inTurn,
@@ -298,6 +280,7 @@ export class Turn extends BaseTurn {
     }
 
     if (nextTurn.status !== 'RUNNING') {
+      // console.warn(nextTurn)
       throw new GameError('GAME_ENDED')
     }
 
@@ -322,7 +305,11 @@ export class Turn extends BaseTurn {
 
       nextTurn.completePlayerHands[hintee.idx].addHint({turnNumber: nextTurn.turnNumber, is: actionParams.is})
 
-      nextTurn.action = {...actionParams, toPlayerName: hintee.name}
+      nextTurn.action = {
+        ...actionParams,
+        toPlayerName: hintee.name,
+        matches: nextTurn.completePlayerHands[hintee.idx].cards.map(c => c.hints[c.hints.length - 1].result),
+      }
     } else {
       const card = nextTurn.completePlayerHands[me.idx].take(actionParams.cardIdx, nextTurn.stock)
 
@@ -373,7 +360,7 @@ export class Turn extends BaseTurn {
 export class MaskedTurn extends BaseTurn {
   playerHandViews: PlayerHandView[]
   stockSize: number
-  constructor(state: TMaskedTurnState, players: TMaskedPlayerState[]) {
+  constructor(state: TMaskedTurnState, players: TPlayerState[]) {
     super(state, players)
     this.playerHandViews = state.playerHandViews.map(p => new PlayerHandView(p))
     this.stockSize = state.stockSize
@@ -394,7 +381,6 @@ export interface TNewGameConstructor {
   discardPile?: Pile
   table?: Table
 }
-// export interface TNewGameConstructor {from: 'FIRST_PLAYER', playerName: string}
 
 export class MaskedGame {
   gameId: TGameId
@@ -407,49 +393,93 @@ export class MaskedGame {
   }
 }
 
+const defaultTurn0Properties = {
+  table: new Table().toJSON(),
+  stock: new Pile([]).toJSON(),
+  discardPile: new Pile([]).toJSON(),
+  completePlayerHands: [[]], // one empty hand, no hand cards yet
+  hintCount: 9,
+  woundCount: 0,
+  turnNumber: 0,
+  turnsLeft: null,
+  // needed only for TypeScript
+  score: 0,
+  stockSize: 0,
+  inTurn: 0,
+}
+
 export class Game {
   turns: Turn[] = []
   gameId: TGameId
+  seed: string
   players: Player[]
   playersById: {[id: string]: Player}
+  initialDeck: string[]
+  isMasked: boolean // no full deck available => no integrity checking
 
-  constructor(params: TNewGameConstructor | TExistingGameConstructor) {
+  replay(playedActions: {timestamp: string; action: TResolvedActionState}[]) {
+    const resolvedActionToActionParams = (a: TResolvedActionState): TActionParams => {
+      if (a.type === 'PLAY') {
+        return {type: a.type, cardIdx: a.cardIdx}
+      } else if (a.type === 'DISCARD') {
+        return {type: a.type, cardIdx: a.cardIdx}
+      } else if (a.type === 'HINT') {
+        return {type: a.type, toPlayerIdx: a.toPlayerIdx, is: a.is}
+      } else {
+        return {type: a.type} // START
+      }
+    }
+
+    for (const [turnNumber, {action, timestamp}] of playedActions.entries()) {
+      const actionParams = resolvedActionToActionParams(action)
+      if (actionParams.type !== 'START') {
+        // console.warn('ACTING', actionParams, turnNumber)
+
+        this.act(this.currentTurn._players[(turnNumber - 1) % this.currentTurn._players.length].id, actionParams)
+      }
+      this.currentTurn.timestamp = timestamp // fix timestamp
+    }
+  }
+  // deal the cards
+  static deal(turn: Turn) {
+    const handSize: number = Game.getHandSize(turn.completePlayerHands.length)
+    for (let i = 0; i < handSize; i++) {
+      for (let p = 0; p < turn.completePlayerHands.length; p++) {
+        turn.completePlayerHands[p].dealOne(turn.stock.drawOne())
+      }
+    }
+  }
+
+  constructor(params: TNewGameConstructor | TExistingGameConstructor, isMasked: boolean = false) {
+    this.isMasked = isMasked
+
     if (params.from === 'SERIALIZED_GAME') {
       // deserialize an ongoing game
       this.gameId = params.game.gameId
+      this.seed = params.game.seed
       this.players = params.game.players.map(p => new Player(p))
       this.turns = [new Turn(params.game.turn0, params.game.players)]
+
+      this.initialDeck = params.game.initialDeck
+
+      // If the game has started but cards have not been dealt yet, deal them now.
+      // (This is needed when loading a masked game.)
+      if (this.currentTurn.status === 'RUNNING' && this.currentTurn.completePlayerHands[0].cards.length === 0)
+        //  this.initialDeck.length === this.currentTurn.stockSize)
+        Game.deal(this.turns[0])
+
       // Fill `this.turns` by "replaying" the game
-
-      const resolvedActionToActionParams = (a: TResolvedActionState): TActionParams => {
-        if (a.type === 'PLAY') {
-          return {type: a.type, cardIdx: a.cardIdx}
-        } else if (a.type === 'DISCARD') {
-          return {type: a.type, cardIdx: a.cardIdx}
-        } else if (a.type === 'HINT') {
-          return {type: a.type, toPlayerIdx: a.toPlayerIdx, is: a.is}
-        } else {
-          return {type: a.type} // START
-        }
-      }
-
-      for (const [turnNumber, {action, timestamp}] of params.game.playedActions.entries()) {
-        const actionParams = resolvedActionToActionParams(action)
-        if (actionParams.type !== 'START')
-          this.act(this.currentTurn._players[(turnNumber - 1) % this.currentTurn._players.length].id, actionParams)
-        this.currentTurn.timestamp = timestamp // fix timestamp
-      }
+      this.replay(params.game.playedActions)
     } else if (params.from === 'NEW_TEST_GAME') {
       // USED IN TESTS
       // set up a new game
-      const seed = randomBytes(20).toString('hex')
+      this.seed = randomBytes(20).toString('hex')
       let {playerNames, deck, discardPile, table} = params
       if (!deck) {
         deck = new Pile(deck || Card.getFullDeck())
-        deck.shuffle(seed)
+        deck.shuffle(this.seed)
       }
-
-      const handSize: number = Game.getHandSize(playerNames.length)
+      this.initialDeck = deck.toJSON()
 
       this.gameId = randomBytes(20).toString('hex')
 
@@ -458,15 +488,11 @@ export class Game {
       this.turns = [
         new Turn(
           {
-            seed,
+            ...defaultTurn0Properties,
             table: new Table(table ? table.toJSON() : undefined).toJSON(),
             stock: deck.toJSON(),
             discardPile: (discardPile || new Pile([])).toJSON(),
             completePlayerHands: playerNames.map(() => []),
-            hintCount: 9,
-            woundCount: 0,
-            turnNumber: 0,
-            turnsLeft: null,
             status: 'RUNNING',
             action: {type: 'START'},
             // needed only for typescript
@@ -479,12 +505,7 @@ export class Game {
         ),
       ]
 
-      // deal the cards
-      for (let i = 0; i < handSize; i++) {
-        for (let p = 0; p < playerNames.length; p++) {
-          this.currentTurn.completePlayerHands[p].dealOne(this.currentTurn.stock.drawOne())
-        }
-      }
+      Game.deal(this.currentTurn)
     } else {
       throw new Error("Invalid 'from'")
     }
@@ -492,6 +513,38 @@ export class Game {
     this.playersById = Object.fromEntries(this.currentTurn._players.map(p => [p.id, p]))
 
     this.checkIntegrity()
+  }
+
+  static fromMaskedGame(maskedGame: TMaskedGameState): Game {
+    const stock = maskedGame.history.revealedStock
+
+    // maintain correct stock size
+    const fullStockSize = Card.getFullDeck().length
+    while (stock.length < fullStockSize) stock.unshift('X5') // bogus
+
+    const game = new Game(
+      {
+        from: 'SERIALIZED_GAME',
+        game: {
+          gameId: maskedGame.gameId,
+          playedActions: maskedGame.history.playedActions,
+          timestamp: maskedGame.currentTurn.timestamp,
+          seed: 'BOGUS',
+          initialDeck: stock,
+          players: maskedGame.players.map(p => new Player({...p})),
+          turn0: {
+            ...defaultTurn0Properties,
+            stock,
+            completePlayerHands: maskedGame.players.map(() => []),
+            status: 'RUNNING',
+            action: {type: 'START'},
+            timestamp: maskedGame.history.playedActions[0].timestamp,
+          },
+        },
+      },
+      true,
+    ) // true: isMasked, skip some integrity checking
+    return game
   }
 
   get currentTurn(): Turn {
@@ -517,25 +570,20 @@ export class Game {
 
   static createPendingGame(firstPlayerName: string, firstPlayerId: TPlayerId): Game {
     const timestamp = new Date().toISOString()
+    const seed = randomBytes(20).toString('hex')
+    const stock = new Pile(Card.getFullDeck()).shuffle(seed).toJSON()
+
     return new Game({
       from: 'SERIALIZED_GAME',
       game: {
         gameId: randomBytes(20).toString('hex'),
+        initialDeck: stock,
+        seed,
         turn0: {
-          table: new Table().toJSON(),
-          stock: new Pile([]).toJSON(),
-          seed: randomBytes(20).toString('hex'),
-          discardPile: new Pile([]).toJSON(),
-          completePlayerHands: [[]], // one empty hand, no hand cards yet
-          hintCount: 9,
-          woundCount: 0,
-          turnNumber: 0,
-          turnsLeft: null,
+          ...defaultTurn0Properties,
+          stock,
           status: 'WAITING_FOR_PLAYERS',
           action: {type: 'START'},
-          score: 0,
-          stockSize: 0,
-          inTurn: 0,
           timestamp,
         },
         players: [
@@ -569,15 +617,7 @@ export class Game {
   }
   static startPendingGame(pendingGame: Game): Game {
     const turn0 = pendingGame.turns[0]
-    turn0.stock = new Pile(Card.getFullDeck())
-    turn0.stock.shuffle(pendingGame.gameId)
 
-    const handSize: number = Game.getHandSize(turn0._players.length)
-    for (let i = 0; i < handSize; i++) {
-      for (let p = 0; p < turn0._players.length; p++) {
-        turn0.completePlayerHands[p].dealOne(turn0.stock.drawOne())
-      }
-    }
     turn0.status = 'RUNNING'
 
     return new Game({from: 'SERIALIZED_GAME', game: pendingGame.toJSON()})
@@ -587,27 +627,21 @@ export class Game {
   toJSON(): TCompleteGameState {
     return {
       gameId: this.gameId,
+      seed: this.seed,
+      initialDeck: this.initialDeck,
       turn0: this.turns[0].toJSON(),
       playedActions: this.turns.map(t => ({action: t.action, timestamp: t.timestamp})),
       timestamp: this.turns[this.turns.length - 1].timestamp,
       players: this.players.map(p => p.toJSON()),
     }
   }
-  // getMaskedGame() {
-  //   return {
-
-  //   }
-  // }
 
   act(playerId: TPlayerId, actionParams: TPlayableActionParams) {
-    // console.warn('ACT', {playerId, actionParams})
+    // console.warn('ACT', {playerId, actionParams, inStock: this.currentTurn.stock.size})
 
     this.turns.push(this.currentTurn.playNext(playerId, actionParams))
     this.checkIntegrity()
   }
-
-  // TODO:
-  // static deserialize(turns: TMaskedTurnState[]) {}
 
   getTurnState(playerId: TPlayerId): TMaskedTurnState {
     return this.currentTurn.getState(playerId)
@@ -615,20 +649,25 @@ export class Game {
 
   // this returns information that is public for a player
   getState(playerId: TPlayerId): TMaskedGameState {
+    const revealedCardCount = this.initialDeck.length - this.currentTurn.stock.size
+
     return {
       gameId: this.gameId,
       currentTurn: this.currentTurn.getState(playerId),
       history: {
-        revealedStock: [],
-        playedActions: [],
+        revealedStock: this.initialDeck.slice(-revealedCardCount),
+        playedActions: this.turns.map(t => ({action: t.action, timestamp: t.timestamp})),
       },
-      players: this.players.map(p => ({...p.toJSON(), id: undefined})),
+      players: this.players.map(p => ({...p.toJSON(), id: p.id === playerId ? p.id : 'REDACTED'})),
     }
   }
 
   checkIntegrity() {
     // if the game has not started yet, cards are not dealt.
     if (this.currentTurn.status === 'WAITING_FOR_PLAYERS') return
+
+    // if this is from a masked game, we don't have th full stock available
+    if (this.isMasked) return
 
     // check that we have the correct set of cards
     const currentCards = [

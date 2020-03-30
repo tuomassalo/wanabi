@@ -17,6 +17,7 @@ export class Pile {
       const j = Math.floor(rng() * (i + 1))
       ;[this.cards[i], this.cards[j]] = [this.cards[j], this.cards[i]]
     }
+    return this // chainable
   }
   get size() {
     return this.cards.length

@@ -6,16 +6,14 @@ describe('A game', () => {
   it('should maintain its state after serialization and deserialization', () => {
     // p0 always plays the oldest card from hand, p1 always discards
 
-    expect(1).toEqual(1)
     for (let i = 1; i <= 24; i++) {
       g.act(g.players[0].id, {type: 'PLAY', cardIdx: 0})
       g.act(g.players[1].id, {type: 'DISCARD', cardIdx: 0})
     }
     const state1 = g.getState(g.players[1].id)
-
     const serialized = JSON.stringify(g)
 
-    expect(serialized.length).toBeLessThan(70000)
+    expect(serialized.length).toBeLessThan(20000)
 
     const g2 = new Game({game: JSON.parse(serialized), from: 'SERIALIZED_GAME'})
 

@@ -19,6 +19,7 @@ export class Hand {
   }
   take(idx: number, stock: Pile): Card {
     if (!this.cards[idx]) {
+      console.warn({idx}, this.cards)
       throw new GameError('NO_SUCH_CARD', {idx})
     }
     const drawnCard = this.cards.splice(idx, 1)[0]
