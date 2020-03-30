@@ -107,19 +107,19 @@ export function knownCard(): any {
   }
 }
 
-export function dbg(g: Game) {
-  for (const [key, cards] of Object.entries({
-    // stock: g.stock.cards,
-    hand0: g.players[0].hand.cards,
-    hand1: g.players[1].hand.cards,
-  })) {
-    console.warn(
-      'DBG',
-      key,
-      cards.map(c => c.toString()),
-    )
-  }
-}
+// export function dbg(g: Game) {
+//   for (const [key, cards] of Object.entries({
+//     // stock: g.stock.cards,
+//     hand0: g.players[0].hand.cards,
+//     hand1: g.players[1].hand.cards,
+//   })) {
+//     console.warn(
+//       'DBG',
+//       key,
+//       cards.map(c => c.toString()),
+//     )
+//   }
+// }
 
 export function createTightGame() {
   // First player always plays their first card, second player discards.

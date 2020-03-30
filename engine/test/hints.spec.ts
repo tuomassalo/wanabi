@@ -82,9 +82,9 @@ describe('An ongoing game', () => {
       turnsLeft: null,
       score: 5,
       status: 'RUNNING',
-      players: jasmine.any(Array),
+      playerHandViews: jasmine.any(Array),
     })
-    expect(g.players.map(p => '' + p.hand.cards.map(hc => hc.color + hc.num))).toEqual([
+    expect(g.currentTurn.completePlayerHands.map(ch => '' + ch.cards.map(hc => hc.color + hc.num))).toEqual([
       'A1,C1,B3,D4,X1',
       'B1,B2,B2,D4,X2',
     ])
@@ -93,7 +93,7 @@ describe('An ongoing game', () => {
     const g = createTestGame()
     g.act(g.players[0].id, {type: 'HINT', toPlayerIdx: 1, is: 5})
     expect(g.getTurnState(g.players[1].id).hintCount).toEqual(8)
-    expect(g.getTurnState(g.players[1].id).players[1].hand).toEqual([
+    expect(g.getTurnState(g.players[1].id).playerHandViews[1].hand).toEqual([
       {hints: [{turnNumber: 12, is: 5, result: false}]},
       {hints: [{turnNumber: 12, is: 5, result: false}]},
       {hints: [{turnNumber: 12, is: 5, result: false}]},
@@ -102,7 +102,7 @@ describe('An ongoing game', () => {
     ])
 
     // the hints received by p1 are also visible to p0
-    expect(g.getTurnState(g.players[0].id).players[1].hand).toEqual([
+    expect(g.getTurnState(g.players[0].id).playerHandViews[1].hand).toEqual([
       {color: 'B', num: 1, actionability: 'PLAYABLE', hints: [{turnNumber: 12, is: 5, result: false}]},
       {color: 'B', num: 2, actionability: 'UNPLAYABLE', hints: [{turnNumber: 12, is: 5, result: false}]},
       {color: 'B', num: 2, actionability: 'UNPLAYABLE', hints: [{turnNumber: 12, is: 5, result: false}]},
@@ -118,7 +118,7 @@ describe('An ongoing game', () => {
     expect(g.getTurnState(g.players[1].id).hintCount).toEqual(6)
 
     // still not enough hints
-    expect(g.getTurnState(g.players[1].id).players[1].hand).toEqual([
+    expect(g.getTurnState(g.players[1].id).playerHandViews[1].hand).toEqual([
       {
         hints: [
           {turnNumber: 12, is: 5, result: false},
@@ -197,7 +197,7 @@ describe('An ongoing game', () => {
     expect(g.getTurnState(g.players[1].id).hintCount).toEqual(4)
 
     // now we have enough hints to possibly identify some cards
-    expect(g.getTurnState(g.players[1].id).players[1].hand).toEqual([
+    expect(g.getTurnState(g.players[1].id).playerHandViews[1].hand).toEqual([
       {
         hints: [
           {turnNumber: 12, is: 5, result: false},

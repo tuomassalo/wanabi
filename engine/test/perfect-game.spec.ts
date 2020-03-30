@@ -26,18 +26,12 @@ describe('A perfect two-player game without any hints or discards', () => {
       turnsLeft: null,
       score: 0,
       status: 'RUNNING',
-      players: [
+      playerHandViews: [
         {
-          name: 'Bonnie',
-          idx: 0,
-          isConnected: true,
           isMe: true,
           hand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
         },
         {
-          name: 'Clyde',
-          idx: 1,
-          isConnected: true,
           isMe: false,
           hand: [
             {color: 'A', num: 2, hints: [], actionability: 'UNPLAYABLE'},
@@ -67,11 +61,8 @@ describe('A perfect two-player game without any hints or discards', () => {
       turnsLeft: null,
       score: 1,
       status: 'RUNNING',
-      players: [
+      playerHandViews: [
         {
-          name: 'Bonnie',
-          idx: 0,
-          isConnected: true,
           isMe: false,
           hand: [
             {color: 'A', num: 3, hints: [], actionability: 'UNPLAYABLE'},
@@ -83,9 +74,6 @@ describe('A perfect two-player game without any hints or discards', () => {
           extraMysticalHand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
         },
         {
-          name: 'Clyde',
-          idx: 1,
-          isConnected: true,
           isMe: true,
           hand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
         },
@@ -118,19 +106,13 @@ describe('A perfect two-player game without any hints or discards', () => {
       turnsLeft: null,
       score: 29,
       status: 'RUNNING',
-      players: [
+      playerHandViews: [
         {
-          name: 'Bonnie',
-          idx: 0,
-          isConnected: true,
           isMe: false,
           hand: [knownCard(), knownCard(), knownCard(), knownCard(), knownCard()],
           extraMysticalHand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
         },
         {
-          name: 'Clyde',
-          idx: 1,
-          isConnected: true,
           isMe: true,
           hand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
         },
@@ -160,19 +142,13 @@ describe('A perfect two-player game without any hints or discards', () => {
       turnsLeft: null,
       score: 30,
       status: 'FINISHED',
-      players: [
+      playerHandViews: [
         {
-          name: 'Bonnie',
-          idx: 0,
-          isConnected: true,
           isMe: false,
           hand: [knownCard(), knownCard(), knownCard(), knownCard(), knownCard()],
           extraMysticalHand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
         },
         {
-          name: 'Clyde',
-          idx: 1,
-          isConnected: true,
           isMe: true,
           hand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
         },

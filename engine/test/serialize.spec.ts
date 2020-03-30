@@ -20,15 +20,18 @@ describe('A game', () => {
     const g2 = new Game({game: JSON.parse(serialized), from: 'SERIALIZED_GAME'})
 
     expect(g2.getState(g.players[1].id)).toEqual(state1)
-    // expect(JSON.parse(JSON.stringify(g2.getState(g.players[1].id)))).toEqual(JSON.parse(JSON.stringify(state1)))
 
+    // play one card in both games
     g.act(g.players[0].id, {type: 'PLAY', cardIdx: 0})
     g2.act(g.players[0].id, {type: 'PLAY', cardIdx: 0})
 
     // both games should be in the same state
     // ... ignoring the timestamp
-    const states = [g.getState(g.players[1].id), g2.getState(g2.players[1].id)].map(s => ({...s, timestamp: 'BOGUS'}))
-
+    const states = [g, g2].map(game => {
+      const state = g.getState(game.players[1].id)
+      state.currentTurn.timestamp = 'BOGUS'
+      return state
+    })
     expect(states[0]).toEqual(states[1])
   })
 })

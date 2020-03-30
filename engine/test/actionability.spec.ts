@@ -29,7 +29,7 @@ describe('When playing color A...', () => {
     g.act(g.players[2].id, {type: 'HINT', toPlayerIdx: 0, is: 'B'}) // none
 
     // now p0 knows that their hand has only A1..A5 cards.
-    expect(g.getTurnState(g.players[0].id).players[0].hand).toEqual(
+    expect(g.getTurnState(g.players[0].id).playerHandViews[0].hand).toEqual(
       Array(5).fill({
         color: 'A',
         hints: [
@@ -53,7 +53,7 @@ describe('When playing color A...', () => {
 
     expect(state.discardPile).toEqual(['A3', 'A3'])
 
-    expect(state.players[0].hand).toEqual(
+    expect(state.playerHandViews[0].hand).toEqual(
       Array(5).fill({
         color: 'A',
         hints: [

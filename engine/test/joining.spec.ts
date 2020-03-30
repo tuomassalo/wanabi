@@ -14,13 +14,10 @@ describe('A new empty game', () => {
       // gameId: jasmine.any(String),
       hintCount: 9,
       inTurn: 0,
-      players: [
+      playerHandViews: [
         {
-          idx: 0,
-          isConnected: true,
           isMe: true,
           hand: [],
-          name: 'Athos',
         },
       ],
       score: 0,
@@ -42,21 +39,15 @@ describe('A new empty game', () => {
       // gameId: jasmine.any(String),
       hintCount: 9,
       inTurn: 0,
-      players: [
+      playerHandViews: [
         {
           hand: [],
-          idx: 0,
-          isConnected: true,
           isMe: true,
-          name: 'Athos',
         },
         {
           hand: [],
           extraMysticalHand: [],
-          idx: 1,
-          isConnected: true,
           isMe: false,
-          name: 'Porthos',
         },
       ],
       score: 0,
@@ -78,21 +69,15 @@ describe('A new empty game', () => {
       // gameId: jasmine.any(String),
       hintCount: 9,
       inTurn: 0,
-      players: [
+      playerHandViews: [
         {
-          idx: 0,
-          isConnected: true,
           isMe: true,
           hand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
-          name: 'Athos',
         },
         {
           extraMysticalHand: jasmine.any(Array),
           hand: [knownCard(), knownCard(), knownCard(), knownCard(), knownCard()],
-          idx: 1,
-          isConnected: true,
           isMe: false,
-          name: 'Porthos',
         },
       ],
       score: 0,

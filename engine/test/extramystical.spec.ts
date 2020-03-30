@@ -1,7 +1,7 @@
 import {Game} from '../src/game'
 
 import {createDeck} from './helpers'
-import {TOtherMaskedPlayerState} from '../src/player'
+import {TOtherPlayerHandViewState} from '../src/player'
 import {TCardState} from '../src/card'
 
 function newGame(deck: string) {
@@ -12,9 +12,10 @@ function newGame(deck: string) {
   })
 }
 
-function getExtraMysticalHand(g, ofPlayerIdx: number, asSeenByPlayerIdx: number) {
-  return ((g.getTurnState(g.players[asSeenByPlayerIdx].id).players[ofPlayerIdx] as unknown) as TOtherMaskedPlayerState)
-    .extraMysticalHand
+function getExtraMysticalHand(g: Game, ofPlayerIdx: number, asSeenByPlayerIdx: number) {
+  return ((g.getTurnState(g.players[asSeenByPlayerIdx].id).playerHandViews[
+    ofPlayerIdx
+  ] as unknown) as TOtherPlayerHandViewState).extraMysticalHand
 }
 
 describe('A three-player game', () => {
@@ -100,7 +101,7 @@ describe('A three-player game', () => {
     g.act(g.players[0].id, {type: 'DISCARD', cardIdx: 0})
 
     expect(
-      (g.getTurnState(g.players[1].id).players[0].hand as TCardState[]).map(c => c.color + c.num).join(','),
+      (g.getTurnState(g.players[1].id).playerHandViews[0].hand as TCardState[]).map(c => c.color + c.num).join(','),
     ).toEqual('B1,C1,D1,E1,X5')
 
     // p0 still sees X5 as one option for p2's first card
@@ -122,7 +123,7 @@ describe('A three-player game', () => {
     g.act(g.players[2].id, {type: 'HINT', toPlayerIdx: 0, is: 'A'})
 
     // Now p0 knows they have A5/X5, and they see p2's A5, so it must be X5.
-    expect(g.getTurnState(g.players[0].id).players[0].hand[4]).toEqual({
+    expect(g.getTurnState(g.players[0].id).playerHandViews[0].hand[4]).toEqual({
       actionability: 'UNDISCARDABLE',
       color: 'X',
       num: 5,
@@ -162,7 +163,7 @@ describe('Another three-player game', () => {
     expect(
       g
         .getTurnState(g.players[0].id)
-        .players[0].hand.slice(0, 2)
+        .playerHandViews[0].hand.slice(0, 2)
         .map(c => c.possibleCards),
     ).toEqual([
       [
@@ -230,7 +231,7 @@ describe('Third three-player game', () => {
     expect(
       g
         .getTurnState(g.players[0].id)
-        .players[0].hand.slice(0, 3)
+        .playerHandViews[0].hand.slice(0, 3)
         .map(c => c.possibleCards),
     ).toEqual([
       [
@@ -320,58 +321,46 @@ describe('A real game ending', () => {
         ],
         gameId: 'ac7942540dfbef26fc795eb6becb8e1c58cfc96a',
         hintCount: 8,
-        players: [
-          {
-            hand: [
-              {
-                color: 'A',
-                hints: [
-                  {is: 1, result: false, turnNumber: 17},
-                  {is: 5, result: true, turnNumber: 19},
-                  {is: 3, result: false, turnNumber: 29},
-                  {is: 'C', result: false, turnNumber: 35},
-                  {is: 'D', result: false, turnNumber: 39},
-                  {is: 3, result: false, turnNumber: 43},
-                  {is: 'C', result: false, turnNumber: 55},
-                  {is: 'E', result: false, turnNumber: 57},
-                  {is: 'A', result: true, turnNumber: 75},
-                ],
-                num: 5,
-              },
-              {color: 'B', hints: [{is: 'A', result: false, turnNumber: 75}], num: 3},
-              {color: 'B', hints: [{is: 'A', result: false, turnNumber: 75}], num: 1},
-              {color: 'D', hints: [{is: 'A', result: false, turnNumber: 75}], num: 2},
-              {color: 'A', hints: [], num: 2},
-            ],
-            id: 'IufDncLagi0AbBg=',
-            idx: 0,
-            isConnected: true,
-            name: 'Essi',
-          },
-          {
-            hand: [
-              {
-                color: 'A',
-                hints: [
-                  {is: 4, result: true, turnNumber: 46},
-                  {is: 'A', result: true, turnNumber: 48},
-                  {is: 'E', result: false, turnNumber: 50},
-                  {is: 1, result: false, turnNumber: 62},
-                  {is: 5, result: false, turnNumber: 64},
-                  {is: 'C', result: false, turnNumber: 66},
-                ],
-                num: 4,
-              },
-              {color: 'C', hints: [], num: 2},
-              {color: 'A', hints: [], num: 1},
-              {color: 'X', hints: [], num: 4},
-              {color: 'C', hints: [], num: 5},
-            ],
-            id: 'Iuj_ocSqAi0CEog=',
-            idx: 1,
-            isConnected: true,
-            name: 'Tumeks',
-          },
+        completePlayerHands: [
+          [
+            {
+              color: 'A',
+              hints: [
+                {is: 1, result: false, turnNumber: 17},
+                {is: 5, result: true, turnNumber: 19},
+                {is: 3, result: false, turnNumber: 29},
+                {is: 'C', result: false, turnNumber: 35},
+                {is: 'D', result: false, turnNumber: 39},
+                {is: 3, result: false, turnNumber: 43},
+                {is: 'C', result: false, turnNumber: 55},
+                {is: 'E', result: false, turnNumber: 57},
+                {is: 'A', result: true, turnNumber: 75},
+              ],
+              num: 5,
+            },
+            {color: 'B', hints: [{is: 'A', result: false, turnNumber: 75}], num: 3},
+            {color: 'B', hints: [{is: 'A', result: false, turnNumber: 75}], num: 1},
+            {color: 'D', hints: [{is: 'A', result: false, turnNumber: 75}], num: 2},
+            {color: 'A', hints: [], num: 2},
+          ],
+          [
+            {
+              color: 'A',
+              hints: [
+                {is: 4, result: true, turnNumber: 46},
+                {is: 'A', result: true, turnNumber: 48},
+                {is: 'E', result: false, turnNumber: 50},
+                {is: 1, result: false, turnNumber: 62},
+                {is: 5, result: false, turnNumber: 64},
+                {is: 'C', result: false, turnNumber: 66},
+              ],
+              num: 4,
+            },
+            {color: 'C', hints: [], num: 2},
+            {color: 'A', hints: [], num: 1},
+            {color: 'X', hints: [], num: 4},
+            {color: 'C', hints: [], num: 5},
+          ],
         ],
         status: 'RUNNING',
         stock: [],
@@ -388,6 +377,20 @@ describe('A real game ending', () => {
         turnsLeft: 2,
         woundCount: 0,
       },
+      players: [
+        {
+          id: 'IufDncLagi0AbBg=',
+          idx: 0,
+          isConnected: true,
+          name: 'Essi',
+        },
+        {
+          id: 'Iuj_ocSqAi0CEog=',
+          idx: 1,
+          isConnected: true,
+          name: 'Tumeks',
+        },
+      ],
       playedActions: [],
     },
   } as any)

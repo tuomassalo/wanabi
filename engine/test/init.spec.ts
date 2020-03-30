@@ -22,26 +22,17 @@ describe('A three-player game without any moves', () => {
       turnsLeft: null,
       score: 0,
       status: 'RUNNING',
-      players: [
+      playerHandViews: [
         {
-          name: 'Huey',
-          idx: 0,
-          isConnected: true,
           isMe: true,
           hand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
         },
         {
-          name: 'Dewey',
-          idx: 1,
-          isConnected: true,
           isMe: false,
           hand: [knownCard(), knownCard(), knownCard(), knownCard(), knownCard()],
           extraMysticalHand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
         },
         {
-          name: 'Louie',
-          idx: 2,
-          isConnected: true,
           isMe: false,
           hand: [knownCard(), knownCard(), knownCard(), knownCard(), knownCard()],
           extraMysticalHand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
@@ -75,18 +66,12 @@ describe('A three-player game with a custom deck', () => {
       score: 0,
       status: 'RUNNING',
       table: {A: [], B: [], C: [], D: [], E: [], X: []},
-      players: [
+      playerHandViews: [
         {
-          name: 'Huey',
-          idx: 0,
-          isConnected: true,
           isMe: true,
           hand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
         },
         {
-          name: 'Dewey',
-          idx: 1,
-          isConnected: true,
           isMe: false,
           hand: [
             {color: 'A', num: 2, hints: [], actionability: 'UNPLAYABLE'},
@@ -98,9 +83,6 @@ describe('A three-player game with a custom deck', () => {
           extraMysticalHand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
         },
         {
-          name: 'Louie',
-          idx: 2,
-          isConnected: true,
           isMe: false,
           hand: [
             {color: 'A', num: 3, hints: [], actionability: 'UNPLAYABLE'},

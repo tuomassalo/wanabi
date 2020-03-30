@@ -34,7 +34,7 @@ describe('A tight three-player game', () => {
       // gameId: jasmine.any(String),
       hintCount: 9,
       inTurn: 0,
-      players: [
+      playerHandViews: [
         {
           extraMysticalHand: [
             {hints: [], possibleCards},
@@ -50,10 +50,7 @@ describe('A tight three-player game', () => {
             {color: 'X', hints: [], num: 3, actionability: 'UNPLAYABLE'},
             {color: 'X', hints: [], num: 4, actionability: 'UNPLAYABLE'},
           ],
-          idx: 0,
-          isConnected: true,
           isMe: false,
-          name: 'Jekyll',
         },
         {
           hand: Array(5).fill({
@@ -67,10 +64,7 @@ describe('A tight three-player game', () => {
               {count: 1, prob: 21 / 155, value: 'X5', actionability: 'UNDISCARDABLE'},
             ],
           }),
-          idx: 1,
-          isConnected: true,
           isMe: true,
-          name: 'Hyde',
         },
       ],
       score: 24,
@@ -114,7 +108,7 @@ describe('A tight three-player game', () => {
     expect(
       g
         .getTurnState(g.players[1].id)
-        .players[0].hand.map(c => (c.color as TColor) + (c.num as TNum))
+        .playerHandViews[0].hand.map(c => (c.color as TColor) + (c.num as TNum))
         .join(','),
     ).toEqual('X1,X2,X3,X4,X5')
 
@@ -122,12 +116,12 @@ describe('A tight three-player game', () => {
     expect(
       g
         .getTurnState(g.players[0].id)
-        .players[1].hand.map(c => (c.color as TColor) + (c.num as TNum))
+        .playerHandViews[1].hand.map(c => (c.color as TColor) + (c.num as TNum))
         .join(','),
     ).toEqual('X4,X3,X2,X1,X1')
 
     // The stock is empty, so p0 knows their hand but not positions
-    expect(g.getTurnState(g.players[0].id).players[0].hand.map(c => c.possibleCards)).toEqual(
+    expect(g.getTurnState(g.players[0].id).playerHandViews[0].hand.map(c => c.possibleCards)).toEqual(
       Array(5).fill([
         {actionability: 'PLAYABLE', count: 1, prob: 0.2, value: 'X1'},
         {actionability: 'UNPLAYABLE', count: 1, prob: 0.2, value: 'X2'},
@@ -138,7 +132,7 @@ describe('A tight three-player game', () => {
     )
 
     // So does p1
-    expect(g.getTurnState(g.players[1].id).players[1].hand.map(c => c.possibleCards)).toEqual(
+    expect(g.getTurnState(g.players[1].id).playerHandViews[1].hand.map(c => c.possibleCards)).toEqual(
       Array(5).fill([
         {actionability: 'PLAYABLE', count: 2, prob: 0.4, value: 'X1'},
         {actionability: 'UNPLAYABLE', count: 1, prob: 0.2, value: 'X2'},
@@ -176,7 +170,7 @@ describe('A tight three-player game', () => {
       turnsLeft: 2, // === number of players
       score: 25,
       status: 'RUNNING',
-      players: [
+      playerHandViews: [
         {
           extraMysticalHand: [
             {hints: [], color: 'X', possibleCards},
@@ -192,14 +186,9 @@ describe('A tight three-player game', () => {
             {color: 'X', hints: [], num: 4, actionability: 'UNPLAYABLE'},
             {color: 'X', hints: [], num: 5, actionability: 'UNDISCARDABLE'},
           ],
-          idx: 0,
-          isConnected: true,
           isMe: false,
-          name: 'Jekyll',
         },
         {
-          idx: 1,
-          isConnected: true,
           isMe: true,
           hand: Array(5).fill({
             color: 'X',
@@ -211,7 +200,6 @@ describe('A tight three-player game', () => {
               {value: 'X4', prob: 1 / 5, count: 1, actionability: 'UNPLAYABLE'},
             ],
           }),
-          name: 'Hyde',
         },
       ],
     })

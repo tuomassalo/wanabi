@@ -32,13 +32,31 @@ async function scan<I>(
   return Items as I[]
 }
 async function scanGames(scanParams = {}): Promise<engine.Game[]> {
-  return (await scan<engine.TCompleteGameState>(gameTable, scanParams))
+  const games = (await scan<engine.TCompleteGameState>(gameTable, scanParams))
     .sort((a, b) =>
       a.playedActions[a.playedActions.length - 1].timestamp > b.playedActions[b.playedActions.length - 1].timestamp
         ? -1
         : 1,
     )
     .map(game => new engine.Game({from: 'SERIALIZED_GAME', game}))
+
+  const allConnections = new Set(await getAllConnections())
+  console.warn(333, {allConnections})
+  for (const game of games) {
+    // update isConnected for all players
+
+    for (const player of game.currentTurn.players) {
+      if (allConnections.has(player.id)) {
+        player.isConnected = true
+      } else {
+        player.isConnected = false
+        player.id = 'NONE'
+      }
+    }
+    console.warn(334, game.currentTurn.players)
+  }
+
+  return games
 }
 
 async function getAllConnections(): Promise<TConnectionId[]> {
@@ -58,7 +76,12 @@ async function sendGamesState(toConnections: TConnectionId[]) {
   // set isConnected for all players in all games
   for (const game of games) {
     for (const p of game.currentTurn.players) {
-      p.isConnected = allConnections.has(p.id)
+      if (allConnections.has(p.id)) {
+        p.isConnected = true
+      } else {
+        p.isConnected = false
+        p.id = 'NONE'
+      }
     }
   }
 
@@ -91,6 +114,9 @@ async function updateGame(game: engine.Game, prevTimestamp: string) {
   const updateKeys = Object.keys(newData)
   const newDataWithColons = Object.fromEntries(updateKeys.map(k => [':' + k, newData[k]]))
 
+  console.warn('PLAYERS', newData.turn0.players)
+  console.warn({prevTimestamp, updateKeys}, newDataWithColons)
+
   await dynamodb
     .update({
       TableName: gameTable,
@@ -113,20 +139,8 @@ async function _getGame(gameId: engine.TGameId): Promise<engine.Game> {
   const game = (await scanGames()).find(g => g.gameId === gameId) // TODO: do this on server
   if (!game) throw new Error('No game found')
 
-  // update isConnected for all players
-  const allConnections = new Set(await getAllConnections())
-  console.warn(333, {allConnections})
-
-  for (const player of game.currentTurn.players) {
-    if (allConnections.has(player.id)) {
-      player.isConnected = true
-    } else {
-      player.isConnected = false
-      player.id = 'NONE'
-    }
-  }
-
-  return new engine.Game({from: 'SERIALIZED_GAME', game: game.toJSON()})
+  return game
+  // return new engine.Game({from: 'SERIALIZED_GAME', game: game.toJSON()})
 }
 
 export async function getGamesState({}: engine.WS_getGamesStateParams, connectionId: string) {
@@ -196,7 +210,7 @@ export async function act({gameId, actionParams}: engine.WS_actParams, connectio
 
 export async function rejoinGame({gameId, playerIdx}: engine.WS_rejoinGameParams, connectionId: string) {
   const game = await _getGame(gameId)
-  const player = game.currentTurn.players[playerIdx]
+  const player = game.turns[0].players[playerIdx] // HACK: part of player state lives at turn[0]
 
   console.warn(111, player)
   if (!player) {
@@ -214,6 +228,7 @@ export async function rejoinGame({gameId, playerIdx}: engine.WS_rejoinGameParams
   player.isConnected = true
 
   console.warn(222, player)
+  console.warn(2222, game.currentTurn.players[playerIdx])
 
   await updateGame(game, game.currentTurn.timestamp)
 
