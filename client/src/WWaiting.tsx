@@ -1,18 +1,18 @@
 import React from 'react'
-import {MaskedTurn, TGameId} from 'wanabi-engine'
+import {MaskedGame} from 'wanabi-engine'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import WPlayerList from './WPlayerList'
 import {WebSocketClient} from './websocketclient'
 
 declare const wsclient: WebSocketClient
 
-export default class WWaiting extends React.Component<{gameId: TGameId; currentTurn: MaskedTurn}> {
+export default class WWaiting extends React.Component<{game: MaskedGame}> {
   startGame = () => {
-    wsclient.startGame({gameId: this.props.gameId})
+    wsclient.startGame({gameId: this.props.game.gameId})
   }
 
   render() {
-    const currentPlayerCount = this.props.currentTurn.players.length
+    const currentPlayerCount = this.props.game.players.length
     const startButton =
       currentPlayerCount > 1 ? (
         <input
@@ -27,7 +27,7 @@ export default class WWaiting extends React.Component<{gameId: TGameId; currentT
     return (
       <div className="WWaiting">
         <h3>Waiting for players...</h3>
-        Players: <WPlayerList gameId={this.props.gameId} turn={this.props.currentTurn} />
+        Players: <WPlayerList game={this.props.game} />
         {startButton}
       </div>
     )

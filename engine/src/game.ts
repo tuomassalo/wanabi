@@ -398,9 +398,11 @@ export interface TNewGameConstructor {
 
 export class MaskedGame {
   gameId: TGameId
+  players: Player[]
   currentTurn: MaskedTurn
   constructor(maskedGameState: TMaskedGameState) {
     this.gameId = maskedGameState.gameId
+    this.players = maskedGameState.players.map(p => new Player({...p, id: 'REDACTED'}))
     this.currentTurn = new MaskedTurn(maskedGameState.currentTurn, maskedGameState.players)
   }
 }

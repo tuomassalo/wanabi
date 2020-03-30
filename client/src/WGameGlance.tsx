@@ -28,7 +28,7 @@ export default class WGameGlance extends React.Component<{game: MaskedGame}> {
     let status = <div></div>
     if (this.props.game.currentTurn.status === 'WAITING_FOR_PLAYERS') {
       status = <h4>Waiting for players...</h4>
-      if (this.props.game.currentTurn.players.length < 5) {
+      if (this.props.game.players.length < 5) {
         actionButtons = (
           <div>
             <input type="button" className="major" value="Join game" onClick={this.join} />
@@ -54,7 +54,7 @@ export default class WGameGlance extends React.Component<{game: MaskedGame}> {
           <TimeAgo date={this.props.game.currentTurn.timestamp} formatter={formatter} />
         </span>
         {status}
-        Players: <WPlayerList gameId={this.props.game.gameId} turn={this.props.game.currentTurn} />
+        Players: <WPlayerList game={this.props.game} />
         {actionButtons}
       </div>
     )

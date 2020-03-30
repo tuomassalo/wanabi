@@ -16,6 +16,18 @@ declare const wsclient: WebSocketClient
 
 const exampleGame: engine.TMaskedGameState = {
   gameId: '123',
+  players: [
+    {
+      idx: 0,
+      name: 'Jekyll',
+      isConnected: true,
+    },
+    {
+      name: 'Hyde',
+      idx: 1,
+      isConnected: true,
+    },
+  ],
   currentTurn: {
     timestamp: '2020-01-01',
     action: {type: 'DISCARD', cardIdx: 1, card: 'E2'},
@@ -37,11 +49,8 @@ const exampleGame: engine.TMaskedGameState = {
     turnsLeft: null,
     score: 24,
     status: 'RUNNING',
-    players: [
+    playerHandViews: [
       {
-        name: 'Jekyll',
-        idx: 0,
-        isConnected: true,
         isMe: false,
         extraMysticalHand: [], // bogus
         hand: [
@@ -60,9 +69,6 @@ const exampleGame: engine.TMaskedGameState = {
         ],
       },
       {
-        name: 'Hyde',
-        idx: 1,
-        isConnected: true,
         isMe: true,
         hand: [
           {
@@ -160,7 +166,7 @@ export default class App extends React.Component<{}, AppState> {
         // console.warn('MSG', data)
 
         if (data.msg === 'M_GamesState') {
-          const activeGameState = data.games.find(g => g.currentTurn.players.some(p => p.isMe))
+          const activeGameState = data.games.find(g => g.currentTurn.playerHandViews.some(phv => phv.isMe))
 
           if (activeGameState) {
             const game = new engine.MaskedGame(activeGameState)
@@ -174,7 +180,7 @@ export default class App extends React.Component<{}, AppState> {
               // play a sound if it's my turn
               if (
                 currentTurn.status === 'RUNNING' &&
-                currentTurn.players[currentTurn.inTurn].isMe &&
+                currentTurn.playerHandViews[currentTurn.inTurn].isMe &&
                 localStorage.getItem('sound') === '1'
               )
                 myTurnSound.play()
@@ -344,10 +350,10 @@ export default class App extends React.Component<{}, AppState> {
       this.state.phase === 'IN_MENU' ? (
         <WMenu games={this.state.games} />
       ) : this.state.game.currentTurn.status === 'WAITING_FOR_PLAYERS' ? (
-        <WWaiting gameId={this.state.game.gameId} currentTurn={this.state.game.currentTurn} />
+        <WWaiting game={this.state.game} />
       ) : (
         // RUNNING or GAME_OVER
-        <WGame gameId={this.state.game.gameId} currentTurn={this.state.game.currentTurn} />
+        <WGame game={this.state.game} />
       )
     return (
       <div className="App">

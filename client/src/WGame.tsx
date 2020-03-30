@@ -16,12 +16,9 @@ import WLatestAction from './WLatestAction'
 import WOtherHandActionButtons from './WOtherHandActionButtons'
 declare const wsclient: WebSocketClient
 
-export default class WGame extends React.Component<
-  {gameId: engine.TGameId; currentTurn: engine.MaskedTurn},
-  {soundChecked: boolean}
-> {
+export default class WGame extends React.Component<{game: engine.MaskedGame}, {soundChecked: boolean}> {
   startGame = () => {
-    wsclient.startGame({gameId: this.props.gameId})
+    wsclient.startGame({gameId: this.props.game.gameId})
   }
 
   constructor(props: any) {
@@ -47,8 +44,8 @@ export default class WGame extends React.Component<
       action,
       status,
       score,
-      players,
       table,
+      playerHandViews,
       stockSize,
       discardPile,
       woundCount,
@@ -56,10 +53,11 @@ export default class WGame extends React.Component<
       turnsLeft,
       inTurn,
       turnNumber,
-    } = this.props.currentTurn
+    } = this.props.game.currentTurn
+    const {players} = this.props.game
     let gameStatusClass: string = ''
     if (status === 'RUNNING') {
-      if (players[inTurn].isMe) {
+      if (playerHandViews[inTurn].isMe) {
         gameStatusClass = ' WGameStatus-myturn'
       }
     } else if (status === 'GAMEOVER') {
@@ -104,40 +102,41 @@ export default class WGame extends React.Component<
             <WDiscardPile discardPile={discardPile} latestAction={action} />
             <WTable table={table} latestAction={action} />
           </div>
-          {players.map(p => {
+          {playerHandViews.map((phv, idx) => {
+            const player = players[idx]
             const getLatestActionIfByThisPlayer = () =>
-              p.idx === (players.length + inTurn - 1) % players.length ? (
+              idx === (players.length + inTurn - 1) % players.length ? (
                 <WLatestAction latestAction={action} />
               ) : (
                 <span />
               )
-            const highlightLatestHint = action.type === 'HINT' && action.toPlayerIdx === p.idx
+            const highlightLatestHint = action.type === 'HINT' && action.toPlayerIdx === idx
 
             return (
-              <div key={p.idx} className={`WPlayer ${p.idx === inTurn ? 'WPlayer-inturn' : ''}`}>
+              <div key={idx} className={`WPlayer ${idx === inTurn ? 'WPlayer-inturn' : ''}`}>
                 <h3>
-                  {p.name}
-                  {p.isConnected ? '' : ' 🔌 '}
+                  {player.name}
+                  {player.isConnected ? '' : ' 🔌 '}
                 </h3>
-                {p.isMe ? (
+                {phv.isMe ? (
                   <WMyHand
-                    cards={refineCards(this.props.currentTurn, p.hand.cards)}
-                    playerIdx={p.idx}
+                    cards={refineCards(this.props.game, phv.hand.cards)}
+                    playerIdx={idx}
                     highlightLatestHint={highlightLatestHint}
                   >
                     {getLatestActionIfByThisPlayer()}
                   </WMyHand>
                 ) : (
                   <WOtherHand
-                    cards={refineCards(this.props.currentTurn, p.hand.cards)}
+                    cards={refineCards(this.props.game, phv.hand.cards)}
                     extraMysticalHand={
-                      p.extraMysticalHand ? refineCards(this.props.currentTurn, p.extraMysticalHand.cards) : []
+                      phv.extraMysticalHand ? refineCards(this.props.game, phv.extraMysticalHand.cards) : []
                     }
-                    playerIdx={p.idx}
+                    playerIdx={idx}
                     hintsAvailable={hintCount > 0}
                     highlightLatestHint={highlightLatestHint}
                   >
-                    <WOtherHandActionButtons playerIdx={p.idx} hintsAvailable={hintCount > 0} />
+                    <WOtherHandActionButtons playerIdx={idx} hintsAvailable={hintCount > 0} />
                     {getLatestActionIfByThisPlayer()}
                   </WOtherHand>
                 )}

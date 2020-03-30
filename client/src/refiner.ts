@@ -1,6 +1,6 @@
 import {MaskedCard, TMaskedCardState} from 'wanabi-engine/dist/card'
 import {THintResultState} from 'wanabi-engine/dist/card'
-import {MaskedTurn} from 'wanabi-engine'
+import {MaskedGame} from 'wanabi-engine'
 
 export interface TRefinedHintResultState extends THintResultState {
   hinterName: string
@@ -12,15 +12,15 @@ export interface TRefinedMaskedCardState extends Omit<TMaskedCardState, 'hints'>
   value: string | undefined
 }
 
-export function refineHint(game: MaskedTurn, hint: THintResultState): TRefinedHintResultState {
+export function refineHint(game: MaskedGame, hint: THintResultState): TRefinedHintResultState {
   return {
     ...hint,
     hinterName: game.players[hint.turnNumber % game.players.length].name,
-    turnsAgo: game.turnNumber - hint.turnNumber,
+    turnsAgo: game.currentTurn.turnNumber - hint.turnNumber,
   }
 }
 
-export function refineCards(game: MaskedTurn, cards: MaskedCard[]): TRefinedMaskedCardState[] {
+export function refineCards(game: MaskedGame, cards: MaskedCard[]): TRefinedMaskedCardState[] {
   return cards.map(c => ({
     ...c.toJSON(),
     value: c.value,
