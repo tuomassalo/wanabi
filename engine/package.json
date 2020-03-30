@@ -13,7 +13,7 @@
   "scripts": {
     "watch": "tsc --watch",
     "build": "tsc",
-    "test": "jest"
+    "test": "jest --bail"
   },
   "devDependencies": {
     "@types/jest": "24.0.25",

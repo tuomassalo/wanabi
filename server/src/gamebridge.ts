@@ -45,7 +45,7 @@ async function scanGames(scanParams = {}): Promise<engine.Game[]> {
   for (const game of games) {
     // update isConnected for all players
 
-    for (const player of game.currentTurn.players) {
+    for (const player of game.players) {
       if (allConnections.has(player.id)) {
         player.isConnected = true
       } else {
@@ -53,7 +53,7 @@ async function scanGames(scanParams = {}): Promise<engine.Game[]> {
         player.id = 'NONE'
       }
     }
-    console.warn(334, game.currentTurn.players)
+    console.warn(334, game.players)
   }
 
   return games
@@ -75,7 +75,7 @@ async function sendGamesState(toConnections: TConnectionId[]) {
 
   // set isConnected for all players in all games
   for (const game of games) {
-    for (const p of game.currentTurn.players) {
+    for (const p of game.players) {
       if (allConnections.has(p.id)) {
         p.isConnected = true
       } else {
@@ -114,7 +114,6 @@ async function updateGame(game: engine.Game, prevTimestamp: string) {
   const updateKeys = Object.keys(newData)
   const newDataWithColons = Object.fromEntries(updateKeys.map(k => [':' + k, newData[k]]))
 
-  console.warn('PLAYERS', newData.turn0.players)
   console.warn({prevTimestamp, updateKeys}, newDataWithColons)
 
   await dynamodb
@@ -210,7 +209,7 @@ export async function act({gameId, actionParams}: engine.WS_actParams, connectio
 
 export async function rejoinGame({gameId, playerIdx}: engine.WS_rejoinGameParams, connectionId: string) {
   const game = await _getGame(gameId)
-  const player = game.turns[0].players[playerIdx] // HACK: part of player state lives at turn[0]
+  const player = game.players[playerIdx] // HACK: part of player state lives at turn[0]
 
   console.warn(111, player)
   if (!player) {
@@ -228,7 +227,7 @@ export async function rejoinGame({gameId, playerIdx}: engine.WS_rejoinGameParams
   player.isConnected = true
 
   console.warn(222, player)
-  console.warn(2222, game.currentTurn.players[playerIdx])
+  console.warn(2222, game.players[playerIdx])
 
   await updateGame(game, game.currentTurn.timestamp)
 

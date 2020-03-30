@@ -142,7 +142,7 @@ abstract class BaseTurn {
   turnNumber: number
   turnsLeft: number | null // `null` means that the countdown has not started yet.
   timestamp: string // ISO string
-  players: Player[]
+  _players: Player[]
 
   constructor(t: TBaseTurnState, players: TMaskedPlayerState[]) {
     // this.gameId = t.gameId
@@ -156,7 +156,7 @@ abstract class BaseTurn {
     this.turnsLeft = typeof t.turnsLeft !== 'undefined' ? t.turnsLeft : null
     this.timestamp = t.timestamp || new Date().toISOString()
 
-    this.players = players.map(p => new Player({id: '[REDACTED]', ...p}))
+    this._players = players.map(p => new Player({id: '[REDACTED]', ...p}))
   }
   get score() {
     return this.table.getScore()
@@ -175,10 +175,10 @@ export class Turn extends BaseTurn {
   }
   clone() {
     // make a deep copy
-    return new Turn(JSON.parse(JSON.stringify(this.toJSON())), this.players)
+    return new Turn(JSON.parse(JSON.stringify(this.toJSON())), this._players)
   }
   get inTurn() {
-    return this.turnNumber % this.players.length
+    return this.turnNumber % this._players.length
   }
 
   toJSON(): TTurnState {
@@ -205,7 +205,7 @@ export class Turn extends BaseTurn {
         // table
         Object.values(this.table.table).flatMap(pile => pile.cards),
         // hands of other players
-        this.players
+        this._players
           .filter(p => !excludePlayerIndices.includes(p.idx))
           .flatMap(p => this.completePlayerHands[p.idx].cards.map(hc => new Card(hc))),
       ].flat()
@@ -254,14 +254,14 @@ export class Turn extends BaseTurn {
   // }
 
   getState(forPlayerId: TPlayerId): TMaskedTurnState {
-    const me = this.players.find(p => p.id === forPlayerId)
+    const me = this._players.find(p => p.id === forPlayerId)
     const isOutsider = !me
 
     return JSON.parse(
       JSON.stringify({
         ...this.toJSON(),
         /// remove these:
-        players: undefined,
+        _players: undefined,
         completePlayerHands: undefined,
         stock: undefined,
         seed: undefined,
@@ -289,7 +289,7 @@ export class Turn extends BaseTurn {
     const nextTurn = this.clone()
 
     // get current player
-    const me: Player = nextTurn.players[nextTurn.inTurn]
+    const me: Player = nextTurn._players[nextTurn.inTurn]
     if (!me) {
       throw new GameError('NO_SUCH_PLAYER', {playerId})
     }
@@ -312,7 +312,7 @@ export class Turn extends BaseTurn {
       }
       nextTurn.hintCount--
 
-      const hintee = nextTurn.players[actionParams.toPlayerIdx]
+      const hintee = nextTurn._players[actionParams.toPlayerIdx]
       if (!hintee) {
         throw new GameError('NO_SUCH_PLAYER', actionParams.toPlayerIdx)
       }
@@ -364,7 +364,7 @@ export class Turn extends BaseTurn {
       nextTurn.status = 'FINISHED'
     } else if (!nextTurn.stock.size && nextTurn.turnsLeft === null) {
       // countdown should start now
-      nextTurn.turnsLeft = nextTurn.players.length
+      nextTurn.turnsLeft = nextTurn._players.length
     }
 
     return nextTurn
@@ -379,7 +379,7 @@ export class MaskedTurn extends BaseTurn {
     this.stockSize = state.stockSize
   }
   get inTurn() {
-    return this.turnNumber % this.players.length
+    return this.turnNumber % this._players.length
   }
 }
 
@@ -434,7 +434,7 @@ export class Game {
       for (const [turnNumber, {action, timestamp}] of params.game.playedActions.entries()) {
         const actionParams = resolvedActionToActionParams(action)
         if (actionParams.type !== 'START')
-          this.act(this.currentTurn.players[(turnNumber - 1) % this.currentTurn.players.length].id, actionParams)
+          this.act(this.currentTurn._players[(turnNumber - 1) % this.currentTurn._players.length].id, actionParams)
         this.currentTurn.timestamp = timestamp // fix timestamp
       }
     } else if (params.from === 'NEW_TEST_GAME') {
@@ -487,7 +487,7 @@ export class Game {
       throw new Error("Invalid 'from'")
     }
 
-    this.playersById = Object.fromEntries(this.currentTurn.players.map(p => [p.id, p]))
+    this.playersById = Object.fromEntries(this.currentTurn._players.map(p => [p.id, p]))
 
     this.checkIntegrity()
   }
@@ -551,12 +551,12 @@ export class Game {
   }
 
   static joinPendingGame(pendingGame: Game, newPlayerName: string, newPlayerId: TPlayerId): Game {
-    if (pendingGame.currentTurn.players.length >= 5) throw new GameError('GAME_FULL')
+    if (pendingGame.currentTurn._players.length >= 5) throw new GameError('GAME_FULL')
 
     pendingGame.players.push(
       new Player({
         name: newPlayerName,
-        idx: pendingGame.currentTurn.players.length,
+        idx: pendingGame.currentTurn._players.length,
         id: newPlayerId,
         isConnected: true,
       }),
@@ -570,9 +570,9 @@ export class Game {
     turn0.stock = new Pile(Card.getFullDeck())
     turn0.stock.shuffle(pendingGame.gameId)
 
-    const handSize: number = Game.getHandSize(turn0.players.length)
+    const handSize: number = Game.getHandSize(turn0._players.length)
     for (let i = 0; i < handSize; i++) {
-      for (let p = 0; p < turn0.players.length; p++) {
+      for (let p = 0; p < turn0._players.length; p++) {
         turn0.completePlayerHands[p].dealOne(turn0.stock.drawOne())
       }
     }
