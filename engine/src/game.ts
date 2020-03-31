@@ -100,7 +100,7 @@ export interface WS_actParams {
 }
 export interface TMaskedGameState {
   history: {
-    revealedStock: TCardValueState[]
+    revealedOtherPlayerCards: TCardValueState[]
     playedActions: {timestamp: string; action: TResolvedActionState}[]
   }
   gameId: TGameId
@@ -259,7 +259,7 @@ export class Turn extends BaseTurn {
   }
 
   // ACTIONS
-  playNext(playerId: string, actionParams: TActionParams) {
+  playNext(playerId: string, actionParams: TActionParams, resolvedAction?: TResolvedActionState) {
     // console.warn(1234, {
     //   type: actionParams.type,
     //   playerId,
@@ -303,7 +303,19 @@ export class Turn extends BaseTurn {
         throw new GameError('CANNOT_HINT_SELF')
       }
 
-      nextTurn.completePlayerHands[hintee.idx].addHint({turnNumber: nextTurn.turnNumber, is: actionParams.is})
+      // If a resolved action was provided, this might be a masked game where we do not have accurate
+      // information about hintee's cards. In that case, add the hints manually.
+      if (resolvedAction) {
+        for (const [cardIdx, result] of (resolvedAction as TResolvedHintActionState).matches.entries()) {
+          nextTurn.completePlayerHands[hintee.idx].cards[cardIdx].hints.push({
+            turnNumber: nextTurn.turnNumber,
+            is: actionParams.is,
+            result,
+          })
+        }
+      } else {
+        nextTurn.completePlayerHands[hintee.idx].addHint({turnNumber: nextTurn.turnNumber, is: actionParams.is})
+      }
 
       nextTurn.action = {
         ...actionParams,
@@ -434,8 +446,13 @@ export class Game {
       const actionParams = resolvedActionToActionParams(action)
       if (actionParams.type !== 'START') {
         // console.warn('ACTING', actionParams, turnNumber)
+        const playerIdx = (turnNumber - 1) % this.currentTurn._players.length
+        if (action.type === 'PLAY' || action.type === 'DISCARD') {
+          this.currentTurn.completePlayerHands[playerIdx].cards[action.cardIdx] = new Card(action.card)
+        } else if (action.type === 'HINT') {
+        }
 
-        this.act(this.currentTurn._players[(turnNumber - 1) % this.currentTurn._players.length].id, actionParams)
+        this.act(this.currentTurn._players[playerIdx].id, actionParams)
       }
       this.currentTurn.timestamp = timestamp // fix timestamp
     }
@@ -516,7 +533,7 @@ export class Game {
   }
 
   static fromMaskedGame(maskedGame: TMaskedGameState): Game {
-    const stock = maskedGame.history.revealedStock
+    const stock = maskedGame.history.revealedOtherPlayerCards
 
     // maintain correct stock size
     const fullStockSize = Card.getFullDeck().length
@@ -636,10 +653,10 @@ export class Game {
     }
   }
 
-  act(playerId: TPlayerId, actionParams: TPlayableActionParams) {
+  act(playerId: TPlayerId, actionParams: TPlayableActionParams, resolvedAction?: TResolvedActionState) {
     // console.warn('ACT', {playerId, actionParams, inStock: this.currentTurn.stock.size})
 
-    this.turns.push(this.currentTurn.playNext(playerId, actionParams))
+    this.turns.push(this.currentTurn.playNext(playerId, actionParams, resolvedAction))
     this.checkIntegrity()
   }
 
@@ -655,7 +672,7 @@ export class Game {
       gameId: this.gameId,
       currentTurn: this.currentTurn.getState(playerId),
       history: {
-        revealedStock: this.initialDeck.slice(-revealedCardCount),
+        revealedOtherPlayerCards: this.initialDeck.slice(-revealedCardCount),
         playedActions: this.turns.map(t => ({action: t.action, timestamp: t.timestamp})),
       },
       players: this.players.map(p => ({...p.toJSON(), id: p.id === playerId ? p.id : 'REDACTED'})),

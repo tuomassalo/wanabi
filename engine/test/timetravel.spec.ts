@@ -70,7 +70,7 @@ describe('A game', () => {
           },
           {action: {card: 'A3', cardIdx: 0, success: false, type: 'PLAY'}, timestamp: jasmine.any(String)},
         ],
-        revealedStock: ['B2', 'B4', 'B1', 'A1', 'A5', 'A1', 'A4', 'A2', 'A3', 'A3', 'A2', 'A4', 'A1'],
+        revealedOtherPlayerCards: ['B2', 'B4', 'B1', 'A1', 'A5', 'A1', 'A4', 'A2', 'A3', 'A3', 'A2', 'A4', 'A1'],
       },
       players: [
         {id: 'bogus_id_Jekyll', idx: 0, isConnected: true, name: 'Jekyll'},
