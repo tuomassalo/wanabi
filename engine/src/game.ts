@@ -179,6 +179,7 @@ export class Turn extends BaseTurn {
   toJSON(): TTurnState {
     return {
       ...this,
+      _players: undefined, // not wanted
       stock: this.stock.toJSON(),
       discardPile: this.discardPile.toJSON(),
       table: this.table.toJSON(),
@@ -257,117 +258,6 @@ export class Turn extends BaseTurn {
       }),
     )
   }
-
-  // ACTIONS
-  playNext(playerId: string, actionParams: TActionParams, resolvedAction?: TResolvedActionState) {
-    // console.warn(1234, {
-    //   type: actionParams.type,
-    //   playerId,
-    //   inTurn: this.inTurn,
-    //   players: this.players,
-    //   turnNumber: this.turnNumber,
-    // })
-
-    const nextTurn = this.clone()
-
-    // get current player
-    const me: Player = nextTurn._players[nextTurn.inTurn]
-    if (!me) {
-      throw new GameError('NO_SUCH_PLAYER', {playerId})
-    }
-    if (playerId !== me.id) {
-      throw new GameError('NOT_MY_TURN', {playerId})
-    }
-
-    if (nextTurn.status !== 'RUNNING') {
-      // console.warn(nextTurn)
-      throw new GameError('GAME_ENDED')
-    }
-
-    if (actionParams.type === 'START') {
-      if (this.turnNumber > 0) {
-        throw new GameError('ALREADY_STARTED')
-      }
-      nextTurn.action = actionParams
-    } else if (actionParams.type === 'HINT') {
-      if (!nextTurn.hintCount) {
-        throw new GameError('NO_HINTS_LEFT')
-      }
-      nextTurn.hintCount--
-
-      const hintee = nextTurn._players[actionParams.toPlayerIdx]
-      if (!hintee) {
-        throw new GameError('NO_SUCH_PLAYER', actionParams.toPlayerIdx)
-      }
-      if (hintee === me) {
-        throw new GameError('CANNOT_HINT_SELF')
-      }
-
-      // If a resolved action was provided, this might be a masked game where we do not have accurate
-      // information about hintee's cards. In that case, add the hints manually.
-      if (resolvedAction) {
-        for (const [cardIdx, result] of (resolvedAction as TResolvedHintActionState).matches.entries()) {
-          nextTurn.completePlayerHands[hintee.idx].cards[cardIdx].hints.push({
-            turnNumber: nextTurn.turnNumber,
-            is: actionParams.is,
-            result,
-          })
-        }
-      } else {
-        nextTurn.completePlayerHands[hintee.idx].addHint({turnNumber: nextTurn.turnNumber, is: actionParams.is})
-      }
-
-      nextTurn.action = {
-        ...actionParams,
-        toPlayerName: hintee.name,
-        matches: nextTurn.completePlayerHands[hintee.idx].cards.map(c => c.hints[c.hints.length - 1].result),
-      }
-    } else {
-      const card = nextTurn.completePlayerHands[me.idx].take(actionParams.cardIdx, nextTurn.stock)
-
-      if (actionParams.type === 'PLAY') {
-        const success: boolean = nextTurn.table.play(card)
-        if (success) {
-          // Successful play:
-          if (card.num === 5 && nextTurn.hintCount < 9) {
-            nextTurn.hintCount++
-          }
-          if (nextTurn.score === AllColors.length * AllNums.length) {
-            nextTurn.status = 'FINISHED'
-          }
-        } else {
-          // fail: add wound
-          nextTurn.discardPile.add(card) // TODO: add metadata?
-          nextTurn.woundCount++
-          // TODO: log
-          if (nextTurn.woundCount === 3) {
-            nextTurn.status = 'GAMEOVER'
-          }
-        }
-        nextTurn.action = {...actionParams, card: card.toJSON(), success}
-      } else if (actionParams.type === 'DISCARD') {
-        nextTurn.discardPile.add(card)
-        if (nextTurn.hintCount < 9) nextTurn.hintCount++
-        nextTurn.action = {...actionParams, card: card.toJSON()}
-      }
-    }
-
-    // actually change the turn:
-
-    nextTurn.timestamp = new Date().toISOString()
-
-    nextTurn.turnNumber++
-    if (nextTurn.turnsLeft !== null) nextTurn.turnsLeft--
-    if (nextTurn.turnsLeft === 0) {
-      // TODO: check if off-by-one
-      nextTurn.status = 'FINISHED'
-    } else if (!nextTurn.stock.size && nextTurn.turnsLeft === null) {
-      // countdown should start now
-      nextTurn.turnsLeft = nextTurn._players.length
-    }
-
-    return nextTurn
-  }
 }
 export class MaskedTurn extends BaseTurn {
   playerHandViews: PlayerHandView[]
@@ -394,16 +284,16 @@ export interface TNewGameConstructor {
   table?: Table
 }
 
-export class MaskedGame {
-  gameId: TGameId
-  players: Player[]
-  currentTurn: MaskedTurn
-  constructor(maskedGameState: TMaskedGameState) {
-    this.gameId = maskedGameState.gameId
-    this.players = maskedGameState.players.map(p => new Player({...p, id: 'REDACTED'}))
-    this.currentTurn = new MaskedTurn(maskedGameState.currentTurn, maskedGameState.players)
-  }
-}
+// export class MaskedGame {
+//   gameId: TGameId
+//   players: Player[]
+//   currentTurn: MaskedTurn
+//   constructor(maskedGameState: TMaskedGameState) {
+//     this.gameId = maskedGameState.gameId
+//     this.players = maskedGameState.players.map(p => new Player({...p, id: 'REDACTED'}))
+//     this.currentTurn = new MaskedTurn(maskedGameState.currentTurn, maskedGameState.players)
+//   }
+// }
 
 const defaultTurn0Properties = {
   table: new Table().toJSON(),
@@ -427,7 +317,6 @@ export class Game {
   players: Player[]
   playersById: {[id: string]: Player}
   initialDeck: string[]
-  isMasked: boolean // no full deck available => no integrity checking
 
   replay(playedActions: {timestamp: string; action: TResolvedActionState}[]) {
     const resolvedActionToActionParams = (a: TResolvedActionState): TActionParams => {
@@ -451,15 +340,15 @@ export class Game {
           this.currentTurn.completePlayerHands[playerIdx].cards[action.cardIdx] = new Card(action.card)
         } else if (action.type === 'HINT') {
         }
-
-        this.act(this.currentTurn._players[playerIdx].id, actionParams)
+        this.act(this.currentTurn._players[playerIdx].id, actionParams, action)
       }
       this.currentTurn.timestamp = timestamp // fix timestamp
     }
   }
   // deal the cards
-  static deal(turn: Turn) {
-    const handSize: number = Game.getHandSize(turn.completePlayerHands.length)
+  deal() {
+    const turn = this.currentTurn
+    const handSize: number = Game.getHandSize(this.players.length)
     for (let i = 0; i < handSize; i++) {
       for (let p = 0; p < turn.completePlayerHands.length; p++) {
         turn.completePlayerHands[p].dealOne(turn.stock.drawOne())
@@ -467,9 +356,14 @@ export class Game {
     }
   }
 
-  constructor(params: TNewGameConstructor | TExistingGameConstructor, isMasked: boolean = false) {
-    this.isMasked = isMasked
+  dealAndReplay(playedActions: TCompleteGameState['playedActions']) {
+    if (this.currentTurn.status === 'RUNNING' && this.currentTurn.completePlayerHands[0].cards.length === 0) {
+      this.deal()
+    }
+    this.replay(playedActions)
+  }
 
+  constructor(params: TNewGameConstructor | TExistingGameConstructor) {
     if (params.from === 'SERIALIZED_GAME') {
       // deserialize an ongoing game
       this.gameId = params.game.gameId
@@ -479,14 +373,7 @@ export class Game {
 
       this.initialDeck = params.game.initialDeck
 
-      // If the game has started but cards have not been dealt yet, deal them now.
-      // (This is needed when loading a masked game.)
-      if (this.currentTurn.status === 'RUNNING' && this.currentTurn.completePlayerHands[0].cards.length === 0)
-        //  this.initialDeck.length === this.currentTurn.stockSize)
-        Game.deal(this.turns[0])
-
-      // Fill `this.turns` by "replaying" the game
-      this.replay(params.game.playedActions)
+      this.dealAndReplay(params.game.playedActions)
     } else if (params.from === 'NEW_TEST_GAME') {
       // USED IN TESTS
       // set up a new game
@@ -522,7 +409,7 @@ export class Game {
         ),
       ]
 
-      Game.deal(this.currentTurn)
+      this.deal()
     } else {
       throw new Error("Invalid 'from'")
     }
@@ -530,38 +417,6 @@ export class Game {
     this.playersById = Object.fromEntries(this.currentTurn._players.map(p => [p.id, p]))
 
     this.checkIntegrity()
-  }
-
-  static fromMaskedGame(maskedGame: TMaskedGameState): Game {
-    const stock = maskedGame.history.revealedOtherPlayerCards
-
-    // maintain correct stock size
-    const fullStockSize = Card.getFullDeck().length
-    while (stock.length < fullStockSize) stock.unshift('X5') // bogus
-
-    const game = new Game(
-      {
-        from: 'SERIALIZED_GAME',
-        game: {
-          gameId: maskedGame.gameId,
-          playedActions: maskedGame.history.playedActions,
-          timestamp: maskedGame.currentTurn.timestamp,
-          seed: 'BOGUS',
-          initialDeck: stock,
-          players: maskedGame.players.map(p => new Player({...p})),
-          turn0: {
-            ...defaultTurn0Properties,
-            stock,
-            completePlayerHands: maskedGame.players.map(() => []),
-            status: 'RUNNING',
-            action: {type: 'START'},
-            timestamp: maskedGame.history.playedActions[0].timestamp,
-          },
-        },
-      },
-      true,
-    ) // true: isMasked, skip some integrity checking
-    return game
   }
 
   get currentTurn(): Turn {
@@ -653,10 +508,136 @@ export class Game {
     }
   }
 
+  takeAndRefillHand(
+    turn: Turn,
+    playerIdx: number,
+    cardIdx: number,
+    resolvedAction?: TResolvedPlayActionState | TResolvedDiscardActionState,
+  ) {
+    return turn.completePlayerHands[playerIdx].take(cardIdx, turn.stock)
+  }
+
+  // ACTIONS
+  playNext(playerId: string, actionParams: TActionParams, resolvedAction?: TResolvedActionState) {
+    // console.warn(1234, {
+    //   type: actionParams.type,
+    //   playerId,
+    //   inTurn: this.inTurn,
+    //   players: this.players,
+    //   turnNumber: this.turnNumber,
+    // })
+
+    const newTurn = this.currentTurn.clone()
+
+    // get current player
+    const me: Player = newTurn._players[newTurn.inTurn]
+    if (!me) {
+      throw new GameError('NO_SUCH_PLAYER', {playerId})
+    }
+    if (playerId !== me.id) {
+      throw new GameError('NOT_MY_TURN', {playerId})
+    }
+
+    if (newTurn.status !== 'RUNNING') {
+      // console.warn(nextTurn)
+      throw new GameError('GAME_ENDED')
+    }
+
+    if (actionParams.type === 'START') {
+      if (this.currentTurn.turnNumber > 0) {
+        throw new GameError('ALREADY_STARTED')
+      }
+      newTurn.action = actionParams
+    } else if (actionParams.type === 'HINT') {
+      if (!newTurn.hintCount) {
+        throw new GameError('NO_HINTS_LEFT')
+      }
+      newTurn.hintCount--
+
+      const hintee = newTurn._players[actionParams.toPlayerIdx]
+      if (!hintee) {
+        throw new GameError('NO_SUCH_PLAYER', actionParams.toPlayerIdx)
+      }
+      if (hintee === me) {
+        throw new GameError('CANNOT_HINT_SELF')
+      }
+
+      // If a resolved action was provided, this might be a masked game where we do not have accurate
+      // information about hintee's cards. In that case, add the hints manually.
+      if (resolvedAction) {
+        for (const [cardIdx, result] of (resolvedAction as TResolvedHintActionState).matches.entries()) {
+          newTurn.completePlayerHands[hintee.idx].cards[cardIdx].hints.push({
+            turnNumber: newTurn.turnNumber,
+            is: actionParams.is,
+            result,
+          })
+        }
+      } else {
+        newTurn.completePlayerHands[hintee.idx].addHint({turnNumber: newTurn.turnNumber, is: actionParams.is})
+      }
+
+      newTurn.action = {
+        ...actionParams,
+        toPlayerName: hintee.name,
+        matches: newTurn.completePlayerHands[hintee.idx].cards.map(c => c.hints[c.hints.length - 1].result),
+      }
+    } else {
+      // PLAY or DISCARD
+      const card = this.takeAndRefillHand(
+        newTurn,
+        me.idx,
+        actionParams.cardIdx,
+        resolvedAction as TResolvedPlayActionState | TResolvedDiscardActionState,
+      )
+
+      if (actionParams.type === 'PLAY') {
+        const success: boolean = newTurn.table.play(card)
+        if (success) {
+          // Successful play:
+          if (card.num === 5 && newTurn.hintCount < 9) {
+            newTurn.hintCount++
+          }
+          if (newTurn.score === AllColors.length * AllNums.length) {
+            newTurn.status = 'FINISHED'
+          }
+        } else {
+          // fail: add wound
+          newTurn.discardPile.add(card) // TODO: add metadata?
+          newTurn.woundCount++
+          // TODO: log
+          if (newTurn.woundCount === 3) {
+            newTurn.status = 'GAMEOVER'
+          }
+        }
+        newTurn.action = {...actionParams, card: card.toJSON(), success}
+      } else if (actionParams.type === 'DISCARD') {
+        newTurn.discardPile.add(card)
+        if (newTurn.hintCount < 9) newTurn.hintCount++
+        newTurn.action = {...actionParams, card: card.toJSON()}
+      }
+    }
+
+    // actually change the turn:
+
+    newTurn.timestamp = new Date().toISOString()
+
+    newTurn.turnNumber++
+    if (newTurn.turnsLeft !== null) newTurn.turnsLeft--
+    if (newTurn.turnsLeft === 0) {
+      // TODO: check if off-by-one
+      newTurn.status = 'FINISHED'
+    } else if (!newTurn.stock.size && newTurn.turnsLeft === null) {
+      // countdown should start now
+      newTurn.turnsLeft = newTurn._players.length
+    }
+
+    return newTurn
+  }
+
   act(playerId: TPlayerId, actionParams: TPlayableActionParams, resolvedAction?: TResolvedActionState) {
     // console.warn('ACT', {playerId, actionParams, inStock: this.currentTurn.stock.size})
 
-    this.turns.push(this.currentTurn.playNext(playerId, actionParams, resolvedAction))
+    this.turns.push(this.playNext(playerId, actionParams, resolvedAction))
     this.checkIntegrity()
   }
 
@@ -666,13 +647,36 @@ export class Game {
 
   // this returns information that is public for a player
   getState(playerId: TPlayerId): TMaskedGameState {
-    const revealedCardCount = this.initialDeck.length - this.currentTurn.stock.size
+    const stock = [...this.initialDeck]
+    const playerCnt = this.players.length
+    const playerIdx = (this.players.find(p => p.id === playerId) as Player).idx
+
+    // "deal" the initial hands and add all played cards by other players
+    const revealedOtherPlayerCards: TCardValueState[] = []
+
+    for (let i = 0; i < Game.getHandSize(playerCnt); i++) {
+      for (const p of this.players) {
+        const card = stock.pop() as TCardValueState
+        if (playerId !== p.id) {
+          revealedOtherPlayerCards.unshift(card)
+        }
+      }
+    }
+
+    for (const turn of this.turns) {
+      if (turn.action.type === 'PLAY' || turn.action.type === 'DISCARD') {
+        const card = stock.pop() as TCardValueState
+        if ((turn.turnNumber - 1) % playerCnt !== playerIdx) {
+          revealedOtherPlayerCards.unshift(card)
+        }
+      }
+    }
 
     return {
       gameId: this.gameId,
       currentTurn: this.currentTurn.getState(playerId),
       history: {
-        revealedOtherPlayerCards: this.initialDeck.slice(-revealedCardCount),
+        revealedOtherPlayerCards,
         playedActions: this.turns.map(t => ({action: t.action, timestamp: t.timestamp})),
       },
       players: this.players.map(p => ({...p.toJSON(), id: p.id === playerId ? p.id : 'REDACTED'})),
@@ -682,9 +686,6 @@ export class Game {
   checkIntegrity() {
     // if the game has not started yet, cards are not dealt.
     if (this.currentTurn.status === 'WAITING_FOR_PLAYERS') return
-
-    // if this is from a masked game, we don't have th full stock available
-    if (this.isMasked) return
 
     // check that we have the correct set of cards
     const currentCards = [
@@ -709,5 +710,80 @@ export class Game {
 
       throw new Error('INTEGRITY_ERROR')
     }
+  }
+}
+
+export class MaskedGame extends Game {
+  revealedOtherPlayerCards: TCardValueState[]
+  mePlayerIdx: number
+
+  dealAndReplay(playedActions: any) {}
+
+  // Do not deal from stock; deal unknowns to me,
+  // and from this.revealedOtherPlayerCards to other players
+  deal() {
+    const turn = this.currentTurn
+    const handSize: number = Game.getHandSize(this.players.length)
+    for (let i = 0; i < handSize; i++) {
+      for (let p = 0; p < turn.completePlayerHands.length; p++) {
+        turn.completePlayerHands[p].dealOne(
+          new Card(p === this.mePlayerIdx ? 'X5' : (this.revealedOtherPlayerCards.pop() as TCardValueState)),
+        )
+      }
+    }
+    // console.warn(333, ...turn.completePlayerHands)
+  }
+
+  constructor(maskedGame: TMaskedGameState) {
+    // fake a stock of correct size
+    const fullStockSize = Card.getFullDeck().length
+    const playerCnt = maskedGame.players.length
+    const stock = Array(fullStockSize - Game.getHandSize(playerCnt) * playerCnt).fill('X5')
+
+    super({
+      from: 'SERIALIZED_GAME',
+      game: {
+        gameId: maskedGame.gameId,
+        playedActions: maskedGame.history.playedActions,
+        timestamp: maskedGame.currentTurn.timestamp,
+        seed: 'BOGUS',
+        initialDeck: [],
+        players: maskedGame.players.map(p => new Player({...p})),
+        turn0: {
+          ...defaultTurn0Properties,
+          stock,
+          completePlayerHands: maskedGame.players.map(() => []),
+          status: 'RUNNING',
+          action: {type: 'START'},
+          timestamp: maskedGame.history.playedActions[0].timestamp,
+        },
+      },
+    })
+    this.mePlayerIdx = maskedGame.players.findIndex(p => p.id !== 'REDACTED')
+    this.revealedOtherPlayerCards = maskedGame.history.revealedOtherPlayerCards
+
+    this.deal()
+    this.replay(maskedGame.history.playedActions)
+  }
+
+  takeAndRefillHand(
+    turn: Turn,
+    playerIdx: number,
+    cardIdx: number,
+    resolvedAction?: TResolvedPlayActionState | TResolvedDiscardActionState,
+  ) {
+    if (!resolvedAction) throw new Error('Should not happen')
+
+    turn.stock.drawOne() // keep the fake stock size in sync
+    if (playerIdx === this.mePlayerIdx) {
+      return new Card(resolvedAction.card)
+    } else {
+      return turn.completePlayerHands[playerIdx].take(cardIdx, turn.stock)
+    }
+  }
+
+  checkIntegrity() {
+    // no integrity check for masked games
+    return
   }
 }
