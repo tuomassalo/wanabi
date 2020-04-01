@@ -306,6 +306,16 @@ const defaultTurn0Properties = {
   inTurn: 0,
 }
 
+export class MaskedGame {
+  gameId: TGameId
+  players: Player[]
+  currentTurn: MaskedTurn
+  constructor(maskedGameState: TMaskedGameState) {
+    this.gameId = maskedGameState.gameId
+    this.players = maskedGameState.players.map(p => new Player(p))
+    this.currentTurn = new MaskedTurn(maskedGameState.currentTurn, maskedGameState.players)
+  }
+}
 export class Game {
   turns: Turn[] = []
   gameId: TGameId

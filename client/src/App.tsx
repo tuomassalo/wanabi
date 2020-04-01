@@ -18,13 +18,15 @@ const exampleGame: engine.TMaskedGameState = {
   gameId: '123',
   players: [
     {
+      id: 'bogus1',
       idx: 0,
       name: 'Jekyll',
       isConnected: true,
     },
     {
-      name: 'Hyde',
+      id: 'bogus2',
       idx: 1,
+      name: 'Hyde',
       isConnected: true,
     },
   ],
@@ -116,10 +118,7 @@ const exampleGame: engine.TMaskedGameState = {
       },
     ],
   },
-  history: {
-    playedActions: [],
-    revealedStock: [],
-  },
+  playedActions: [],
 }
 
 interface CommonState {
