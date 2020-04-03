@@ -65,18 +65,15 @@ test('connect, createGame', async done => {
           playerHandViews: [{hand: [], isMe: true}],
           score: 0,
           status: 'WAITING_FOR_PLAYERS',
-          stockSize: 0,
+          stockSize: 60,
           table: {A: [], B: [], C: [], D: [], E: [], X: []},
           timestamp: jasmine.any(String),
           turnNumber: 0,
           turnsLeft: null,
           woundCount: 0,
         },
-        players: [{idx: 0, isConnected: true, name: 'BOBBY_TABLES'}],
-        history: {
-          revealedStock: [],
-          playedActions: [],
-        },
+        players: [{id: jasmine.any(String), idx: 0, isConnected: true, name: 'BOBBY_TABLES'}],
+        playedActions: [{action: {type: 'START'}, timestamp: jasmine.any(String)}],
       },
     ],
     msg: 'M_GamesState',
@@ -104,18 +101,15 @@ test('getGamesState', async done => {
           playerHandViews: [],
           score: 0,
           status: 'WAITING_FOR_PLAYERS',
-          stockSize: 0,
+          stockSize: 60,
           table: {A: [], B: [], C: [], D: [], E: [], X: []},
           timestamp: jasmine.any(String),
           turnNumber: 0,
           turnsLeft: null,
           woundCount: 0,
         },
-        history: {
-          revealedStock: [],
-          playedActions: [],
-        },
-        players: [{idx: 0, isConnected: true, name: 'BOBBY_TABLES'}],
+        playedActions: [{action: {type: 'START'}, timestamp: jasmine.any(String)}],
+        players: [{id: 'REDACTED', idx: 0, isConnected: true, name: 'BOBBY_TABLES'}],
       },
     ],
     msg: 'M_GamesState',
@@ -141,20 +135,17 @@ test('joinGame', async done => {
           ],
           score: 0,
           status: 'WAITING_FOR_PLAYERS',
-          stockSize: 0,
+          stockSize: 60,
           table: {A: [], B: [], C: [], D: [], E: [], X: []},
           timestamp: jasmine.any(String),
           turnNumber: 0,
           turnsLeft: null,
           woundCount: 0,
         },
-        history: {
-          revealedStock: [],
-          playedActions: [],
-        },
+        playedActions: [{action: {type: 'START'}, timestamp: jasmine.any(String)}],
         players: [
-          {idx: 0, isConnected: true, name: 'BOBBY_TABLES'},
-          {idx: 1, isConnected: true, name: 'Beatrice'},
+          {id: 'REDACTED', idx: 0, isConnected: true, name: 'BOBBY_TABLES'},
+          {id: jasmine.any(String), idx: 1, isConnected: true, name: 'Beatrice'},
         ],
       },
     ],
@@ -201,13 +192,10 @@ test('startGame', async done => {
           turnsLeft: null,
           woundCount: 0,
         },
-        history: {
-          revealedStock: [],
-          playedActions: [],
-        },
+        playedActions: [{action: {type: 'START'}, timestamp: jasmine.any(String)}],
         players: [
-          {idx: 0, isConnected: true, name: 'BOBBY_TABLES'},
-          {idx: 1, isConnected: true, name: 'Beatrice'},
+          {id: jasmine.any(String), idx: 0, isConnected: true, name: 'BOBBY_TABLES'},
+          {id: 'REDACTED', idx: 1, isConnected: true, name: 'Beatrice'},
         ],
       },
     ],
@@ -254,13 +242,13 @@ test('act', async done => {
           turnsLeft: null,
           woundCount: 0,
         },
-        history: {
-          revealedStock: [],
-          playedActions: [],
-        },
+        playedActions: [
+          {action: {type: 'START'}, timestamp: jasmine.any(String)},
+          {action: {type: 'DISCARD', cardIdx: 2, card: jasmine.any(String)}, timestamp: jasmine.any(String)},
+        ],
         players: [
-          {idx: 0, isConnected: true, name: 'BOBBY_TABLES'},
-          {idx: 1, isConnected: true, name: 'Beatrice'},
+          {id: jasmine.any(String), idx: 0, isConnected: true, name: 'BOBBY_TABLES'},
+          {id: 'REDACTED', idx: 1, isConnected: true, name: 'Beatrice'},
         ],
       },
     ],
@@ -303,13 +291,13 @@ test('act', async done => {
           turnsLeft: null,
           woundCount: 0,
         },
-        history: {
-          revealedStock: [],
-          playedActions: [],
-        },
+        playedActions: [
+          {action: {type: 'START'}, timestamp: jasmine.any(String)},
+          {action: {type: 'DISCARD', cardIdx: 2, card: jasmine.any(String)}, timestamp: jasmine.any(String)},
+        ],
         players: [
-          {idx: 0, isConnected: true, name: 'BOBBY_TABLES'},
-          {idx: 1, isConnected: true, name: 'Beatrice'},
+          {id: 'REDACTED', idx: 0, isConnected: true, name: 'BOBBY_TABLES'},
+          {id: jasmine.any(String), idx: 1, isConnected: true, name: 'Beatrice'},
         ],
       },
     ],
@@ -341,13 +329,13 @@ test('An outsider sees the started game, but cannot see any hands', async done =
           turnsLeft: null,
           woundCount: 0,
         },
-        history: {
-          revealedStock: [],
-          playedActions: [],
-        },
+        playedActions: [
+          {action: {type: 'START'}, timestamp: jasmine.any(String)},
+          {action: {type: 'DISCARD', cardIdx: 2, card: jasmine.any(String)}, timestamp: jasmine.any(String)},
+        ],
         players: [
-          {idx: 0, isConnected: true, name: 'BOBBY_TABLES'},
-          {idx: 1, isConnected: true, name: 'Beatrice'},
+          {id: 'REDACTED', idx: 0, isConnected: true, name: 'BOBBY_TABLES'},
+          {id: jasmine.any(String), idx: 1, isConnected: true, name: 'Beatrice'},
         ],
       },
     ],
@@ -367,8 +355,8 @@ test('An "outsider" can join a game if someone disconnects', async done => {
   const msg = await waitMsg('ws3')
 
   expect(msg.games[0].players).toEqual([
-    {idx: 0, isConnected: true, name: 'BOBBY_TABLES'},
-    {idx: 1, isConnected: false, name: 'Beatrice'}, // NB: not connected!
+    {id: 'REDACTED', idx: 0, isConnected: true, name: 'BOBBY_TABLES'},
+    {id: 'REDACTED', idx: 1, isConnected: false, name: 'Beatrice'}, // NB: not connected!
   ])
 
   await new Promise(r => setTimeout(r, 100))
@@ -376,8 +364,8 @@ test('An "outsider" can join a game if someone disconnects', async done => {
 
   const msg2 = await waitMsg('ws3')
   expect(msg2.games[0].players).toEqual([
-    {idx: 0, isConnected: true, name: 'BOBBY_TABLES'},
-    {idx: 1, isConnected: true, name: 'Beatrice'},
+    {id: 'REDACTED', idx: 0, isConnected: true, name: 'BOBBY_TABLES'},
+    {id: jasmine.any(String), idx: 1, isConnected: true, name: 'Beatrice'},
   ])
 
   expect(msg2.games[0].currentTurn.playerHandViews).toEqual([
