@@ -1,27 +1,18 @@
 import React from 'react'
 
-import {WebSocketClient} from './websocketclient'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import WMysteryCard from './WMysteryCard'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import WMyCardActionButtons from './WMyCardActionButtons'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import WHints from './WHints'
-import {TGameId} from 'wanabi-engine'
 import {TRefinedMaskedCardState} from './refiner'
-
-declare const wsclient: WebSocketClient
-declare const gameId: TGameId
 
 export default class WMyHand extends React.Component<{
   cards: TRefinedMaskedCardState[]
   playerIdx: number
   highlightLatestHint: boolean
 }> {
-  // startGame = () => {
-  //   wsclient.startGame({gameId: this.props.currentTurn.gameId})
-  // }
-
   render() {
     return (
       <div className="WMyHand">

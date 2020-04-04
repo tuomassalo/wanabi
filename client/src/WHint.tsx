@@ -13,10 +13,6 @@ export default class WHint extends React.Component<{
   hint: TRefinedHintResultState | TRawHintResultState
   highlight?: boolean
 }> {
-  // startGame = () => {
-  //   wsclient.startGame({gameId: this.props.currentTurn.gameId})
-  // }
-
   render() {
     const h = this.props.hint
     return (

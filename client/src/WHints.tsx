@@ -46,10 +46,6 @@ const Tooltip = ({children, tooltip, hideArrow, ...props}: any) => (
 )
 
 export default class WHints extends React.Component<{hints: TRefinedHintResultState[]; highlightLatestHint: boolean}> {
-  // startGame = () => {
-  //   wsclient.startGame({gameId: this.props.currentTurn.gameId})
-  // }
-
   render() {
     return (
       <div className="WHints clearfix">

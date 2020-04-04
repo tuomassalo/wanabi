@@ -98,11 +98,6 @@ export interface WS_actParams {
   gameId: TGameId
   actionParams: TPlayableActionParams
 }
-// When the client rejoins a game, it queries the turn history with this method.
-// export interface WS_getHistoryParams {
-//   gameId: TGameId
-//   upToTurnNumber: number
-// }
 export interface TMaskedGameState {
   playedActions: {timestamp: string; action: TResolvedActionState}[]
   gameId: TGameId
