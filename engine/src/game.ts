@@ -129,7 +129,7 @@ export interface M_GameHistory {
 //   currentTurn: TMaskedTurnState
 // }
 
-export type WebsocketServerMessage = M_GamesState // | M_GameState
+export type WebsocketServerMessage = M_GamesState | M_GameHistory // | M_GameState
 
 abstract class BaseTurn {
   status: TGameStatus
@@ -309,17 +309,14 @@ export class MaskedGame {
     this.players = maskedGameState.players.map(p => new Player(p))
 
     this.turns = []
-    this.addTurn(maskedGameState)
+    this.addTurn(maskedGameState.currentTurn)
   }
   get currentTurn(): MaskedTurn {
     return this.turns[this.turns.length - 1]
   }
   // Used by the client when receiving a new turn from the server.
-  addTurn(maskedGameState: TMaskedGameState) {
-    this.turns[maskedGameState.currentTurn.turnNumber] = new MaskedTurn(
-      maskedGameState.currentTurn,
-      maskedGameState.players,
-    )
+  addTurn(maskedTurn: TMaskedTurnState) {
+    this.turns[maskedTurn.turnNumber] = new MaskedTurn(maskedTurn, this.players)
   }
 }
 export class Game {

@@ -189,7 +189,7 @@ export default class App extends React.Component<{}, AppState> {
 
               this.setState(
                 (state: InGameState): InGameState => {
-                  state.game.addTurn(activeGameState)
+                  state.game.addTurn(activeGameState.currentTurn)
                   return {
                     phase: 'IN_GAME',
                     game: state.game,
@@ -224,6 +224,17 @@ export default class App extends React.Component<{}, AppState> {
           //   this.setState(state => {
           //     return {phase: 'IN_GAME', games: data.currentTurn, messages: [...state.messages, data]}
           //   })
+        } else if (data.msg === 'M_GameHistory') {
+          this.setState(
+            (state: InGameState): InGameState => {
+              data.previousTurns.forEach(t => state.game.addTurn(t))
+              return {
+                phase: 'IN_GAME',
+                game: state.game,
+                messages: [...state.messages, data],
+              }
+            },
+          )
         } else {
           console.warn('unknown msg', data)
         }

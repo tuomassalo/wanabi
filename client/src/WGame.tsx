@@ -84,7 +84,7 @@ export default class WGame extends React.Component<{game: engine.MaskedGame}, {s
             <em>
               <select>
                 {this.props.game.turns.map(t => (
-                  <option>{t.action.type}</option>
+                  <option key={t.turnNumber}>{t.action.type}</option>
                 ))}{' '}
               </select>
               {turnNumber}
