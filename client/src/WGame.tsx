@@ -54,6 +54,7 @@ export default class WGame extends React.Component<{game: engine.MaskedGame}, {s
       inTurn,
       turnNumber,
     } = this.props.game.currentTurn
+    // ;(window as any).g = this.props.game
     const {players} = this.props.game
     let gameStatusClass: string = ''
     if (status === 'RUNNING') {
@@ -79,7 +80,15 @@ export default class WGame extends React.Component<{game: engine.MaskedGame}, {s
             </label>
           </span>
           <span>
-            Turn: <em>{turnNumber}</em>
+            Turn:{' '}
+            <em>
+              <select>
+                {this.props.game.turns.map(t => (
+                  <option>{t.action.type}</option>
+                ))}{' '}
+              </select>
+              {turnNumber}
+            </em>
           </span>
           <span>
             Stock: <em>{stockSize}</em>

@@ -386,5 +386,29 @@ test('An "outsider" can join a game if someone disconnects', async done => {
     },
   ])
 
+  // the rejoining client gets the game history as "push"
+  const msg3 = ((await waitMsg('ws3')) as unknown) as game.M_GameHistory
+  expect(msg3).toEqual({
+    gameId: jasmine.any(String),
+    msg: 'M_GameHistory',
+    previousTurns: [
+      {
+        action: {type: 'START'},
+        discardPile: [],
+        hintCount: 9,
+        inTurn: 0,
+        playerHandViews: [],
+        score: 0,
+        status: 'RUNNING',
+        stockSize: 50,
+        table: {A: [], B: [], C: [], D: [], E: [], X: []},
+        timestamp: jasmine.any(String),
+        turnNumber: 0,
+        turnsLeft: null,
+        woundCount: 0,
+      },
+    ],
+  })
+
   setTimeout(done, 100)
 })

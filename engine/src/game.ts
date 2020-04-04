@@ -98,6 +98,11 @@ export interface WS_actParams {
   gameId: TGameId
   actionParams: TPlayableActionParams
 }
+// When the client rejoins a game, it queries the turn history with this method.
+// export interface WS_getHistoryParams {
+//   gameId: TGameId
+//   upToTurnNumber: number
+// }
 export interface TMaskedGameState {
   playedActions: {timestamp: string; action: TResolvedActionState}[]
   gameId: TGameId
@@ -116,7 +121,12 @@ export interface TCompleteGameState {
 export interface M_GamesState {
   msg: 'M_GamesState'
   timestamp: string
-  games: TMaskedGameState[] // latest turn and history of each game
+  games: TMaskedGameState[] // latest turn of each game
+}
+export interface M_GameHistory {
+  msg: 'M_GameHistory'
+  gameId: TGameId
+  previousTurns: TMaskedTurnState[] // all previous turns of this game
 }
 // interface M_GameState {
 //   msg: 'M_GameState'
@@ -280,17 +290,6 @@ export interface TNewGameConstructor {
   table?: Table
 }
 
-// export class MaskedGame {
-//   gameId: TGameId
-//   players: Player[]
-//   currentTurn: MaskedTurn
-//   constructor(maskedGameState: TMaskedGameState) {
-//     this.gameId = maskedGameState.gameId
-//     this.players = maskedGameState.players.map(p => new Player({...p, id: 'REDACTED'}))
-//     this.currentTurn = new MaskedTurn(maskedGameState.currentTurn, maskedGameState.players)
-//   }
-// }
-
 const defaultTurn0Properties = {
   table: new Table().toJSON(),
   stock: new Pile([]).toJSON(),
@@ -309,11 +308,23 @@ const defaultTurn0Properties = {
 export class MaskedGame {
   gameId: TGameId
   players: Player[]
-  currentTurn: MaskedTurn
+  turns: MaskedTurn[]
   constructor(maskedGameState: TMaskedGameState) {
     this.gameId = maskedGameState.gameId
     this.players = maskedGameState.players.map(p => new Player(p))
-    this.currentTurn = new MaskedTurn(maskedGameState.currentTurn, maskedGameState.players)
+
+    this.turns = []
+    this.addTurn(maskedGameState)
+  }
+  get currentTurn(): MaskedTurn {
+    return this.turns[this.turns.length - 1]
+  }
+  // Used by the client when receiving a new turn from the server.
+  addTurn(maskedGameState: TMaskedGameState) {
+    this.turns[maskedGameState.currentTurn.turnNumber] = new MaskedTurn(
+      maskedGameState.currentTurn,
+      maskedGameState.players,
+    )
   }
 }
 export class Game {
@@ -623,6 +634,11 @@ export class Game {
       playedActions: this.turns.map(t => ({action: t.action, timestamp: t.timestamp})),
       players: this.players.map(p => ({...p.toJSON(), id: p.id === playerId ? p.id : 'REDACTED'})),
     }
+  }
+
+  getPreviousTurns(playerId: TPlayerId): TMaskedTurnState[] {
+    // returns information about previus turns that is public for a player
+    return this.turns.filter(t => t !== this.currentTurn).map(t => t.getState(playerId))
   }
 
   checkIntegrity() {

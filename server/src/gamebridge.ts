@@ -41,7 +41,7 @@ async function scanGames(scanParams = {}): Promise<engine.Game[]> {
     .map(game => new engine.Game({from: 'SERIALIZED_GAME', game}))
 
   const allConnections = new Set(await getAllConnections())
-  console.warn(333, {allConnections})
+
   for (const game of games) {
     // update isConnected for all players
 
@@ -53,7 +53,6 @@ async function scanGames(scanParams = {}): Promise<engine.Game[]> {
         player.id = 'NONE'
       }
     }
-    console.warn(334, game.players)
   }
 
   return games
@@ -142,6 +141,19 @@ async function _getGame(gameId: engine.TGameId): Promise<engine.Game> {
   // return new engine.Game({from: 'SERIALIZED_GAME', game: game.toJSON()})
 }
 
+async function _sendTurnHistory(game: engine.Game, connectionId: TConnectionId) {
+  await apig
+    .postToConnection({
+      ConnectionId: connectionId,
+      Data: JSON.stringify({
+        msg: 'M_GameHistory',
+        gameId: game.gameId,
+        previousTurns: game.getPreviousTurns(connectionId),
+      }),
+    })
+    .promise()
+}
+
 export async function getGamesState({}: engine.WS_getGamesStateParams, connectionId: string) {
   await sendGamesState([connectionId])
   // const data: engine.WebsocketServerMessage = {
@@ -209,9 +221,8 @@ export async function act({gameId, actionParams}: engine.WS_actParams, connectio
 
 export async function rejoinGame({gameId, playerIdx}: engine.WS_rejoinGameParams, connectionId: string) {
   const game = await _getGame(gameId)
-  const player = game.players[playerIdx] // HACK: part of player state lives at turn[0]
+  const player = game.players[playerIdx]
 
-  console.warn(111, player)
   if (!player) {
     throw new Error('No such player')
   }
@@ -226,13 +237,13 @@ export async function rejoinGame({gameId, playerIdx}: engine.WS_rejoinGameParams
   player.id = connectionId
   player.isConnected = true
 
-  console.warn(222, player)
-  console.warn(2222, game.players[playerIdx])
-
   await updateGame(game, game.currentTurn.timestamp)
 
   // send updated game state to all players
   await broadcastGamesState()
+
+  // send turn history to the player who joined
+  await _sendTurnHistory(game, connectionId)
 }
 
 export async function purgeGames() {

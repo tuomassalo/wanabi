@@ -159,7 +159,7 @@ export default class App extends React.Component<{}, AppState> {
         game: new engine.MaskedGame(exampleGame),
         messages: [],
       }
-      ;(window as any).gameId = '123'
+      // ;(window as any).gameId = '123'
     } else
       this.wsclient.on('msg', async (data: engine.WebsocketServerMessage) => {
         // console.warn('MSG', data)
@@ -186,17 +186,30 @@ export default class App extends React.Component<{}, AppState> {
 
               // do some animation before changing state
               await this.animate(currentTurn.action, this.state.game.currentTurn.inTurn)
+
+              this.setState(
+                (state: InGameState): InGameState => {
+                  state.game.addTurn(activeGameState)
+                  return {
+                    phase: 'IN_GAME',
+                    game: state.game,
+                    messages: [...state.messages, data],
+                  }
+                },
+              )
+            } else {
+              // something else than just a new turn in this game
+              this.setState(
+                (state): AppState => {
+                  return {
+                    phase: 'IN_GAME',
+                    game,
+                    messages: [...state.messages, data],
+                  }
+                },
+              )
+              ;(window as any).gameId = game.gameId
             }
-            this.setState(
-              (state): AppState => {
-                return {
-                  phase: 'IN_GAME',
-                  game,
-                  messages: [...state.messages, data],
-                }
-              },
-            )
-            ;(window as any).gameId = game.gameId
           } else
             this.setState(
               (state): AppState => {
