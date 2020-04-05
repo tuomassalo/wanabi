@@ -70,7 +70,7 @@ async function sendGamesState(toConnections: TConnectionId[]) {
 
   const allConnections = new Set(await getAllConnections())
 
-  console.warn({allConnections})
+  // console.warn({allConnections})
 
   // set isConnected for all players in all games
   for (const game of games) {
@@ -86,7 +86,7 @@ async function sendGamesState(toConnections: TConnectionId[]) {
 
   console.warn('sending game state to', ...toConnections)
 
-  console.warn(...toConnections.map(cId => JSON.stringify(games.map(g => g.getState(cId)))))
+  // console.warn(...toConnections.map(cId => JSON.stringify(games.map(g => g.getState(cId)))))
 
   await Promise.all(
     toConnections.map(cId => {
@@ -113,7 +113,7 @@ async function updateGame(game: engine.Game, prevTimestamp: string) {
   const updateKeys = Object.keys(newData)
   const newDataWithColons = Object.fromEntries(updateKeys.map(k => [':' + k, newData[k]]))
 
-  console.warn({prevTimestamp, updateKeys}, newDataWithColons)
+  // console.warn({prevTimestamp, updateKeys}, newDataWithColons)
 
   await dynamodb
     .update({
@@ -169,9 +169,6 @@ export async function createGame({firstPlayerName}: engine.WS_createGameParams, 
 
   if (firstPlayerName === 'BOBBY_TABLES' && process.env.IS_OFFLINE) {
     console.warn('Wiping dev tables.')
-
-    const ids = await scanGames()
-    console.warn({ids})
 
     for (const {gameId} of await scanGames()) {
       await deleteGame(gameId)

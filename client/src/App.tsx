@@ -12,8 +12,6 @@ import 'react-loader-spinner/dist/loader/css/react-spinner-loader.css'
 import WMenu from './WMenu'
 import {AllColors, TColor, Card} from 'wanabi-engine/dist/card'
 
-declare const wsclient: WebSocketClient
-
 const exampleGame: engine.TMaskedGameState = {
   gameId: '123',
   players: [
@@ -121,9 +119,13 @@ const exampleGame: engine.TMaskedGameState = {
   playedActions: [],
 }
 
-interface CommonState {
-  messages: engine.WebsocketServerMessage[]
+// when the user is in a game, these are saved to sessionStorage. In case of a reload, the player will auto-rejoin.
+interface RejoinParams {
+  gameId: string
+  playerIdx: number
 }
+
+interface CommonState {}
 interface LoadingState extends CommonState {
   phase: 'LOADING'
 }
@@ -140,10 +142,25 @@ type AppState = LoadingState | InMenuState | InGameState
 export default class App extends React.Component<{}, AppState> {
   wsclient: WebSocketClient
 
+  onSetRejoinParams = (rejoinParams: RejoinParams | undefined) => {
+    if (rejoinParams) {
+      sessionStorage.setItem('rejoinParams', JSON.stringify(rejoinParams))
+    } else {
+      sessionStorage.removeItem('rejoinParams')
+      document.location.reload()
+    }
+  }
+
   constructor(props: any) {
     super(props)
     this.wsclient = new WebSocketClient()
-    this.state = {messages: [], phase: 'LOADING'}
+    this.state = {
+      phase: 'LOADING',
+    }
+
+    const loadedRejoinParams: RejoinParams | undefined = sessionStorage.getItem('rejoinParams')
+      ? JSON.parse(sessionStorage.getItem('rejoinParams') as string)
+      : undefined
 
     const myTurnSound = new Audio('myturn.mp3')
 
@@ -157,7 +174,6 @@ export default class App extends React.Component<{}, AppState> {
       this.state = {
         phase: 'IN_GAME',
         game: new engine.MaskedGame(exampleGame),
-        messages: [],
       }
       // ;(window as any).gameId = '123'
     } else
@@ -168,6 +184,8 @@ export default class App extends React.Component<{}, AppState> {
           const activeGameState = data.games.find(g => g.currentTurn.playerHandViews.some(phv => phv.isMe))
 
           if (activeGameState) {
+            // A game was found with this connection.
+
             const game = new engine.MaskedGame(activeGameState)
             const currentTurn = game.currentTurn
 
@@ -193,33 +211,43 @@ export default class App extends React.Component<{}, AppState> {
                   return {
                     phase: 'IN_GAME',
                     game: state.game,
-                    messages: [...state.messages, data],
                   }
                 },
               )
             } else {
-              // something else than just a new turn in this game
-              this.setState(
-                (state): AppState => {
-                  return {
-                    phase: 'IN_GAME',
-                    game,
-                    messages: [...state.messages, data],
-                  }
-                },
-              )
+              // something else than just a new turn in this game that the user was already viewing
+
+              this.onSetRejoinParams({
+                gameId: game.gameId,
+                playerIdx: currentTurn.playerHandViews.findIndex(phv => phv.isMe),
+              })
+
+              this.setState((state_): AppState => ({phase: 'IN_GAME', game}))
               ;(window as any).gameId = game.gameId
             }
-          } else
-            this.setState(
-              (state): AppState => {
-                return {
+          } else {
+            // This connection is not currently bound to a game.
+            // If we have rejoinParams AND the game still exists AND the seat is unoccupied, rejoin.
+            // Otherwise, go to the menu.
+            if (
+              loadedRejoinParams &&
+              data.games.find(g => g.gameId === loadedRejoinParams.gameId)?.players[loadedRejoinParams.playerIdx]
+                .isConnected === false
+            ) {
+              this.wsclient.rejoinGame(loadedRejoinParams)
+              // do not set state; we will get another message for that
+            } else {
+              // no active game (or the rejoining was not possible)
+              sessionStorage.removeItem('rejoinParams')
+
+              this.setState(
+                (state_): AppState => ({
                   phase: 'IN_MENU',
                   games: data.games.map(g => new engine.MaskedGame(g)),
-                  messages: [...state.messages, data],
-                }
-              },
-            )
+                }),
+              )
+            }
+          }
           // } else if (data.msg === 'M_GameState') {
           //   this.setState(state => {
           //     return {phase: 'IN_GAME', games: data.currentTurn, messages: [...state.messages, data]}
@@ -231,7 +259,6 @@ export default class App extends React.Component<{}, AppState> {
               return {
                 phase: 'IN_GAME',
                 game: state.game,
-                messages: [...state.messages, data],
               }
             },
           )
@@ -376,7 +403,7 @@ export default class App extends React.Component<{}, AppState> {
         <WWaiting game={this.state.game} />
       ) : (
         // RUNNING or GAME_OVER
-        <WGame game={this.state.game} />
+        <WGame game={this.state.game} onSetRejoinParams={this.onSetRejoinParams} />
       )
     return (
       <div className="App">

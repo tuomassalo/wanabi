@@ -7,7 +7,7 @@ import WDiscardPile from './WDiscardPile'
 import WMyHand from './WMyHand'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import WOtherHand from './WOtherHand'
-import {WebSocketClient} from './websocketclient'
+// import {WebSocketClient} from './websocketclient'
 import * as engine from 'wanabi-engine'
 import {refineCards} from './refiner'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -16,16 +16,11 @@ import WTurnSelector from './WTurnSelector'
 import WActionDescription from './WActionDescription'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import WOtherHandActionButtons from './WOtherHandActionButtons'
-declare const wsclient: WebSocketClient
 
 export default class WGame extends React.Component<
-  {game: engine.MaskedGame},
+  {game: engine.MaskedGame; onSetRejoinParams: any},
   {soundChecked: boolean; visibleTurnNumber: number}
 > {
-  startGame = () => {
-    wsclient.startGame({gameId: this.props.game.gameId})
-  }
-
   constructor(props: any) {
     super(props)
     this.state = {
@@ -99,6 +94,10 @@ export default class WGame extends React.Component<
             </label>
             <label>
               <input type="checkbox" checked={this.state.soundChecked} onChange={this.changeSoundChecked} /> Sound
+            </label>
+            {/* exit this game */}
+            <label>
+              <input type="button" value="X" onClick={() => this.props.onSetRejoinParams(undefined)} />
             </label>
           </span>
           <span>
