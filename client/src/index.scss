@@ -313,10 +313,9 @@ div.WTable {
   }
 }
 
-div.WActionDescription {
-  display: block !important;
-  text-align: center;
-  .WCard {
+.WActionDescription {
+  .WCard,
+  .WHint {
     display: inline-block;
     width: $cardWidth / 4.5;
     height: $cardHeight / 4.5;
@@ -327,6 +326,10 @@ div.WActionDescription {
   .WHint {
     display: inline-block;
     float: none;
+  }
+  .WPlayer & {
+    display: block !important;
+    text-align: center;
   }
 }
 
@@ -451,33 +454,33 @@ div.WActionDescription {
   }
 }
 
-.WTurnSelector {
-  display: inline;
-  outline: none !important;
-  & [class$='-control'] {
-    display: inline-block;
-    border: none;
-    min-height: 0 !important;
-    width: 80px;
-    // outline-color: transparent !important;
-    border-color: transparent !important;
-    box-shadow: none !important;
-  }
-  & [class$='-IndicatorsContainer'] {
+.popup-content {
+  width: auto !important;
+  z-index: 3 !important;
+  > div:nth-child(1) {
     display: none;
   }
-  & [class$='-menu'] {
-    width: 400px;
-  }
-  & [class$='-placeholder'] {
-    color: inherit;
-    // text-decoration: underline;
-    // border-bottom: 1px solid #0008;
+}
+
+.WTurnSelector {
+  max-height: 90vh;
+  overflow: scroll;
+  table {
+    border-collapse: collapse;
+
+    tr:hover {
+      cursor: pointer;
+      background: #eee;
+    }
+    td {
+      padding-right: 0.2em;
+    }
+    .WActionDescription {
+      text-align: left;
+      .WCard {
+        border: none;
+      }
+    }
+    font-weight: normal;
   }
 }
-// styles={{
-//   control: base => ({...base, 'border-style': 'none', 'min-height': 'none', outline: 'none'}),
-//   indicatorSeparator: base => ({...base, display: 'none'}),
-
-//   menu: base => ({...base, width: '400px'}),
-// }}

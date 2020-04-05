@@ -136,7 +136,13 @@ export default class WGame extends React.Component<
           {playerHandViews.map((phv, idx) => {
             const player = players[idx]
             const getLatestActionIfByThisPlayer = () =>
-              idx === (players.length + inTurn - 1) % players.length ? <WActionDescription action={action} /> : <span />
+              idx === (players.length + inTurn - 1) % players.length && action.type !== 'START' ? (
+                <div className="WActionDescription">
+                  {player.name} <WActionDescription action={action} />
+                </div>
+              ) : (
+                <span />
+              )
             const highlightLatestHint = action.type === 'HINT' && action.toPlayerIdx === idx
 
             return (

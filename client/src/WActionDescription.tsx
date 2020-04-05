@@ -14,22 +14,22 @@ export default class WActionDescription extends React.Component<{action: TResolv
 
     if (action.type === 'PLAY') {
       return (
-        <div className="WActionDescription">
-          Played <WCard card={Card.fromValueString(action.card)} />
+        <React.Fragment>
+          played <WCard card={Card.fromValueString(action.card)} />
           {action.success ? '' : ' 👎'}
-        </div>
+        </React.Fragment>
       )
     } else if (action.type === 'DISCARD') {
       return (
-        <div className="WActionDescription">
-          Discarded <WCard card={Card.fromValueString(action.card)} />
-        </div>
+        <React.Fragment>
+          discarded <WCard card={Card.fromValueString(action.card)} />
+        </React.Fragment>
       )
     } else if (action.type === 'HINT') {
       return (
-        <div className="WActionDescription">
-          Hinted {action.toPlayerName}: <WHint hint={{is: action.is, result: true}} />
-        </div>
+        <React.Fragment>
+          hinted {action.toPlayerName}: <WHint hint={{is: action.is, result: true}} />
+        </React.Fragment>
       )
     } else {
       //START

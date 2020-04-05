@@ -2,7 +2,7 @@ import React from 'react'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import WActionDescription from './WActionDescription'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import Select from 'react-select'
+import Popup from 'reactjs-popup'
 
 // const SingleValue = ({ children, ...props }) => (
 //   <components.SingleValue {...props}>{children}</components.SingleValue>
@@ -18,9 +18,6 @@ export default class WTurnSelector extends React.Component<{
 }> {
   render() {
     const cur = this.props.currentVisibleTurnNumber
-    const onChange = ({value}: any) => {
-      this.props.onSetVisibleTurnNumber(value)
-    }
     const button = (mod: number, label: string) => {
       return (
         <input
@@ -34,24 +31,35 @@ export default class WTurnSelector extends React.Component<{
     return (
       <span>
         {button(-1, '<')}
-        <Select
-          value={null}
-          className="WTurnSelector"
-          onChange={onChange}
-          isSearchable={false}
-          placeholder={`Turn: ${cur}`}
-          options={this.props.turns.map(t => ({
-            value: t.turnNumber,
-            label: (
-              <div>
-                Turn <b>{t.turnNumber}</b>:
-                {t.turnNumber ? this.props.players[(t.turnNumber - 1) % this.props.players.length].name : ''}
-                <WActionDescription action={t.action} />
-              </div>
-            ),
-            //`<b>foo</b> ${t.turnNumber} ${t.action.type}`,
-          }))}
-        />
+        <Popup
+          open={true}
+          position="bottom left"
+          trigger={
+            <span>
+              Turn: <b>{cur}</b>
+            </span>
+          }
+        >
+          <div className="WTurnSelector">
+            <table>
+              <tbody>
+                {this.props.turns.map(t => (
+                  <tr key={t.turnNumber} onClick={() => this.props.onSetVisibleTurnNumber(t.turnNumber)}>
+                    <td>
+                      Turn <b>{t.turnNumber}</b>
+                    </td>
+                    <td>
+                      {t.turnNumber ? this.props.players[(t.turnNumber - 1) % this.props.players.length].name : ''}
+                    </td>
+                    <td className="WActionDescription">
+                      <WActionDescription action={t.action} />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Popup>
         {button(+1, '>')}
       </span>
     )

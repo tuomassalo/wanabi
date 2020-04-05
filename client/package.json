@@ -10,7 +10,6 @@
     "@types/node": "12.12.21",
     "@types/react": "16.9.17",
     "@types/react-dom": "16.9.4",
-    "@types/react-select": "3.0.11",
     "eslint": "6.8.0",
     "jest": "24.9.0",
     "ts-jest": "24.3.0",
@@ -25,8 +24,8 @@
     "react-loader-spinner": "3.1.5",
     "react-popper-tooltip": "2.10.1",
     "react-scripts": "3.3.0",
-    "react-select": "3.1.0",
     "react-timeago": "4.4.0",
+    "reactjs-popup": "1.5.0",
     "wanabi-engine": "file:../engine"
   },
   "scripts": {
