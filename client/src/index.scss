@@ -313,7 +313,7 @@ div.WTable {
   }
 }
 
-div.WLatestAction {
+div.WActionDescription {
   display: block !important;
   text-align: center;
   .WCard {
@@ -450,3 +450,34 @@ div.WLatestAction {
     transform: rotateY(360deg);
   }
 }
+
+.WTurnSelector {
+  display: inline;
+  outline: none !important;
+  & [class$='-control'] {
+    display: inline-block;
+    border: none;
+    min-height: 0 !important;
+    width: 80px;
+    // outline-color: transparent !important;
+    border-color: transparent !important;
+    box-shadow: none !important;
+  }
+  & [class$='-IndicatorsContainer'] {
+    display: none;
+  }
+  & [class$='-menu'] {
+    width: 400px;
+  }
+  & [class$='-placeholder'] {
+    color: inherit;
+    // text-decoration: underline;
+    // border-bottom: 1px solid #0008;
+  }
+}
+// styles={{
+//   control: base => ({...base, 'border-style': 'none', 'min-height': 'none', outline: 'none'}),
+//   indicatorSeparator: base => ({...base, display: 'none'}),
+
+//   menu: base => ({...base, width: '400px'}),
+// }}

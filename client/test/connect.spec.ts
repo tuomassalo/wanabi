@@ -33,8 +33,7 @@ beforeEach(() => {
   msgQueues.ws3 = []
 })
 
-// poll for new messages
-async function waitMsg(websocketName: 'ws1' | 'ws2' | 'ws3'): Promise<game.M_GamesState> {
+async function waitMsg(websocketName: 'ws1' | 'ws2' | 'ws3'): Promise<game.WebsocketServerMessage> {
   const q = msgQueues[websocketName]
   let waitedFor = 0
   // console.warn(`waiting for ${websocketName}...`)
@@ -47,12 +46,12 @@ async function waitMsg(websocketName: 'ws1' | 'ws2' | 'ws3'): Promise<game.M_Gam
     waitedFor += 10
   }
   // console.warn(`got a response in ${waitedFor} ms.`)
-  return q.shift() as game.WebsocketServerMessage
+  return q.shift() as any // as game.WebsocketServerMessage
 }
 
 test('connect, createGame', async done => {
   ws1.createGame({firstPlayerName: 'BOBBY_TABLES'}) // this wipes the tables in dev
-  const msg = await waitMsg('ws1')
+  const msg = (await waitMsg('ws1')) as game.M_GamesState
   expect(msg).toEqual({
     games: [
       {
@@ -88,7 +87,7 @@ test('connect, createGame', async done => {
 
 test('getGamesState', async done => {
   ws2.getGamesState({})
-  const msg = await waitMsg('ws2')
+  const msg = (await waitMsg('ws2')) as game.M_GamesState
   expect(msg).toEqual({
     games: [
       {
@@ -352,7 +351,7 @@ test('An "outsider" can join a game if someone disconnects', async done => {
   ws2.disconnect()
   await new Promise(r => setTimeout(r, 100))
 
-  const msg = await waitMsg('ws3')
+  const msg = (await waitMsg('ws3')) as game.M_GamesState
 
   expect(msg.games[0].players).toEqual([
     {id: 'REDACTED', idx: 0, isConnected: true, name: 'BOBBY_TABLES'},
@@ -362,7 +361,7 @@ test('An "outsider" can join a game if someone disconnects', async done => {
   await new Promise(r => setTimeout(r, 100))
   ws3.rejoinGame({gameId: msg.games[0].gameId, playerIdx: 1})
 
-  const msg2 = await waitMsg('ws3')
+  const msg2 = (await waitMsg('ws3')) as game.M_GamesState
   expect(msg2.games[0].players).toEqual([
     {id: 'REDACTED', idx: 0, isConnected: true, name: 'BOBBY_TABLES'},
     {id: jasmine.any(String), idx: 1, isConnected: true, name: 'Beatrice'},
@@ -387,7 +386,7 @@ test('An "outsider" can join a game if someone disconnects', async done => {
   ])
 
   // the rejoining client gets the game history as "push"
-  const msg3 = ((await waitMsg('ws3')) as unknown) as game.M_GameHistory
+  const msg3 = (await waitMsg('ws3')) as game.M_GameHistory
   expect(msg3).toEqual({
     gameId: jasmine.any(String),
     msg: 'M_GameHistory',
@@ -397,7 +396,23 @@ test('An "outsider" can join a game if someone disconnects', async done => {
         discardPile: [],
         hintCount: 9,
         inTurn: 0,
-        playerHandViews: [],
+        playerHandViews: [
+          {
+            extraMysticalHand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
+            hand: [
+              {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
+              {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
+              {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
+              {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
+              {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
+            ],
+            isMe: false,
+          },
+          {
+            hand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
+            isMe: true,
+          },
+        ],
         score: 0,
         status: 'RUNNING',
         stockSize: 50,

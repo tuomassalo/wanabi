@@ -242,8 +242,10 @@ export async function rejoinGame({gameId, playerIdx}: engine.WS_rejoinGameParams
   // send updated game state to all players
   await broadcastGamesState()
 
-  // send turn history to the player who joined
-  await _sendTurnHistory(game, connectionId)
+  // Send turn history to the player who joined. But first, fetch the game so we have
+  // the current connection - otherwise getState would return an outsider view.)
+  const gameWithUpdatedConnectionId = await _getGame(gameId)
+  await _sendTurnHistory(gameWithUpdatedConnectionId, connectionId)
 }
 
 export async function purgeGames() {

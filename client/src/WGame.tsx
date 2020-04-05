@@ -11,12 +11,17 @@ import {WebSocketClient} from './websocketclient'
 import * as engine from 'wanabi-engine'
 import {refineCards} from './refiner'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import WLatestAction from './WLatestAction'
+import WTurnSelector from './WTurnSelector'
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import WActionDescription from './WActionDescription'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import WOtherHandActionButtons from './WOtherHandActionButtons'
 declare const wsclient: WebSocketClient
 
-export default class WGame extends React.Component<{game: engine.MaskedGame}, {soundChecked: boolean}> {
+export default class WGame extends React.Component<
+  {game: engine.MaskedGame},
+  {soundChecked: boolean; visibleTurnNumber: number}
+> {
   startGame = () => {
     wsclient.startGame({gameId: this.props.game.gameId})
   }
@@ -25,6 +30,7 @@ export default class WGame extends React.Component<{game: engine.MaskedGame}, {s
     super(props)
     this.state = {
       soundChecked: localStorage.getItem('sound') === '1',
+      visibleTurnNumber: -1, // current
     }
   }
 
@@ -40,6 +46,12 @@ export default class WGame extends React.Component<{game: engine.MaskedGame}, {s
 
   render() {
     // const currentPlayerCount = this.props.currentTurn.players.length
+
+    const visibleTurn: engine.MaskedTurn =
+      this.state.visibleTurnNumber > -1
+        ? this.props.game.turns[this.state.visibleTurnNumber]
+        : this.props.game.currentTurn
+
     const {
       action,
       status,
@@ -52,9 +64,10 @@ export default class WGame extends React.Component<{game: engine.MaskedGame}, {s
       hintCount,
       turnsLeft,
       inTurn,
-      turnNumber,
-    } = this.props.game.currentTurn
-    // ;(window as any).g = this.props.game
+      // turnNumber,
+    } = visibleTurn
+    console.warn({vtn: this.state.visibleTurnNumber, visibleTurn, inTurn, playerHandViews})
+    ;(window as any).g = this.props.game
     const {players} = this.props.game
     let gameStatusClass: string = ''
     if (status === 'RUNNING') {
@@ -66,6 +79,15 @@ export default class WGame extends React.Component<{game: engine.MaskedGame}, {s
     } else {
       // finished
       gameStatusClass = ' WGameStatus-finished'
+    }
+
+    const onSetVisibleTurnNumber = (turnNumber: number) => {
+      console.warn('setting visibleTurnNumber to ' + turnNumber)
+
+      this.setState((state: any) => ({
+        ...state,
+        visibleTurnNumber: turnNumber,
+      }))
     }
 
     return (
@@ -80,14 +102,15 @@ export default class WGame extends React.Component<{game: engine.MaskedGame}, {s
             </label>
           </span>
           <span>
-            Turn:{' '}
+            {/* Turn:{' '} */}
             <em>
-              <select>
-                {this.props.game.turns.map(t => (
-                  <option key={t.turnNumber}>{t.action.type}</option>
-                ))}{' '}
-              </select>
-              {turnNumber}
+              <WTurnSelector
+                currentVisibleTurnNumber={visibleTurn.turnNumber}
+                currentTurnNumber={this.props.game.currentTurn.turnNumber}
+                onSetVisibleTurnNumber={onSetVisibleTurnNumber}
+                turns={this.props.game.turns}
+                players={players}
+              />
             </em>
           </span>
           <span>
@@ -114,11 +137,7 @@ export default class WGame extends React.Component<{game: engine.MaskedGame}, {s
           {playerHandViews.map((phv, idx) => {
             const player = players[idx]
             const getLatestActionIfByThisPlayer = () =>
-              idx === (players.length + inTurn - 1) % players.length ? (
-                <WLatestAction latestAction={action} />
-              ) : (
-                <span />
-              )
+              idx === (players.length + inTurn - 1) % players.length ? <WActionDescription action={action} /> : <span />
             const highlightLatestHint = action.type === 'HINT' && action.toPlayerIdx === idx
 
             return (
