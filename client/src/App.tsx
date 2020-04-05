@@ -12,6 +12,20 @@ import 'react-loader-spinner/dist/loader/css/react-spinner-loader.css'
 import WMenu from './WMenu'
 import {AllColors, TColor, Card} from 'wanabi-engine/dist/card'
 
+// from https://stackoverflow.com/a/58189464/95357
+function unlockAudio() {
+  const sound = new Audio('myturn.mp3')
+
+  sound.play()
+  sound.pause()
+  sound.currentTime = 0
+
+  document.body.removeEventListener('click', unlockAudio)
+  document.body.removeEventListener('touchstart', unlockAudio)
+}
+document.body.addEventListener('click', unlockAudio)
+document.body.addEventListener('touchstart', unlockAudio)
+
 const exampleGame: engine.TMaskedGameState = {
   gameId: '123',
   players: [
@@ -199,9 +213,12 @@ export default class App extends React.Component<{}, AppState> {
                 currentTurn.status === 'RUNNING' &&
                 currentTurn.playerHandViews[currentTurn.inTurn].isMe &&
                 localStorage.getItem('sound') === '1'
-              )
-                myTurnSound.play()
-
+              ) {
+                const promise = myTurnSound.play()
+                if (promise !== undefined) {
+                  promise.then(() => {}).catch(e => console.error('Error playing myTurnSound', e))
+                }
+              }
               // do some animation before changing state
               await this.animate(currentTurn.action, this.state.game.currentTurn.inTurn)
 
