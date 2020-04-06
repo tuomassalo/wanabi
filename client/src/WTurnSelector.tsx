@@ -21,7 +21,7 @@ export default class WTurnSelector extends React.Component<{
     const button = (mod: number, label: string) => {
       return (
         <input
-          style={{visibility: (cur + mod >= 0 && cur + mod) < this.props.currentTurnNumber ? 'visible' : 'hidden'}}
+          style={{visibility: cur + mod >= 0 && cur + mod <= this.props.currentTurnNumber ? 'visible' : 'hidden'}}
           type="button"
           value={label}
           onClick={() => this.props.onSetVisibleTurnNumber(cur + mod)}
@@ -32,11 +32,10 @@ export default class WTurnSelector extends React.Component<{
       <span>
         {button(-1, '<')}
         <Popup
-          open={true}
           position="bottom left"
           trigger={
-            <span>
-              Turn: <b>{cur}</b>
+            <span className="WTurnSelector-label">
+              Turn: <b>{cur}</b> ▼
             </span>
           }
         >
@@ -44,7 +43,11 @@ export default class WTurnSelector extends React.Component<{
             <table>
               <tbody>
                 {this.props.turns.map(t => (
-                  <tr key={t.turnNumber} onClick={() => this.props.onSetVisibleTurnNumber(t.turnNumber)}>
+                  <tr
+                    key={t.turnNumber}
+                    className={t.turnNumber === cur ? 'visible-turn' : ''}
+                    onClick={() => this.props.onSetVisibleTurnNumber(t.turnNumber)}
+                  >
                     <td>
                       Turn <b>{t.turnNumber}</b>
                     </td>

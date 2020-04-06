@@ -457,9 +457,15 @@ div.WTable {
 .popup-content {
   width: auto !important;
   z-index: 3 !important;
+  padding: 0 !important;
+  background: #ddd !important;
   > div:nth-child(1) {
     display: none;
   }
+}
+
+.WTurnSelector-label {
+  cursor: pointer;
 }
 
 .WTurnSelector {
@@ -467,13 +473,23 @@ div.WTable {
   overflow: scroll;
   table {
     border-collapse: collapse;
-
+    margin-top: 8px;
     tr:hover {
       cursor: pointer;
       background: #eee;
     }
+    tr.visible-turn {
+      background: white !important;
+      cursor: initial !important;
+    }
     td {
       padding-right: 0.2em;
+    }
+    td:first-child {
+      padding-left: 1em;
+    }
+    td:last-child {
+      padding-right: 1em;
     }
     .WActionDescription {
       text-align: left;
