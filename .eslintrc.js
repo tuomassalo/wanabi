@@ -3,6 +3,7 @@ module.exports = {
   env: {
     node: true,
   },
+  plugins: ['react-hooks'],
   extends: ['plugin:@typescript-eslint/recommended'],
   rules: {
     'no-console': process.env.NODE_ENV === 'production' ? 'error' : 'off',
@@ -43,5 +44,8 @@ module.exports = {
     '@typescript-eslint/no-inferrable-types': 0, // `_initialized: boolean = false` is ok
     '@typescript-eslint/camelcase': 0, // `firstImage_c` is ok
     '@typescript-eslint/no-empty-function': 0, // `() => {}` is ok
+
+    'react-hooks/rules-of-hooks': 'error',
+    'react-hooks/exhaustive-deps': 'warn', // <--- THIS IS THE NEW RULE
   },
 }
