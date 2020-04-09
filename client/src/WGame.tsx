@@ -59,7 +59,7 @@ export default function WGame({game}: {game: engine.MaskedGame}) {
   const {players} = game
   let gameStatusClass: string = ''
   if (status === 'RUNNING') {
-    if (playerHandViews[inTurn].isMe) {
+    if (playerHandViews[inTurn].isMe && visibleTurn === game.currentTurn) {
       gameStatusClass = ' WGameStatus-myturn'
     }
   } else if (status === 'GAMEOVER') {
