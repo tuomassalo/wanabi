@@ -42,9 +42,9 @@ export const Wsclient = () => {
         const game = new engine.MaskedGame(activeGameState)
         const currentTurn = game.currentTurn
 
-        // only do sound and animation on turn change, not when joining or if someone disconnects/reconnects
         if (state.phase === 'IN_GAME' && currentTurn.turnNumber === state.game.currentTurn.turnNumber + 1) {
-          // play a sound if it's my turn
+          // This is a new turn in the active game. Only do sound and animation on
+          //  turn change, not when joining or if someone disconnects/reconnects
           if (
             currentTurn.status === 'RUNNING' &&
             currentTurn.playerHandViews[currentTurn.inTurn].isMe &&
@@ -56,14 +56,12 @@ export const Wsclient = () => {
               promise.then(() => {}).catch((e) => console.error('Error playing myTurnSound', e))
             }
           }
-          // // do some animation before changing state
-          await animate(currentTurn.action, state.game.currentTurn.inTurn)
+          if (currentTurn.turnNumber === state.visibleTurnNumber + 1) {
+            // do some animation before changing state, but only if the player is viewing the current turn.
+            await animate(currentTurn.action, state.game.currentTurn.inTurn)
+          }
 
-          game.addTurn(activeGameState.currentTurn)
-          console.warn('ADDED_TURN', game.turns)
-
-          dispatch({type: 'SET_GAME', game})
-          dispatch({type: 'SET_VISIBLE_TURN', turnNumber: game.currentTurn.turnNumber})
+          dispatch({type: 'ADD_TURN', turn: activeGameState.currentTurn})
         } else {
           // something else than just a new turn in this game that the user was already viewing
 

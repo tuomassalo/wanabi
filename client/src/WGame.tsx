@@ -22,7 +22,8 @@ import {Context} from './Store'
 import {InGameState, Action} from './Reducer'
 
 export default function WGame({game}: {game: engine.MaskedGame}) {
-  const {state, dispatch} = useContext(Context) as {state: InGameState; dispatch: Dispatch<Action>}
+  const {state} = useContext(Context) as {state: InGameState; dispatch: Dispatch<Action>}
+  // const {state, dispatch} = useContext(Context) as {state: InGameState; dispatch: Dispatch<Action>}
 
   // const changeSoundChecked = () => {
   //   if ((window.event as any).target.checked) {

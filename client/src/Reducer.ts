@@ -38,6 +38,10 @@ export type Action =
       game: engine.MaskedGame | undefined
     }
   | {
+      type: 'ADD_TURN'
+      turn: engine.TMaskedTurnState
+    }
+  | {
       type: 'SET_VISIBLE_TURN'
       turnNumber: number
     }
@@ -76,6 +80,14 @@ const Reducer = (state: AppState, action: Action): AppState => {
           games: (state as InMenuState).games,
           phase: 'IN_MENU',
         }
+    case 'ADD_TURN':
+      const game = (state as InGameState).game
+      game.addTurn(action.turn)
+      return {
+        ...state,
+        game,
+        visibleTurnNumber: game.currentTurn.turnNumber,
+      } as any
     case 'SET_VISIBLE_TURN':
       return {
         ...state,
