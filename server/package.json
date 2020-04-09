@@ -15,6 +15,7 @@
   "devDependencies": {
     "@anttiviljami/serverless-stack-output": "0.3.1",
     "@types/node": "12.12.21",
+    "@types/pako": "1.0.1",
     "nodemon": "2.0.2",
     "serverless": "1.60.5",
     "serverless-plugin-common-excludes": "2.4.0",
@@ -24,6 +25,7 @@
     "typescript": "3.7.3"
   },
   "dependencies": {
+    "pako": "1.0.11",
     "serverless-dynamodb-client": "git+https://github.com/ibrado/serverless-dynamodb-client.git#00a67b86bcea61c2f38c98ca4c100ef98ddd196b",
     "serverless-dynamodb-local": "0.2.38",
     "serverless-offline": "5.12.1",

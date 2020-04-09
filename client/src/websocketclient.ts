@@ -1,5 +1,6 @@
 import {EventEmitter} from 'events'
 import * as game from 'wanabi-engine'
+import pako from 'pako'
 
 export class WebSocketClient extends EventEmitter {
   websocket: WebSocket
@@ -13,14 +14,14 @@ export class WebSocketClient extends EventEmitter {
       this.emit('closing', 'CLOSE', {wasClean, code, reason})
     }
 
-    this.websocket.onerror = error => {
+    this.websocket.onerror = (error) => {
       console.warn('onerror', error)
 
       this.emit('error', 'ERROR', 'An error has occurred. See console for details.')
     }
 
     this.websocket.onmessage = ({data}) => {
-      this.emit('msg', JSON.parse(data))
+      this.emit('msg', JSON.parse(pako.inflate(data, {to: 'string'})))
     }
 
     this.websocket.onopen = () => {
@@ -30,7 +31,7 @@ export class WebSocketClient extends EventEmitter {
         for (const msg of this.queue) {
           this.send(msg.action, msg.data)
         }
-      }, 1000)
+      }, 50)
     }
   }
   send(action: string, data: any) {

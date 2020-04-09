@@ -9,7 +9,7 @@ let ws1: WebSocketClient, ws2: WebSocketClient
 const msgQueues: {[key: string]: game.M_GamesState[]} = {ws1: [], ws2: []}
 
 beforeAll(async () => {
-  await new Promise(r => setTimeout(r, 100)) // fix obscure race when running all tests
+  await new Promise((r) => setTimeout(r, 100)) // fix obscure race when running all tests
   ws1 = new WebSocketClient()
   ws2 = new WebSocketClient()
 
@@ -29,6 +29,8 @@ beforeEach(() => {
 })
 
 // poll for new messages
+// NB: actually this returns a game.WebsocketServerMessage, but usually
+// we need a game.M_GamesState, so we pretend this returns such a thing.
 async function waitMsg(websocketName: 'ws1' | 'ws2' | 'ws3'): Promise<game.M_GamesState> {
   const q = msgQueues[websocketName]
   let waitedFor = 0
@@ -38,14 +40,14 @@ async function waitMsg(websocketName: 'ws1' | 'ws2' | 'ws3'): Promise<game.M_Gam
     if (waitedFor > 6000) {
       throw new Error(`TIMEOUT waiting ${websocketName}`)
     }
-    await new Promise(r => setTimeout(r, 10))
+    await new Promise((r) => setTimeout(r, 10))
     waitedFor += 10
   }
   // console.warn(`got a response in ${waitedFor} ms.`)
-  return q.shift() as game.WebsocketServerMessage
+  return q.shift() as game.M_GamesState
 }
 
-test('connect, createGame', async done => {
+test('connect, createGame', async (done) => {
   ws1.createGame({firstPlayerName: 'BOBBY_TABLES'}) // this wipes the tables in dev
   const msg = await waitMsg('ws1')
   expect(msg).toEqual({
@@ -81,7 +83,7 @@ test('connect, createGame', async done => {
   setTimeout(done, 100)
 })
 
-test('joinGame', async done => {
+test('joinGame', async (done) => {
   ws2.joinGame({newPlayerName: 'Beatrice', gameId})
   expect(await waitMsg('ws2')).toEqual({
     games: [
@@ -118,7 +120,7 @@ test('joinGame', async done => {
   setTimeout(done, 100)
 })
 
-test('startGame', async done => {
+test('startGame', async (done) => {
   ws1.startGame({gameId})
   expect(await waitMsg('ws1')).toEqual({
     games: [
@@ -168,7 +170,7 @@ test('startGame', async done => {
   setTimeout(done, 200)
 })
 
-test('act', async done => {
+test('act', async (done) => {
   let turn: game.TMaskedTurnState
 
   const getTurnState = async () => {

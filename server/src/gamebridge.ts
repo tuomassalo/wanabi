@@ -2,6 +2,7 @@ import * as AWS from 'aws-sdk'
 import {DocumentClient} from 'aws-sdk/lib/dynamodb/document_client'
 import * as dynamodbClient from 'serverless-dynamodb-client'
 import * as engine from 'wanabi-engine'
+import pako from 'pako'
 
 type TConnectionId = string
 
@@ -9,6 +10,13 @@ const apig = new AWS.ApiGatewayManagementApi({
   endpoint: process.env.APIG_ENDPOINT,
   sslEnabled: !process.env.APIG_ENDPOINT?.startsWith('http://'),
 })
+async function send(connectionId: TConnectionId, data: engine.WebsocketServerMessage) {
+  // const compressedData = Buffer.from(pako.deflate(JSON.stringify(data), {to: 'string'})).toString('base64')
+  const compressedData = pako.deflate(JSON.stringify(data), {to: 'string'})
+  console.warn(`Sending ${data.msg} to ${connectionId} (${compressedData.length} bytes)`)
+
+  return apig.postToConnection({ConnectionId: connectionId, Data: compressedData}).promise()
+}
 
 const dynamodb: DocumentClient = dynamodbClient.doc
 
@@ -96,7 +104,7 @@ async function sendGamesState(toConnections: TConnectionId[]) {
         timestamp: new Date().toISOString(),
       }
 
-      return apig.postToConnection({ConnectionId: cId, Data: JSON.stringify(data)}).promise()
+      return send(cId, data)
     }),
   )
 }
@@ -142,16 +150,11 @@ async function _getGame(gameId: engine.TGameId): Promise<engine.Game> {
 }
 
 async function _sendTurnHistory(game: engine.Game, connectionId: TConnectionId) {
-  await apig
-    .postToConnection({
-      ConnectionId: connectionId,
-      Data: JSON.stringify({
-        msg: 'M_GameHistory',
-        gameId: game.gameId,
-        previousTurns: game.getPreviousTurns(connectionId),
-      }),
-    })
-    .promise()
+  await send(connectionId, {
+    msg: 'M_GameHistory',
+    gameId: game.gameId,
+    previousTurns: game.getPreviousTurns(connectionId),
+  })
 }
 
 export async function getGamesState({}: engine.WS_getGamesStateParams, connectionId: string) {

@@ -57,3 +57,11 @@ npm run localbroadcast
 `./deploy.sh`
 
 ```
+
+### Saving and restoring local games:
+
+```
+aws dynamodb scan --table-name WanabiGames --endpoint-url http://localhost:3003 > mygames.json
+
+aws dynamodb put-item --table-name WanabiGames --endpoint-url http://localhost:3003 --item "$(jq '.Items[0]' < mygames.json)"
+```
