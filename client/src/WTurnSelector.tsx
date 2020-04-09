@@ -8,14 +8,27 @@ import Popup from 'reactjs-popup'
 import {Context} from './Store'
 import {InGameState, Action} from './Reducer'
 
+document.body.addEventListener('keydown', (event) => {
+  if (event.keyCode === 37) {
+    // left
+    document.getElementById('prev-turn')?.click()
+    event.preventDefault()
+  } else if (event.keyCode === 39) {
+    // right
+    document.getElementById('next-turn')?.click()
+    event.preventDefault()
+  }
+})
+
 export default function WTurnSelector() {
   const {state, dispatch} = useContext(Context) as {state: InGameState; dispatch: Dispatch<Action>}
 
   const cur = state.visibleTurnNumber
-  const button = (mod: number, label: string) => {
+  const button = (mod: number, label: string, id: string) => {
     return (
       <input
-        style={{visibility: cur + mod >= 0 && cur + mod <= state.game.currentTurn.turnNumber ? 'visible' : 'hidden'}}
+        id={id}
+        disabled={cur + mod < 0 || cur + mod > state.game.currentTurn.turnNumber}
         type="button"
         value={label}
         onClick={() => dispatch({type: 'SET_VISIBLE_TURN', turnNumber: cur + mod})}
@@ -24,7 +37,7 @@ export default function WTurnSelector() {
   }
   return (
     <span>
-      {button(-1, '<')}
+      {button(-1, '<', 'prev-turn')}
       <Popup
         position="bottom left"
         trigger={
@@ -55,7 +68,7 @@ export default function WTurnSelector() {
           </table>
         </div>
       </Popup>
-      {button(+1, '>')}
+      {button(+1, '>', 'next-turn')}
     </span>
   )
 }
