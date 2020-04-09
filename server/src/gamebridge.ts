@@ -38,7 +38,7 @@ async function scanGames(scanParams = {}): Promise<engine.Game[]> {
         ? -1
         : 1,
     )
-    .map(game => new engine.Game({from: 'SERIALIZED_GAME', game}))
+    .map((game) => new engine.Game({from: 'SERIALIZED_GAME', game}))
 
   const allConnections = new Set(await getAllConnections())
 
@@ -59,7 +59,7 @@ async function scanGames(scanParams = {}): Promise<engine.Game[]> {
 }
 
 async function getAllConnections(): Promise<TConnectionId[]> {
-  return (await scan<any>(connectionTable, {AttributesToGet: ['connectionId']})).map(item => item.connectionId)
+  return (await scan<any>(connectionTable, {AttributesToGet: ['connectionId']})).map((item) => item.connectionId)
 }
 async function deleteGame(gameId: engine.TGameId) {
   await dynamodb.delete({TableName: gameTable, Key: {gameId}}).promise()
@@ -89,10 +89,10 @@ async function sendGamesState(toConnections: TConnectionId[]) {
   // console.warn(...toConnections.map(cId => JSON.stringify(games.map(g => g.getState(cId)))))
 
   await Promise.all(
-    toConnections.map(cId => {
+    toConnections.map((cId) => {
       const data: engine.WebsocketServerMessage = {
         msg: 'M_GamesState',
-        games: games.map(g => g.getState(cId)),
+        games: games.map((g) => g.getState(cId)),
         timestamp: new Date().toISOString(),
       }
 
@@ -111,7 +111,7 @@ async function updateGame(game: engine.Game, prevTimestamp: string) {
   // if (isNaN(newData.turnsLeft as number)) delete newData.turnsLeft
   delete newData.gameId // never changes
   const updateKeys = Object.keys(newData)
-  const newDataWithColons = Object.fromEntries(updateKeys.map(k => [':' + k, newData[k]]))
+  const newDataWithColons = Object.fromEntries(updateKeys.map((k) => [':' + k, newData[k]]))
 
   // console.warn({prevTimestamp, updateKeys}, newDataWithColons)
 
@@ -119,10 +119,10 @@ async function updateGame(game: engine.Game, prevTimestamp: string) {
     .update({
       TableName: gameTable,
       Key: {gameId: game.gameId},
-      UpdateExpression: 'SET ' + updateKeys.map(k => `#X_${k} = :${k}`).join(', '),
+      UpdateExpression: 'SET ' + updateKeys.map((k) => `#X_${k} = :${k}`).join(', '),
       ExpressionAttributeNames: {
         '#X_timestamp': 'timestamp',
-        ...Object.fromEntries(Object.keys(newData).map(k => [`#X_${k}`, k])),
+        ...Object.fromEntries(Object.keys(newData).map((k) => [`#X_${k}`, k])),
       },
       ExpressionAttributeValues: {
         ...newDataWithColons,
@@ -134,7 +134,7 @@ async function updateGame(game: engine.Game, prevTimestamp: string) {
 }
 
 async function _getGame(gameId: engine.TGameId): Promise<engine.Game> {
-  const game = (await scanGames()).find(g => g.gameId === gameId) // TODO: do this on server
+  const game = (await scanGames()).find((g) => g.gameId === gameId) // TODO: do this on server
   if (!game) throw new Error('No game found')
 
   return game
@@ -227,7 +227,7 @@ export async function rejoinGame({gameId, playerIdx}: engine.WS_rejoinGameParams
   if (player.isConnected) {
     throw new Error('Player is already connected from another connection')
   }
-  if ((await getAllConnections()).some(cId => cId === player.id)) {
+  if ((await getAllConnections()).some((cId) => cId === player.id)) {
     throw new Error('This connection is already occupied by another player')
   }
 
@@ -250,10 +250,10 @@ export async function purgeGames() {
 
   // purge non-started games that have no connected players
   const purgeGames = (await scanGames()).filter(
-    game => game.currentTurn.status === 'WAITING_FOR_PLAYERS' && game.players.every(p => !allConnections.has(p.id)),
+    (game) => game.currentTurn.status === 'WAITING_FOR_PLAYERS' && game.players.every((p) => !allConnections.has(p.id)),
   )
 
-  await Promise.all(purgeGames.map(game => deleteGame(game.gameId)))
+  await Promise.all(purgeGames.map((game) => deleteGame(game.gameId)))
 
   await broadcastGamesState()
 }
