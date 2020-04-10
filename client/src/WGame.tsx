@@ -21,6 +21,15 @@ import {setRejoinParams} from './rejoin-storage'
 import {Context} from './Store'
 import {InGameState, Action} from './Reducer'
 
+document.body.addEventListener('keydown', (event) => {
+  if (event.keyCode === 77) {
+    // 'm'
+    // left
+    document.getElementById('mystery-view-checkbox')?.click()
+    event.preventDefault()
+  }
+})
+
 export default function WGame({game}: {game: engine.MaskedGame}) {
   const {state} = useContext(Context) as {state: InGameState; dispatch: Dispatch<Action>}
   // const {state, dispatch} = useContext(Context) as {state: InGameState; dispatch: Dispatch<Action>}
@@ -74,7 +83,12 @@ export default function WGame({game}: {game: engine.MaskedGame}) {
       <div className="WHeader">
         <span style={{float: 'right'}}>
           <label>
-            <input type="checkbox" onClick={() => document.body.classList.toggle('mysteryview')} /> Mystery View
+            <input
+              type="checkbox"
+              onClick={() => document.body.classList.toggle('mysteryview')}
+              id="mystery-view-checkbox"
+            />{' '}
+            Mystery View
           </label>
           {/* <label>
             <input type="checkbox" checked={state.settings.sound} onChange={changeSoundChecked} /> Sound

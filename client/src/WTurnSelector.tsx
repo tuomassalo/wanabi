@@ -11,11 +11,11 @@ import {InGameState, Action} from './Reducer'
 document.body.addEventListener('keydown', (event) => {
   if (event.keyCode === 37) {
     // left
-    document.getElementById('prev-turn')?.click()
+    document.getElementById('prev-turn-button')?.click()
     event.preventDefault()
   } else if (event.keyCode === 39) {
     // right
-    document.getElementById('next-turn')?.click()
+    document.getElementById('next-turn-button')?.click()
     event.preventDefault()
   }
 })
@@ -37,7 +37,7 @@ export default function WTurnSelector() {
   }
   return (
     <span>
-      {button(-1, '<', 'prev-turn')}
+      {button(-1, '<', 'prev-turn-button')}
       <Popup
         position="bottom left"
         trigger={
@@ -68,7 +68,7 @@ export default function WTurnSelector() {
           </table>
         </div>
       </Popup>
-      {button(+1, '>', 'next-turn')}
+      {button(+1, '>', 'next-turn-button')}
     </span>
   )
 }
