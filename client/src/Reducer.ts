@@ -3,7 +3,7 @@ import * as engine from 'wanabi-engine'
 interface CommonState {
   settings: {
     sound: boolean
-    mysteryView: boolean
+    showStats: boolean
   }
 }
 export interface LoadingState extends CommonState {
@@ -22,12 +22,9 @@ export type AppState = LoadingState | InMenuState | InGameState
 
 export type Action =
   | {
-      type: 'SET_SOUND'
-      enabled: true | false
-    }
-  | {
-      type: 'SET_MYSTERY_VIEW'
-      enabled: true | false
+      type: 'SET_SETTING'
+      key: 'sound' | 'showStats' // | 'showmysteryview'
+      value: true | false
     }
   | {
       type: 'SET_GAMES'
@@ -50,15 +47,10 @@ const Reducer = (state: AppState, action: Action): AppState => {
   // console.warn('REDUCING', state, action)
 
   switch (action.type) {
-    case 'SET_SOUND':
+    case 'SET_SETTING':
       return {
         ...state,
-        settings: {...state.settings, sound: action.enabled},
-      }
-    case 'SET_MYSTERY_VIEW':
-      return {
-        ...state,
-        settings: {...state.settings, mysteryView: action.enabled},
+        settings: {...state.settings, [action.key]: action.value},
       }
     case 'SET_GAMES':
       return {

@@ -238,7 +238,7 @@ div.WPlayer {
     font-weight: bold;
     padding-right: 30px;
   }
-  input {
+  input[value='X'] {
     margin-left: 25px;
   }
 }
@@ -499,4 +499,8 @@ div.WTable {
     }
     font-weight: normal;
   }
+}
+
+.WStats {
+  background: white;
 }

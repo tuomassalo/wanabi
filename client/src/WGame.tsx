@@ -20,18 +20,19 @@ import WOtherHandActionButtons from './WOtherHandActionButtons'
 import {setRejoinParams} from './rejoin-storage'
 import {Context} from './Store'
 import {InGameState, Action} from './Reducer'
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import WStats from './WStats'
 
 document.body.addEventListener('keydown', (event) => {
   if (event.keyCode === 77) {
     // 'm'
-    // left
     document.getElementById('mystery-view-checkbox')?.click()
     event.preventDefault()
   }
 })
 
 export default function WGame({game}: {game: engine.MaskedGame}) {
-  const {state} = useContext(Context) as {state: InGameState; dispatch: Dispatch<Action>}
+  const {state, dispatch} = useContext(Context) as {state: InGameState; dispatch: Dispatch<Action>}
   // const {state, dispatch} = useContext(Context) as {state: InGameState; dispatch: Dispatch<Action>}
 
   // const changeSoundChecked = () => {
@@ -78,6 +79,10 @@ export default function WGame({game}: {game: engine.MaskedGame}) {
     gameStatusClass = ' WGameStatus-finished'
   }
 
+  const toggleSetting = (key: 'sound' | 'showStats') => {
+    dispatch({type: 'SET_SETTING', key, value: !state.settings[key]})
+  }
+
   return (
     <div className={gameStatusClass}>
       <div className="WHeader">
@@ -114,12 +119,13 @@ export default function WGame({game}: {game: engine.MaskedGame}) {
           Wounds: <em>{woundCount}</em>
         </span>
         <span>
-          Score: <em>{score}</em>
+          Score: <em onClick={() => toggleSetting('showStats')}>{score}</em>
         </span>
         <span style={turnsLeft ? {} : {display: 'none'}}>
           Turns left: <em>{turnsLeft}</em>
         </span>
       </div>
+      {state.settings.showStats ? <WStats turns={game.turns} players={game.players} /> : ''}
       <div className="WGame">
         <div className="clearfix">
           <WDiscardPile discardPile={discardPile} latestAction={action} />

@@ -6,7 +6,8 @@ const initialState: AppState = {
   phase: 'LOADING',
   settings: {
     sound: localStorage.getItem('sound') === '1',
-    mysteryView: false,
+    showStats: false,
+    // mysteryView: false,
   },
 }
 
