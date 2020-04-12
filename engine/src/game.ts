@@ -113,6 +113,11 @@ export interface TCompleteGameState {
   timestamp: string
 }
 
+export interface TSpeculativeHintState {
+  toPlayerIdx: number
+  is: TColor | TNum
+}
+
 export interface M_GamesState {
   msg: 'M_GamesState'
   timestamp: string
@@ -191,7 +196,7 @@ export class Turn extends BaseTurn {
     return this.stock.cards.length
   }
 
-  _getPlayerHandViewStates(meIdx: number) {
+  _getPlayerHandViewStates(meIdx: number, speculativeHint?: TSpeculativeHintState) {
     const myHand = this.completePlayerHands[meIdx]
     // NB: this does not include own hand cards that are resolved
     const getRevealedCards = (...excludePlayerIndices: number[]) =>
@@ -213,7 +218,22 @@ export class Turn extends BaseTurn {
 
     const demystifyOtherHand = (ch: Hand, playerIdx: number) => {
       return demystify(
-        ch.cards.map(c => new MaskedCard({hints: c.hints})),
+        ch.cards.map(
+          c =>
+            new MaskedCard({
+              hints:
+                speculativeHint && speculativeHint.toPlayerIdx === playerIdx
+                  ? [
+                      ...c.hints,
+                      {
+                        is: speculativeHint.is,
+                        result: c.looksLike(speculativeHint.is),
+                        turnNumber: 999,
+                      },
+                    ]
+                  : c.hints,
+            }),
+        ),
         [...myCardsRevealedToMe, ...getRevealedCards(meIdx, playerIdx)],
       )[0]
     }
@@ -238,7 +258,7 @@ export class Turn extends BaseTurn {
     )
   }
 
-  getState(forPlayerId: TPlayerId): TMaskedTurnState {
+  getState(forPlayerId: TPlayerId, speculativeHint?: TSpeculativeHintState): TMaskedTurnState {
     const me = this._players.find(p => p.id === forPlayerId)
     const isOutsider = !me
 
@@ -255,7 +275,7 @@ export class Turn extends BaseTurn {
         score: this.score,
         playerHandViews: isOutsider
           ? [] // this.players.map(p => MaskedPlayer.outsiderFromPlayer(p))
-          : this._getPlayerHandViewStates((me as Player).idx),
+          : this._getPlayerHandViewStates((me as Player).idx, speculativeHint),
       }),
     )
   }
@@ -621,8 +641,8 @@ export class Game {
     this.checkIntegrity()
   }
 
-  getTurnState(playerId: TPlayerId): TMaskedTurnState {
-    return this.currentTurn.getState(playerId)
+  getTurnState(playerId: TPlayerId, speculativeHint?: TSpeculativeHintState): TMaskedTurnState {
+    return this.currentTurn.getState(playerId, speculativeHint)
   }
 
   // this returns information that is public for a player

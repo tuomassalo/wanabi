@@ -176,7 +176,7 @@ describe('An ongoing game', () => {
       {
         hints: [
           {turnNumber: 12, is: 5, result: false},
-          {turnNumber: 14, is: 'B', result: true}, // NB! Is really 'X', but looks truhty as 'B'
+          {turnNumber: 14, is: 'B', result: true}, // NB! Is really 'X', but looks truthy as 'B'
         ],
         possibleCards: [
           {count: 1, prob: 1 / 13, value: 'B1', actionability: 'PLAYABLE'},
