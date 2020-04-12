@@ -342,12 +342,19 @@ export class Game {
     for (const [turnNumber, {action, timestamp}] of playedActions.entries()) {
       const actionParams = resolvedActionToActionParams(action)
       if (actionParams.type !== 'START') {
-        // console.warn('ACTING', actionParams, turnNumber)
         const playerIdx = (turnNumber - 1) % this.currentTurn._players.length
         if (action.type === 'PLAY' || action.type === 'DISCARD') {
-          this.currentTurn.completePlayerHands[playerIdx].cards[action.cardIdx] = new Card(action.card)
-        } else if (action.type === 'HINT') {
+          // when replaying a masked game, replace the potentially unknown card with the
+          // revealed card, so it can be properly played. But before that, conserve any
+          // hints from the masked card.
+          const cards = this.currentTurn.completePlayerHands[playerIdx].cards
+          const hints = cards[action.cardIdx].hints
+          const completeCard = new Card(action.card)
+          completeCard.hints = hints
+          this.currentTurn.completePlayerHands[playerIdx].cards[action.cardIdx] = completeCard
         }
+        // NB: nothing special needed for HINT actions
+
         this.act(this.currentTurn._players[playerIdx].id, actionParams)
       }
       this.currentTurn.timestamp = timestamp // fix timestamp
