@@ -8,7 +8,7 @@ import Popup from 'reactjs-popup'
 import {Context} from './Store'
 import {InGameState, Action} from './Reducer'
 
-document.body.addEventListener('keydown', (event) => {
+document.body.addEventListener('keydown', event => {
   if (event.keyCode === 37) {
     // left
     document.getElementById('prev-turn-button')?.click()
@@ -49,7 +49,7 @@ export default function WTurnSelector() {
         <div className="WTurnSelector">
           <table>
             <tbody>
-              {state.game.turns.map((t) => (
+              {state.game.turns.map(t => (
                 <tr
                   key={t.turnNumber}
                   className={t.turnNumber === cur ? 'visible-turn' : ''}

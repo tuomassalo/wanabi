@@ -34,7 +34,7 @@ export const Wsclient = () => {
 
   w.msgHandler = async (data: engine.WebsocketServerMessage) => {
     if (data.msg === 'M_GamesState') {
-      const activeGameState = data.games.find((g) => g.currentTurn.playerHandViews.some((phv) => phv.isMe))
+      const activeGameState = data.games.find(g => g.currentTurn.playerHandViews.some(phv => phv.isMe))
 
       if (activeGameState) {
         // A game was found with this connection.
@@ -53,7 +53,7 @@ export const Wsclient = () => {
             const myTurnSound = new Audio('myturn.mp3')
             const promise = myTurnSound.play()
             if (promise !== undefined) {
-              promise.then(() => {}).catch((e) => console.error('Error playing myTurnSound', e))
+              promise.then(() => {}).catch(e => console.error('Error playing myTurnSound', e))
             }
           }
           if (currentTurn.turnNumber === state.visibleTurnNumber + 1) {
@@ -67,7 +67,7 @@ export const Wsclient = () => {
 
           setRejoinParams({
             gameId: game.gameId,
-            playerIdx: currentTurn.playerHandViews.findIndex((phv) => phv.isMe),
+            playerIdx: currentTurn.playerHandViews.findIndex(phv => phv.isMe),
           })
 
           dispatch({type: 'SET_GAME', game})
@@ -80,8 +80,7 @@ export const Wsclient = () => {
         const rejoinParams = getRejoinParams()
         if (
           rejoinParams &&
-          data.games.find((g) => g.gameId === rejoinParams.gameId)?.players[rejoinParams.playerIdx].isConnected ===
-            false
+          data.games.find(g => g.gameId === rejoinParams.gameId)?.players[rejoinParams.playerIdx].isConnected === false
         ) {
           w.wsclient.rejoinGame(rejoinParams)
           // do not set state; we will get another message for that
@@ -89,11 +88,11 @@ export const Wsclient = () => {
           // no active game (or the rejoining was not possible)
           sessionStorage.removeItem('rejoinParams')
 
-          dispatch({type: 'SET_GAMES', games: data.games.map((g) => new engine.MaskedGame(g))})
+          dispatch({type: 'SET_GAMES', games: data.games.map(g => new engine.MaskedGame(g))})
         }
       }
     } else if (data.msg === 'M_GameHistory') {
-      data.previousTurns.forEach((t) => (getState() as InGameState).game.addTurn(t))
+      data.previousTurns.forEach(t => (getState() as InGameState).game.addTurn(t))
       dispatch({type: 'SET_GAME', game: (state as InGameState).game})
     } else {
       console.warn('unknown msg', data)

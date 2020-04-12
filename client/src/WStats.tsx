@@ -13,7 +13,7 @@ export default function WStats({turns, players}: {turns: engine.MaskedTurn[]; pl
     return <div></div>
   }
 
-  const turnTimeByPlayer = players.map((p) => ({
+  const turnTimeByPlayer = players.map(p => ({
     name: `time used by ${p.name}`,
     data: turns.map(() => 0),
     // type: 'column',

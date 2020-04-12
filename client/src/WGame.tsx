@@ -23,7 +23,7 @@ import {InGameState, Action} from './Reducer'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import WStats from './WStats'
 
-document.body.addEventListener('keydown', (event) => {
+document.body.addEventListener('keydown', event => {
   if (event.keyCode === 77) {
     // 'm'
     document.getElementById('mystery-view-checkbox')?.click()
