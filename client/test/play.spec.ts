@@ -9,7 +9,7 @@ let ws1: WebSocketClient, ws2: WebSocketClient
 const msgQueues: {[key: string]: game.M_GamesState[]} = {ws1: [], ws2: []}
 
 beforeAll(async () => {
-  await new Promise((r) => setTimeout(r, 100)) // fix obscure race when running all tests
+  await new Promise(r => setTimeout(r, 100)) // fix obscure race when running all tests
   ws1 = new WebSocketClient()
   ws2 = new WebSocketClient()
 
@@ -29,9 +29,7 @@ beforeEach(() => {
 })
 
 // poll for new messages
-// NB: actually this returns a game.WebsocketServerMessage, but usually
-// we need a game.M_GamesState, so we pretend this returns such a thing.
-async function waitMsg(websocketName: 'ws1' | 'ws2' | 'ws3'): Promise<game.M_GamesState> {
+async function waitMsg(websocketName: 'ws1' | 'ws2' | 'ws3'): Promise<game.WebsocketServerMessage> {
   const q = msgQueues[websocketName]
   let waitedFor = 0
   // console.warn(`waiting for ${websocketName}...`)
@@ -40,141 +38,135 @@ async function waitMsg(websocketName: 'ws1' | 'ws2' | 'ws3'): Promise<game.M_Gam
     if (waitedFor > 6000) {
       throw new Error(`TIMEOUT waiting ${websocketName}`)
     }
-    await new Promise((r) => setTimeout(r, 10))
+    await new Promise(r => setTimeout(r, 10))
     waitedFor += 10
   }
   // console.warn(`got a response in ${waitedFor} ms.`)
-  return q.shift() as game.M_GamesState
+  return q.shift() as game.WebsocketServerMessage
 }
 
-test('connect, createGame', async (done) => {
+test('connect, createGame', async done => {
   ws1.createGame({firstPlayerName: 'BOBBY_TABLES'}) // this wipes the tables in dev
-  const msg = await waitMsg('ws1')
+  const msg = (await waitMsg('ws1')) as game.M_GameState
   expect(msg).toEqual({
-    games: [
-      {
-        gameId: jasmine.any(String),
-        currentTurn: {
-          action: {type: 'START'},
-          discardPile: [],
-          playerHandViews: [{hand: [], isMe: true}],
-          hintCount: 9,
-          inTurn: 0,
-          score: 0,
-          status: 'WAITING_FOR_PLAYERS',
-          stockSize: 60,
-          table: {A: [], B: [], C: [], D: [], E: [], X: []},
-          timestamp: jasmine.any(String),
-          turnNumber: 0,
-          turnsLeft: null,
-          woundCount: 0,
-        },
-        playedActions: [{action: {type: 'START'}, timestamp: jasmine.any(String)}],
-        players: [{id: jasmine.any(String), idx: 0, isConnected: true, name: 'BOBBY_TABLES'}],
+    game: {
+      gameId: jasmine.any(String),
+      currentTurn: {
+        action: {type: 'START'},
+        discardPile: [],
+        playerHandViews: [{hand: [], isMe: true}],
+        hintCount: 9,
+        inTurn: 0,
+        score: 0,
+        status: 'WAITING_FOR_PLAYERS',
+        stockSize: 60,
+        table: {A: [], B: [], C: [], D: [], E: [], X: []},
+        timestamp: jasmine.any(String),
+        turnNumber: 0,
+        turnsLeft: null,
+        woundCount: 0,
       },
-    ],
-    msg: 'M_GamesState',
+      playedActions: [{action: {type: 'START'}, timestamp: jasmine.any(String)}],
+      players: [{id: jasmine.any(String), idx: 0, isConnected: true, name: 'BOBBY_TABLES'}],
+    },
+    msg: 'M_GameState',
     timestamp: jasmine.any(String),
   })
-  gameId = msg.games[0].gameId
+  gameId = msg.game.gameId
 
   expect(gameId).toMatch(/\w/)
   // this obscure delay is needed; otherwise messages get somehow garbled
   setTimeout(done, 100)
 })
 
-test('joinGame', async (done) => {
+test('joinGame', async done => {
   ws2.joinGame({newPlayerName: 'Beatrice', gameId})
   expect(await waitMsg('ws2')).toEqual({
-    games: [
-      {
-        gameId: jasmine.any(String),
-        currentTurn: {
-          action: {type: 'START'},
-          discardPile: [],
-          hintCount: 9,
-          inTurn: 0,
-          playerHandViews: [
-            {extraMysticalHand: [], hand: [], isMe: false},
-            {hand: [], isMe: true},
-          ],
-          score: 0,
-          status: 'WAITING_FOR_PLAYERS',
-          stockSize: 60,
-          table: {A: [], B: [], C: [], D: [], E: [], X: []},
-          timestamp: jasmine.any(String),
-          turnNumber: 0,
-          turnsLeft: null,
-          woundCount: 0,
-        },
-        playedActions: [{action: {type: 'START'}, timestamp: jasmine.any(String)}],
-        players: [
-          {id: 'REDACTED', idx: 0, isConnected: true, name: 'BOBBY_TABLES'},
-          {id: jasmine.any(String), idx: 1, isConnected: true, name: 'Beatrice'},
+    game: {
+      gameId: jasmine.any(String),
+      currentTurn: {
+        action: {type: 'START'},
+        discardPile: [],
+        hintCount: 9,
+        inTurn: 0,
+        playerHandViews: [
+          {extraMysticalHand: [], hand: [], isMe: false},
+          {hand: [], isMe: true},
         ],
+        score: 0,
+        status: 'WAITING_FOR_PLAYERS',
+        stockSize: 60,
+        table: {A: [], B: [], C: [], D: [], E: [], X: []},
+        timestamp: jasmine.any(String),
+        turnNumber: 0,
+        turnsLeft: null,
+        woundCount: 0,
       },
-    ],
-    msg: 'M_GamesState',
+      playedActions: [{action: {type: 'START'}, timestamp: jasmine.any(String)}],
+      players: [
+        {id: 'REDACTED', idx: 0, isConnected: true, name: 'BOBBY_TABLES'},
+        {id: jasmine.any(String), idx: 1, isConnected: true, name: 'Beatrice'},
+      ],
+    },
+    msg: 'M_GameState',
     timestamp: jasmine.any(String),
   })
   setTimeout(done, 100)
 })
 
-test('startGame', async (done) => {
+test('startGame', async done => {
   ws1.startGame({gameId})
   expect(await waitMsg('ws1')).toEqual({
-    games: [
-      {
-        gameId: jasmine.any(String),
-        currentTurn: {
-          action: {type: 'START'},
-          discardPile: [],
-          hintCount: 9,
-          inTurn: 0,
-          playerHandViews: [
-            {
-              isMe: true,
-              hand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
-            },
-            {
-              extraMysticalHand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
-              hand: [
-                {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
-                {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
-                {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
-                {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
-                {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
-              ],
-              isMe: false,
-            },
-          ],
-          score: 0,
-          status: 'RUNNING',
-          stockSize: 50,
-          table: {A: [], B: [], C: [], D: [], E: [], X: []},
-          timestamp: jasmine.any(String),
-          turnNumber: 0,
-          turnsLeft: null,
-          woundCount: 0,
-        },
-        playedActions: [{action: {type: 'START'}, timestamp: jasmine.any(String)}],
-        players: [
-          {id: jasmine.any(String), idx: 0, isConnected: true, name: 'BOBBY_TABLES'},
-          {id: jasmine.any(String), idx: 1, isConnected: true, name: 'Beatrice'},
+    game: {
+      gameId: jasmine.any(String),
+      currentTurn: {
+        action: {type: 'START'},
+        discardPile: [],
+        hintCount: 9,
+        inTurn: 0,
+        playerHandViews: [
+          {
+            isMe: true,
+            hand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
+          },
+          {
+            extraMysticalHand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
+            hand: [
+              {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
+              {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
+              {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
+              {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
+              {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
+            ],
+            isMe: false,
+          },
         ],
+        score: 0,
+        status: 'RUNNING',
+        stockSize: 50,
+        table: {A: [], B: [], C: [], D: [], E: [], X: []},
+        timestamp: jasmine.any(String),
+        turnNumber: 0,
+        turnsLeft: null,
+        woundCount: 0,
       },
-    ],
-    msg: 'M_GamesState',
+      playedActions: [{action: {type: 'START'}, timestamp: jasmine.any(String)}],
+      players: [
+        {id: jasmine.any(String), idx: 0, isConnected: true, name: 'BOBBY_TABLES'},
+        {id: jasmine.any(String), idx: 1, isConnected: true, name: 'Beatrice'},
+      ],
+    },
+    msg: 'M_GameState',
     timestamp: jasmine.any(String),
   })
   setTimeout(done, 200)
 })
 
-test('act', async (done) => {
+test('act', async done => {
   let turn: game.TMaskedTurnState
 
   const getTurnState = async () => {
-    return (await waitMsg('ws1')).games[0].currentTurn
+    return ((await waitMsg('ws1')) as game.M_GameState).game.currentTurn
   }
 
   for (let n = 0; n <= 23; n++) {

@@ -62,7 +62,8 @@ const Reducer = (state: AppState, action: Action): AppState => {
       if (action.game)
         return {
           ...state,
-          visibleTurnNumber: action.game.currentTurn.turnNumber,
+          // only update visibleTurnNumber here if the old state was not InGameState
+          visibleTurnNumber: (state as InGameState).visibleTurnNumber || action.game.currentTurn.turnNumber,
           phase: 'IN_GAME',
           game: action.game,
         }

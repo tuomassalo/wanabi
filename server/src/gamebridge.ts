@@ -46,7 +46,7 @@ async function scanGames(scanParams = {}): Promise<engine.Game[]> {
         ? -1
         : 1,
     )
-    .map((game) => new engine.Game({from: 'SERIALIZED_GAME', game}))
+    .map(game => new engine.Game({from: 'SERIALIZED_GAME', game}))
 
   const allConnections = new Set(await getAllConnections())
 
@@ -67,16 +67,21 @@ async function scanGames(scanParams = {}): Promise<engine.Game[]> {
 }
 
 async function getAllConnections(): Promise<TConnectionId[]> {
-  return (await scan<any>(connectionTable, {AttributesToGet: ['connectionId']})).map((item) => item.connectionId)
+  return (await scan<any>(connectionTable, {AttributesToGet: ['connectionId']})).map(item => item.connectionId)
 }
 async function deleteGame(gameId: engine.TGameId) {
   await dynamodb.delete({TableName: gameTable, Key: {gameId}}).promise()
 }
 
-async function sendGamesState(toConnections: TConnectionId[]) {
+async function broadcastGamesState() {
+  await sendState()
+}
+async function sendState(onlySendToConnectionId?: TConnectionId) {
   const games = await scanGames()
 
   const allConnections = new Set(await getAllConnections())
+
+  const connectionToGame: {[key: string]: engine.Game} = {}
 
   // console.warn({allConnections})
 
@@ -84,6 +89,7 @@ async function sendGamesState(toConnections: TConnectionId[]) {
   for (const game of games) {
     for (const p of game.players) {
       if (allConnections.has(p.id)) {
+        connectionToGame[p.id] = game
         p.isConnected = true
       } else {
         p.isConnected = false
@@ -92,24 +98,33 @@ async function sendGamesState(toConnections: TConnectionId[]) {
     }
   }
 
-  console.warn('sending game state to', ...toConnections)
+  const sendGame = (cId: TConnectionId, game: engine.Game) =>
+    send(cId, {
+      msg: 'M_GameState',
+      game: game.getState(cId),
+      timestamp: new Date().toISOString(),
+    })
 
-  // console.warn(...toConnections.map(cId => JSON.stringify(games.map(g => g.getState(cId)))))
+  const sendGames = (cId: TConnectionId) =>
+    send(cId, {
+      msg: 'M_GamesState',
+      games: games.map(g => g.getState(cId)),
+      timestamp: new Date().toISOString(),
+    })
 
-  await Promise.all(
-    toConnections.map((cId) => {
-      const data: engine.WebsocketServerMessage = {
-        msg: 'M_GamesState',
-        games: games.map((g) => g.getState(cId)),
-        timestamp: new Date().toISOString(),
-      }
+  if (onlySendToConnectionId) {
+    if (connectionToGame[onlySendToConnectionId]) {
+      await sendGame(onlySendToConnectionId, connectionToGame[onlySendToConnectionId])
+    } else {
+      await sendGames(onlySendToConnectionId)
+    }
+  } else {
+    // send current game status to everyone connected to a certain game
+    await Promise.all(Object.entries(connectionToGame).map(([cId, game]) => sendGame(cId, game)))
 
-      return send(cId, data)
-    }),
-  )
-}
-async function broadcastGamesState() {
-  return await sendGamesState(await getAllConnections())
+    // send overall status to everyone else
+    await Promise.all([...allConnections].filter(cId => !connectionToGame[cId]).map(sendGames))
+  }
 }
 async function updateGame(game: engine.Game, prevTimestamp: string) {
   const newData = JSON.parse(JSON.stringify(game)) as engine.TCompleteGameState
@@ -119,7 +134,7 @@ async function updateGame(game: engine.Game, prevTimestamp: string) {
   // if (isNaN(newData.turnsLeft as number)) delete newData.turnsLeft
   delete newData.gameId // never changes
   const updateKeys = Object.keys(newData)
-  const newDataWithColons = Object.fromEntries(updateKeys.map((k) => [':' + k, newData[k]]))
+  const newDataWithColons = Object.fromEntries(updateKeys.map(k => [':' + k, newData[k]]))
 
   // console.warn({prevTimestamp, updateKeys}, newDataWithColons)
 
@@ -127,10 +142,10 @@ async function updateGame(game: engine.Game, prevTimestamp: string) {
     .update({
       TableName: gameTable,
       Key: {gameId: game.gameId},
-      UpdateExpression: 'SET ' + updateKeys.map((k) => `#X_${k} = :${k}`).join(', '),
+      UpdateExpression: 'SET ' + updateKeys.map(k => `#X_${k} = :${k}`).join(', '),
       ExpressionAttributeNames: {
         '#X_timestamp': 'timestamp',
-        ...Object.fromEntries(Object.keys(newData).map((k) => [`#X_${k}`, k])),
+        ...Object.fromEntries(Object.keys(newData).map(k => [`#X_${k}`, k])),
       },
       ExpressionAttributeValues: {
         ...newDataWithColons,
@@ -142,7 +157,7 @@ async function updateGame(game: engine.Game, prevTimestamp: string) {
 }
 
 async function _getGame(gameId: engine.TGameId): Promise<engine.Game> {
-  const game = (await scanGames()).find((g) => g.gameId === gameId) // TODO: do this on server
+  const game = (await scanGames()).find(g => g.gameId === gameId) // TODO: do this on server
   if (!game) throw new Error('No game found')
 
   return game
@@ -158,7 +173,7 @@ async function _sendTurnHistory(game: engine.Game, connectionId: TConnectionId) 
 }
 
 export async function getGamesState({}: engine.WS_getGamesStateParams, connectionId: string) {
-  await sendGamesState([connectionId])
+  await sendState(connectionId)
   // const data: engine.WebsocketServerMessage = {
   //   msg: 'M_GamesState',
   //   games: (await _getGamesState(connectionId)).map(t => new engine.Turn(t).getState(connectionId)),
@@ -230,7 +245,7 @@ export async function rejoinGame({gameId, playerIdx}: engine.WS_rejoinGameParams
   if (player.isConnected) {
     throw new Error('Player is already connected from another connection')
   }
-  if ((await getAllConnections()).some((cId) => cId === player.id)) {
+  if ((await getAllConnections()).some(cId => cId === player.id)) {
     throw new Error('This connection is already occupied by another player')
   }
 
@@ -253,10 +268,10 @@ export async function purgeGames() {
 
   // purge non-started games that have no connected players
   const purgeGames = (await scanGames()).filter(
-    (game) => game.currentTurn.status === 'WAITING_FOR_PLAYERS' && game.players.every((p) => !allConnections.has(p.id)),
+    game => game.currentTurn.status === 'WAITING_FOR_PLAYERS' && game.players.every(p => !allConnections.has(p.id)),
   )
 
-  await Promise.all(purgeGames.map((game) => deleteGame(game.gameId)))
+  await Promise.all(purgeGames.map(game => deleteGame(game.gameId)))
 
   await broadcastGamesState()
 }

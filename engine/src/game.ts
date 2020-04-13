@@ -77,9 +77,9 @@ export interface TMaskedTurnState extends TBaseTurnState {
 }
 
 export interface WS_getGamesStateParams {}
-export interface WS_getGameStateParams {
-  gameId: TGameId
-}
+// export interface WS_getGameStateParams {
+//   gameId: TGameId
+// }
 export interface WS_createGameParams {
   firstPlayerName: string
 }
@@ -128,13 +128,13 @@ export interface M_GameHistory {
   gameId: TGameId
   previousTurns: TMaskedTurnState[] // all previous turns of this game
 }
-// interface M_GameState {
-//   msg: 'M_GameState'
-//   timestamp: string
-//   currentTurn: TMaskedTurnState
-// }
+export interface M_GameState {
+  msg: 'M_GameState'
+  timestamp: string
+  game: TMaskedGameState
+}
 
-export type WebsocketServerMessage = M_GamesState | M_GameHistory // | M_GameState
+export type WebsocketServerMessage = M_GamesState | M_GameHistory | M_GameState
 
 abstract class BaseTurn {
   status: TGameStatus

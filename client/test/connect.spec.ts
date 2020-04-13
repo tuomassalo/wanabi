@@ -51,34 +51,32 @@ async function waitMsg(websocketName: 'ws1' | 'ws2' | 'ws3'): Promise<game.Webso
 
 test('connect, createGame', async done => {
   ws1.createGame({firstPlayerName: 'BOBBY_TABLES'}) // this wipes the tables in dev
-  const msg = (await waitMsg('ws1')) as game.M_GamesState
+  const msg = (await waitMsg('ws1')) as game.M_GameState
   expect(msg).toEqual({
-    games: [
-      {
-        gameId: jasmine.any(String),
-        currentTurn: {
-          action: {type: 'START'},
-          discardPile: [],
-          hintCount: 9,
-          inTurn: 0,
-          playerHandViews: [{hand: [], isMe: true}],
-          score: 0,
-          status: 'WAITING_FOR_PLAYERS',
-          stockSize: 60,
-          table: {A: [], B: [], C: [], D: [], E: [], X: []},
-          timestamp: jasmine.any(String),
-          turnNumber: 0,
-          turnsLeft: null,
-          woundCount: 0,
-        },
-        players: [{id: jasmine.any(String), idx: 0, isConnected: true, name: 'BOBBY_TABLES'}],
-        playedActions: [{action: {type: 'START'}, timestamp: jasmine.any(String)}],
+    game: {
+      gameId: jasmine.any(String),
+      currentTurn: {
+        action: {type: 'START'},
+        discardPile: [],
+        hintCount: 9,
+        inTurn: 0,
+        playerHandViews: [{hand: [], isMe: true}],
+        score: 0,
+        status: 'WAITING_FOR_PLAYERS',
+        stockSize: 60,
+        table: {A: [], B: [], C: [], D: [], E: [], X: []},
+        timestamp: jasmine.any(String),
+        turnNumber: 0,
+        turnsLeft: null,
+        woundCount: 0,
       },
-    ],
-    msg: 'M_GamesState',
+      players: [{id: jasmine.any(String), idx: 0, isConnected: true, name: 'BOBBY_TABLES'}],
+      playedActions: [{action: {type: 'START'}, timestamp: jasmine.any(String)}],
+    },
+    msg: 'M_GameState',
     timestamp: jasmine.any(String),
   })
-  gameId = msg.games[0].gameId
+  gameId = msg.game.gameId
 
   expect(gameId).toMatch(/\w/)
   // this obscure delay is needed; otherwise messages get somehow garbled
@@ -120,35 +118,33 @@ test('getGamesState', async done => {
 test('joinGame', async done => {
   ws2.joinGame({newPlayerName: 'Beatrice', gameId})
   expect(await waitMsg('ws2')).toEqual({
-    games: [
-      {
-        gameId: jasmine.any(String),
-        currentTurn: {
-          action: {type: 'START'},
-          discardPile: [],
-          hintCount: 9,
-          inTurn: 0,
-          playerHandViews: [
-            {extraMysticalHand: [], hand: [], isMe: false},
-            {hand: [], isMe: true},
-          ],
-          score: 0,
-          status: 'WAITING_FOR_PLAYERS',
-          stockSize: 60,
-          table: {A: [], B: [], C: [], D: [], E: [], X: []},
-          timestamp: jasmine.any(String),
-          turnNumber: 0,
-          turnsLeft: null,
-          woundCount: 0,
-        },
-        playedActions: [{action: {type: 'START'}, timestamp: jasmine.any(String)}],
-        players: [
-          {id: 'REDACTED', idx: 0, isConnected: true, name: 'BOBBY_TABLES'},
-          {id: jasmine.any(String), idx: 1, isConnected: true, name: 'Beatrice'},
+    game: {
+      gameId: jasmine.any(String),
+      currentTurn: {
+        action: {type: 'START'},
+        discardPile: [],
+        hintCount: 9,
+        inTurn: 0,
+        playerHandViews: [
+          {extraMysticalHand: [], hand: [], isMe: false},
+          {hand: [], isMe: true},
         ],
+        score: 0,
+        status: 'WAITING_FOR_PLAYERS',
+        stockSize: 60,
+        table: {A: [], B: [], C: [], D: [], E: [], X: []},
+        timestamp: jasmine.any(String),
+        turnNumber: 0,
+        turnsLeft: null,
+        woundCount: 0,
       },
-    ],
-    msg: 'M_GamesState',
+      playedActions: [{action: {type: 'START'}, timestamp: jasmine.any(String)}],
+      players: [
+        {id: 'REDACTED', idx: 0, isConnected: true, name: 'BOBBY_TABLES'},
+        {id: jasmine.any(String), idx: 1, isConnected: true, name: 'Beatrice'},
+      ],
+    },
+    msg: 'M_GameState',
     timestamp: jasmine.any(String),
   })
   setTimeout(done, 100)
@@ -157,48 +153,46 @@ test('joinGame', async done => {
 test('startGame', async done => {
   ws1.startGame({gameId})
   expect(await waitMsg('ws1')).toEqual({
-    games: [
-      {
-        gameId: jasmine.any(String),
-        currentTurn: {
-          action: {type: 'START'},
-          discardPile: [],
-          hintCount: 9,
-          inTurn: 0,
-          playerHandViews: [
-            {
-              isMe: true,
-              hand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
-            },
-            {
-              extraMysticalHand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
-              hand: [
-                {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
-                {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
-                {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
-                {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
-                {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
-              ],
-              isMe: false,
-            },
-          ],
-          score: 0,
-          status: 'RUNNING',
-          stockSize: 50,
-          table: {A: [], B: [], C: [], D: [], E: [], X: []},
-          timestamp: jasmine.any(String),
-          turnNumber: 0,
-          turnsLeft: null,
-          woundCount: 0,
-        },
-        playedActions: [{action: {type: 'START'}, timestamp: jasmine.any(String)}],
-        players: [
-          {id: jasmine.any(String), idx: 0, isConnected: true, name: 'BOBBY_TABLES'},
-          {id: 'REDACTED', idx: 1, isConnected: true, name: 'Beatrice'},
+    game: {
+      gameId: jasmine.any(String),
+      currentTurn: {
+        action: {type: 'START'},
+        discardPile: [],
+        hintCount: 9,
+        inTurn: 0,
+        playerHandViews: [
+          {
+            isMe: true,
+            hand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
+          },
+          {
+            extraMysticalHand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
+            hand: [
+              {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
+              {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
+              {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
+              {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
+              {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
+            ],
+            isMe: false,
+          },
         ],
+        score: 0,
+        status: 'RUNNING',
+        stockSize: 50,
+        table: {A: [], B: [], C: [], D: [], E: [], X: []},
+        timestamp: jasmine.any(String),
+        turnNumber: 0,
+        turnsLeft: null,
+        woundCount: 0,
       },
-    ],
-    msg: 'M_GamesState',
+      playedActions: [{action: {type: 'START'}, timestamp: jasmine.any(String)}],
+      players: [
+        {id: jasmine.any(String), idx: 0, isConnected: true, name: 'BOBBY_TABLES'},
+        {id: 'REDACTED', idx: 1, isConnected: true, name: 'Beatrice'},
+      ],
+    },
+    msg: 'M_GameState',
     timestamp: jasmine.any(String),
   })
   setTimeout(done, 100)
@@ -207,101 +201,95 @@ test('startGame', async done => {
 test('act', async done => {
   ws1.act({gameId, actionParams: {type: 'DISCARD', cardIdx: 2}})
   expect(await waitMsg('ws1')).toEqual({
-    games: [
-      {
-        gameId: jasmine.any(String),
-        currentTurn: {
-          action: {type: 'DISCARD', card: jasmine.any(String), cardIdx: 2},
-          discardPile: [jasmine.any(String)],
-          hintCount: 9,
-          inTurn: 1,
-          playerHandViews: [
-            {
-              isMe: true,
-              hand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
-            },
-            {
-              extraMysticalHand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
-              hand: [
-                {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
-                {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
-                {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
-                {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
-                {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
-              ],
-              isMe: false,
-            },
-          ],
-          score: 0,
-          status: 'RUNNING',
-          stockSize: 49,
-          table: {A: [], B: [], C: [], D: [], E: [], X: []},
-          timestamp: jasmine.any(String),
-          turnNumber: 1,
-          turnsLeft: null,
-          woundCount: 0,
-        },
-        playedActions: [
-          {action: {type: 'START'}, timestamp: jasmine.any(String)},
-          {action: {type: 'DISCARD', cardIdx: 2, card: jasmine.any(String)}, timestamp: jasmine.any(String)},
+    game: {
+      gameId: jasmine.any(String),
+      currentTurn: {
+        action: {type: 'DISCARD', card: jasmine.any(String), cardIdx: 2},
+        discardPile: [jasmine.any(String)],
+        hintCount: 9,
+        inTurn: 1,
+        playerHandViews: [
+          {
+            isMe: true,
+            hand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
+          },
+          {
+            extraMysticalHand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
+            hand: [
+              {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
+              {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
+              {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
+              {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
+              {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
+            ],
+            isMe: false,
+          },
         ],
-        players: [
-          {id: jasmine.any(String), idx: 0, isConnected: true, name: 'BOBBY_TABLES'},
-          {id: 'REDACTED', idx: 1, isConnected: true, name: 'Beatrice'},
-        ],
+        score: 0,
+        status: 'RUNNING',
+        stockSize: 49,
+        table: {A: [], B: [], C: [], D: [], E: [], X: []},
+        timestamp: jasmine.any(String),
+        turnNumber: 1,
+        turnsLeft: null,
+        woundCount: 0,
       },
-    ],
-
-    msg: 'M_GamesState',
+      playedActions: [
+        {action: {type: 'START'}, timestamp: jasmine.any(String)},
+        {action: {type: 'DISCARD', cardIdx: 2, card: jasmine.any(String)}, timestamp: jasmine.any(String)},
+      ],
+      players: [
+        {id: jasmine.any(String), idx: 0, isConnected: true, name: 'BOBBY_TABLES'},
+        {id: 'REDACTED', idx: 1, isConnected: true, name: 'Beatrice'},
+      ],
+    },
+    msg: 'M_GameState',
     timestamp: jasmine.any(String),
   })
   expect(await waitMsg('ws2')).toEqual({
-    games: [
-      {
-        gameId: jasmine.any(String),
-        currentTurn: {
-          action: {type: 'DISCARD', card: jasmine.any(String), cardIdx: 2},
-          discardPile: [jasmine.any(String)],
-          hintCount: 9,
-          inTurn: 1,
-          playerHandViews: [
-            {
-              extraMysticalHand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
-              hand: [
-                {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
-                {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
-                {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
-                {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
-                {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
-              ],
-              isMe: false,
-            },
-            {
-              isMe: true,
-              hand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
-            },
-          ],
-          score: 0,
-          status: 'RUNNING',
-          stockSize: 49,
-          table: {A: [], B: [], C: [], D: [], E: [], X: []},
-          timestamp: jasmine.any(String),
-          turnNumber: 1,
-          turnsLeft: null,
-          woundCount: 0,
-        },
-        playedActions: [
-          {action: {type: 'START'}, timestamp: jasmine.any(String)},
-          {action: {type: 'DISCARD', cardIdx: 2, card: jasmine.any(String)}, timestamp: jasmine.any(String)},
+    game: {
+      gameId: jasmine.any(String),
+      currentTurn: {
+        action: {type: 'DISCARD', card: jasmine.any(String), cardIdx: 2},
+        discardPile: [jasmine.any(String)],
+        hintCount: 9,
+        inTurn: 1,
+        playerHandViews: [
+          {
+            extraMysticalHand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
+            hand: [
+              {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
+              {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
+              {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
+              {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
+              {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
+            ],
+            isMe: false,
+          },
+          {
+            isMe: true,
+            hand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
+          },
         ],
-        players: [
-          {id: 'REDACTED', idx: 0, isConnected: true, name: 'BOBBY_TABLES'},
-          {id: jasmine.any(String), idx: 1, isConnected: true, name: 'Beatrice'},
-        ],
+        score: 0,
+        status: 'RUNNING',
+        stockSize: 49,
+        table: {A: [], B: [], C: [], D: [], E: [], X: []},
+        timestamp: jasmine.any(String),
+        turnNumber: 1,
+        turnsLeft: null,
+        woundCount: 0,
       },
-    ],
-
-    msg: 'M_GamesState',
+      playedActions: [
+        {action: {type: 'START'}, timestamp: jasmine.any(String)},
+        {action: {type: 'DISCARD', cardIdx: 2, card: jasmine.any(String)}, timestamp: jasmine.any(String)},
+      ],
+      players: [
+        {id: 'REDACTED', idx: 0, isConnected: true, name: 'BOBBY_TABLES'},
+        {id: jasmine.any(String), idx: 1, isConnected: true, name: 'Beatrice'},
+      ],
+    },
+    msg: 'M_GameState',
     timestamp: jasmine.any(String),
   })
   setTimeout(done, 100)
@@ -361,13 +349,13 @@ test('An "outsider" can join a game if someone disconnects', async done => {
   await new Promise(r => setTimeout(r, 100))
   ws3.rejoinGame({gameId: msg.games[0].gameId, playerIdx: 1})
 
-  const msg2 = (await waitMsg('ws3')) as game.M_GamesState
-  expect(msg2.games[0].players).toEqual([
+  const msg2 = (await waitMsg('ws3')) as game.M_GameState
+  expect(msg2.game.players).toEqual([
     {id: 'REDACTED', idx: 0, isConnected: true, name: 'BOBBY_TABLES'},
     {id: jasmine.any(String), idx: 1, isConnected: true, name: 'Beatrice'},
   ])
 
-  expect(msg2.games[0].currentTurn.playerHandViews).toEqual([
+  expect(msg2.game.currentTurn.playerHandViews).toEqual([
     {
       extraMysticalHand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
       hand: [

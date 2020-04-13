@@ -33,16 +33,22 @@ export const Wsclient = () => {
   // copy of `state` in the handler.
 
   w.msgHandler = async (data: engine.WebsocketServerMessage) => {
-    if (data.msg === 'M_GamesState') {
-      const activeGameState = data.games.find(g => g.currentTurn.playerHandViews.some(phv => phv.isMe))
+    // console.warn('WSSM', data)
 
-      if (activeGameState) {
-        // A game was found with this connection.
+    if (data.msg === 'M_GameState') {
+      // const activeGameState = data.games.find(g => g.currentTurn.playerHandViews.some(phv => phv.isMe))
 
-        const game = new engine.MaskedGame(activeGameState)
-        const currentTurn = game.currentTurn
+      // if (activeGameState) {
+      // A game was found with this connection.
 
-        if (state.phase === 'IN_GAME' && currentTurn.turnNumber === state.game.currentTurn.turnNumber + 1) {
+      const game = new engine.MaskedGame(data.game)
+      const currentTurn = game.currentTurn
+
+      if (state.phase === 'IN_GAME' && currentTurn.turnNumber > 0) {
+        // console.warn('in game')
+        if (currentTurn.turnNumber === state.game.currentTurn.turnNumber + 1) {
+          // console.warn('new turn')
+
           // This is a new turn in the active game. Only do sound and animation on
           //  turn change, not when joining or if someone disconnects/reconnects
           if (
@@ -61,35 +67,45 @@ export const Wsclient = () => {
             await animate(currentTurn.action, state.game.currentTurn.inTurn)
           }
 
-          dispatch({type: 'ADD_TURN', turn: activeGameState.currentTurn})
+          dispatch({type: 'ADD_TURN', turn: data.game.currentTurn})
         } else {
-          // something else than just a new turn in this game that the user was already viewing
+          // console.warn('not new turn')
 
-          setRejoinParams({
-            gameId: game.gameId,
-            playerIdx: currentTurn.playerHandViews.findIndex(phv => phv.isMe),
-          })
-
-          dispatch({type: 'SET_GAME', game})
-          w.gameId = game.gameId
+          // someone disconnecting / rejoining: update game state, but preserve turn history.
+          // NB! For now, only update the isConnected attributes.
+          for (const p of state.game.players) {
+            p.isConnected = game.players[p.idx].isConnected
+          }
+          dispatch({type: 'SET_GAME', game: state.game})
         }
       } else {
-        // This connection is not currently bound to a game.
-        // If we have rejoinParams AND the game still exists AND the seat is unoccupied, rejoin.
-        // Otherwise, go to the menu.
-        const rejoinParams = getRejoinParams()
-        if (
-          rejoinParams &&
-          data.games.find(g => g.gameId === rejoinParams.gameId)?.players[rejoinParams.playerIdx].isConnected === false
-        ) {
-          w.wsclient.rejoinGame(rejoinParams)
-          // do not set state; we will get another message for that
-        } else {
-          // no active game (or the rejoining was not possible)
-          sessionStorage.removeItem('rejoinParams')
+        // something else than just a new turn in this game that the user was already viewing
+        // console.warn('not in game')
 
-          dispatch({type: 'SET_GAMES', games: data.games.map(g => new engine.MaskedGame(g))})
-        }
+        setRejoinParams({
+          gameId: game.gameId,
+          playerIdx: currentTurn.playerHandViews.findIndex(phv => phv.isMe),
+        })
+
+        dispatch({type: 'SET_GAME', game})
+        w.gameId = game.gameId
+      }
+    } else if (data.msg === 'M_GamesState') {
+      // This connection is not currently bound to a game.
+      // If we have rejoinParams AND the game still exists AND the seat is unoccupied, rejoin.
+      // Otherwise, go to the menu.
+      const rejoinParams = getRejoinParams()
+      if (
+        rejoinParams &&
+        data.games.find(g => g.gameId === rejoinParams.gameId)?.players[rejoinParams.playerIdx].isConnected === false
+      ) {
+        w.wsclient.rejoinGame(rejoinParams)
+        // do not set state; we will get another message for that
+      } else {
+        // no active game (or the rejoining was not possible)
+        sessionStorage.removeItem('rejoinParams')
+
+        dispatch({type: 'SET_GAMES', games: data.games.map(g => new engine.MaskedGame(g))})
       }
     } else if (data.msg === 'M_GameHistory') {
       data.previousTurns.forEach(t => (getState() as InGameState).game.addTurn(t))

@@ -14,7 +14,7 @@ export class WebSocketClient extends EventEmitter {
       this.emit('closing', 'CLOSE', {wasClean, code, reason})
     }
 
-    this.websocket.onerror = (error) => {
+    this.websocket.onerror = error => {
       console.warn('onerror', error)
 
       this.emit('error', 'ERROR', 'An error has occurred. See console for details.')
@@ -48,10 +48,9 @@ export class WebSocketClient extends EventEmitter {
     if (!/\bjsdom\b/.test(navigator.userAgent)) setTimeout(() => window.location.reload(), 1000)
   }
 
-  // perl -wlne 'print qq!$2(p: game.$1): void { this.send("$2", p) } // prettier-ignore! if /interface (WS_(\w+)Params)\b/' ../engine/src/game.ts | pbcopy
+  // perl -wlne 'print qq!$2(p: game.$1): void { this.send("$2", p) } // prettier-ignore! if /^export interface (WS_(\w+)Params)\b/' ../engine/src/game.ts | pbcopy
   // PASTE AFTER THIS LINE:
   getGamesState(p: game.WS_getGamesStateParams): void { this.send("getGamesState", p) } // prettier-ignore
-  getGameState(p: game.WS_getGameStateParams): void { this.send("getGameState", p) } // prettier-ignore
   createGame(p: game.WS_createGameParams): void { this.send("createGame", p) } // prettier-ignore
   startGame(p: game.WS_startGameParams): void { this.send("startGame", p) } // prettier-ignore
   joinGame(p: game.WS_joinGameParams): void { this.send("joinGame", p) } // prettier-ignore
