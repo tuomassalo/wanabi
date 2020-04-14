@@ -64,7 +64,7 @@ export const Wsclient = () => {
           }
           if (currentTurn.turnNumber === state.visibleTurnNumber + 1) {
             // do some animation before changing state, but only if the player is viewing the current turn.
-            await animate(currentTurn.action, state.game.currentTurn.inTurn)
+            await animate(currentTurn.action, state.game.currentTurn.inTurn, currentTurn.score === 30)
           }
 
           dispatch({type: 'ADD_TURN', turn: data.game.currentTurn})

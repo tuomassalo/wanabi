@@ -1,14 +1,54 @@
 import * as engine from 'wanabi-engine'
 import {AllColors, TColor, Card} from 'wanabi-engine/dist/card'
+import {range, sample, random} from 'lodash'
 
-export async function animate(action: engine.TResolvedActionState, playerIdx: number) {
+async function animateFullScore() {
+  const highestNumber = parseInt((document.querySelector('.WTable > .WCard') as Element).textContent as string, 10)
+  for (const num of [3]) {
+    // range(1, highestNumber + 1).reverse()) {
+    for (const pile of Array.from(document.querySelectorAll('.WTable > .WCard'))) {
+      const pileBounds = pile.getBoundingClientRect()
+      const xSpeed = (sample([-1, 1]) as number) * random(3, 9, true)
+      let ySpeed = random(-6, 0, true)
+
+      let x = pileBounds.left
+      let y = pileBounds.top
+
+      while (x < window.innerWidth + 10 && x > -pileBounds.width - 10) {
+        const clone = pile.cloneNode(true) as HTMLDivElement
+        clone.textContent = '' + num
+        clone.style.position = 'absolute'
+        clone.style.left = x + 'px'
+        clone.style.top = y + 'px'
+        clone.style.boxShadow = 'none'
+        clone.style.zIndex = '3'
+
+        document.body.appendChild(clone)
+
+        x += xSpeed
+        y += ySpeed
+
+        if (y >= window.innerHeight - pileBounds.height) {
+          // bounce
+          ySpeed *= -0.8
+          y = window.innerHeight - pileBounds.height
+        } else {
+          ySpeed += 0.5 // acceleration
+        }
+        await new Promise(r => setTimeout(r, 1))
+      }
+    }
+  }
+}
+
+export async function animate(action: engine.TResolvedActionState, playerIdx: number, isFullScore: boolean) {
   // only animate plays and discards
   if (!(action.type === 'PLAY' || action.type === 'DISCARD')) return
 
   const playedCard = new Card(action.card)
 
   const waitForAnimation = async (elem: HTMLElement) => {
-    await new Promise((r) => {
+    await new Promise(r => {
       elem.addEventListener('animationend', r, {once: true})
     })
   }
@@ -68,7 +108,7 @@ export async function animate(action: engine.TResolvedActionState, playerIdx: nu
   }
 
   const findTablePileBounds = (color: TColor) => {
-    const pileIdx = AllColors.findIndex((c) => c === color)
+    const pileIdx = AllColors.findIndex(c => c === color)
     const pileEl = (document.querySelector('.WTable') as HTMLElement).childNodes[pileIdx] as HTMLElement
     return pileEl.getBoundingClientRect()
   }
@@ -88,15 +128,15 @@ export async function animate(action: engine.TResolvedActionState, playerIdx: nu
   ghost.classList.add('WCard-ghost')
 
   // this is needed, otherwise animationend triggers immediately.
-  await new Promise((r) => setTimeout(r, 1))
+  await new Promise(r => setTimeout(r, 1))
 
   await waitForAnimation(ghost)
 
   // Old card has been moved now.
 
   const cardElems = [0, 1, 2, 3, 4]
-    .map((idx) => document.getElementById(`card-${playerIdx}-${idx}`))
-    .filter((el) => el) as HTMLElement[]
+    .map(idx => document.getElementById(`card-${playerIdx}-${idx}`))
+    .filter(el => el) as HTMLElement[]
   const movingCards = cardElems.filter((el, idx) => idx > action.cardIdx)
   if (movingCards.length) {
     const cardDstOffsetXEnd = cardElems[0].getBoundingClientRect().left - cardElems[1].getBoundingClientRect().left
@@ -112,5 +152,9 @@ export async function animate(action: engine.TResolvedActionState, playerIdx: nu
   orig.style.visibility = 'visible'
   for (const c of movingCards) {
     c.classList.remove('WCard-slide-left')
+  }
+
+  if (isFullScore) {
+    await animateFullScore()
   }
 }
