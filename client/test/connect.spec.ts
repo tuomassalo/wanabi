@@ -60,7 +60,7 @@ test('connect, createGame', async done => {
         discardPile: [],
         hintCount: 9,
         inTurn: 0,
-        playerHandViews: [{hand: [], isMe: true}],
+        maskedPlayerViews: [{hand: [], isMe: true}],
         score: 0,
         status: 'WAITING_FOR_PLAYERS',
         stockSize: 60,
@@ -95,7 +95,7 @@ test('getGamesState', async done => {
           discardPile: [],
           hintCount: 9,
           inTurn: 0,
-          playerHandViews: [],
+          maskedPlayerViews: [],
           score: 0,
           status: 'WAITING_FOR_PLAYERS',
           stockSize: 60,
@@ -125,8 +125,8 @@ test('joinGame', async done => {
         discardPile: [],
         hintCount: 9,
         inTurn: 0,
-        playerHandViews: [
-          {extraMysticalHand: [], hand: [], isMe: false},
+        maskedPlayerViews: [
+          {hand: [], isMe: false},
           {hand: [], isMe: true},
         ],
         score: 0,
@@ -160,19 +160,18 @@ test('startGame', async done => {
         discardPile: [],
         hintCount: 9,
         inTurn: 0,
-        playerHandViews: [
+        maskedPlayerViews: [
           {
             isMe: true,
             hand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
           },
           {
-            extraMysticalHand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
             hand: [
-              {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
-              {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
-              {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
-              {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
-              {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
+              {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
+              {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
+              {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
+              {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
+              {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
             ],
             isMe: false,
           },
@@ -208,19 +207,18 @@ test('act', async done => {
         discardPile: [jasmine.any(String)],
         hintCount: 9,
         inTurn: 1,
-        playerHandViews: [
+        maskedPlayerViews: [
           {
             isMe: true,
             hand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
           },
           {
-            extraMysticalHand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
             hand: [
-              {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
-              {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
-              {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
-              {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
-              {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
+              {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
+              {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
+              {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
+              {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
+              {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
             ],
             isMe: false,
           },
@@ -254,15 +252,14 @@ test('act', async done => {
         discardPile: [jasmine.any(String)],
         hintCount: 9,
         inTurn: 1,
-        playerHandViews: [
+        maskedPlayerViews: [
           {
-            extraMysticalHand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
             hand: [
-              {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
-              {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
-              {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
-              {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
-              {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
+              {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
+              {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
+              {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
+              {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
+              {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
             ],
             isMe: false,
           },
@@ -306,7 +303,7 @@ test('An outsider sees the started game, but cannot see any hands', async done =
           discardPile: [jasmine.any(String)],
           hintCount: 9,
           inTurn: 1,
-          playerHandViews: [], // NB: no hands are shown
+          maskedPlayerViews: [], // NB: no hands are shown
           score: 0,
           status: 'RUNNING',
           stockSize: 49,
@@ -355,15 +352,14 @@ test('An "outsider" can join a game if someone disconnects', async done => {
     {id: jasmine.any(String), idx: 1, isConnected: true, name: 'Beatrice'},
   ])
 
-  expect(msg2.game.currentTurn.playerHandViews).toEqual([
+  expect(msg2.game.currentTurn.maskedPlayerViews).toEqual([
     {
-      extraMysticalHand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
       hand: [
-        {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
-        {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
-        {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
-        {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
-        {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
+        {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
+        {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
+        {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
+        {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
+        {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
       ],
       isMe: false,
     },
@@ -384,15 +380,14 @@ test('An "outsider" can join a game if someone disconnects', async done => {
         discardPile: [],
         hintCount: 9,
         inTurn: 0,
-        playerHandViews: [
+        maskedPlayerViews: [
           {
-            extraMysticalHand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
             hand: [
-              {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
-              {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
-              {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
-              {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
-              {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
+              {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
+              {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
+              {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
+              {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
+              {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
             ],
             isMe: false,
           },

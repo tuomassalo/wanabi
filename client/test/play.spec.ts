@@ -54,7 +54,7 @@ test('connect, createGame', async done => {
       currentTurn: {
         action: {type: 'START'},
         discardPile: [],
-        playerHandViews: [{hand: [], isMe: true}],
+        maskedPlayerViews: [{hand: [], isMe: true}],
         hintCount: 9,
         inTurn: 0,
         score: 0,
@@ -89,8 +89,8 @@ test('joinGame', async done => {
         discardPile: [],
         hintCount: 9,
         inTurn: 0,
-        playerHandViews: [
-          {extraMysticalHand: [], hand: [], isMe: false},
+        maskedPlayerViews: [
+          {hand: [], isMe: false},
           {hand: [], isMe: true},
         ],
         score: 0,
@@ -124,19 +124,18 @@ test('startGame', async done => {
         discardPile: [],
         hintCount: 9,
         inTurn: 0,
-        playerHandViews: [
+        maskedPlayerViews: [
           {
             isMe: true,
             hand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
           },
           {
-            extraMysticalHand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
             hand: [
-              {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
-              {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
-              {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
-              {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
-              {num: jasmine.any(Number), color: jasmine.any(String), actionability: jasmine.any(String), hints: []},
+              {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
+              {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
+              {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
+              {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
+              {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
             ],
             isMe: false,
           },
