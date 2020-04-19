@@ -27,7 +27,7 @@ describe('Speculative hint', () => {
   it('should be shown when no hints given', () => {
     // no hints first
     expect(
-      (g.COMPAT_getRefinedTurnState(g.players[0].id)
+      (g.COMPAT_getRefinedMaskedTurnState(g.players[0].id)
         .maskedPlayerViews[1] as COMPAT_TMaskedOtherPlayerViewState).extraMysticalHand.map(c => c.hints),
     ).toEqual([[], [], [], [], []])
 
@@ -47,7 +47,7 @@ describe('Speculative hint', () => {
     g.act(g.players[0].id, {type: 'HINT', toPlayerIdx: 1, is: 'A'})
 
     expect(
-      (g.COMPAT_getRefinedTurnState(g.players[0].id)
+      (g.COMPAT_getRefinedMaskedTurnState(g.players[0].id)
         .maskedPlayerViews[1] as COMPAT_TMaskedOtherPlayerViewState).extraMysticalHand.map(c => c.hints),
     ).toEqual([
       [{is: 'A', result: false, turnNumber: 0}],

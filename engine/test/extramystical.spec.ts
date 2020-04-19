@@ -13,7 +13,7 @@ function newGame(deck: string) {
 }
 
 function getExtraMysticalHand(g: Game, ofPlayerIdx: number, asSeenByPlayerIdx: number) {
-  return (g.COMPAT_getRefinedTurnState(g.players[asSeenByPlayerIdx].id).maskedPlayerViews[ofPlayerIdx] as any)
+  return (g.COMPAT_getRefinedMaskedTurnState(g.players[asSeenByPlayerIdx].id).maskedPlayerViews[ofPlayerIdx] as any)
     .extraMysticalHand as TMaskedPlayerViewState
 }
 
@@ -100,7 +100,7 @@ describe('A three-player game', () => {
     g.act(g.players[0].id, {type: 'DISCARD', cardIdx: 0})
 
     expect(
-      (g.COMPAT_getRefinedTurnState(g.players[1].id).maskedPlayerViews[0].hand as TCardState[])
+      (g.COMPAT_getRefinedMaskedTurnState(g.players[1].id).maskedPlayerViews[0].hand as TCardState[])
         .map(c => c.color + c.num)
         .join(','),
     ).toEqual('B1,C1,D1,E1,X5')
@@ -124,7 +124,7 @@ describe('A three-player game', () => {
     g.act(g.players[2].id, {type: 'HINT', toPlayerIdx: 0, is: 'A'})
 
     // Now p0 knows they have A5/X5, and they see p2's A5, so it must be X5.
-    expect(g.COMPAT_getRefinedTurnState(g.players[0].id).maskedPlayerViews[0].hand[4]).toEqual({
+    expect(g.COMPAT_getRefinedMaskedTurnState(g.players[0].id).maskedPlayerViews[0].hand[4]).toEqual({
       actionability: 'UNDISCARDABLE',
       color: 'X',
       num: 5,
@@ -163,7 +163,7 @@ describe('Another three-player game', () => {
     // p2 knows they have a 5.
     expect(
       g
-        .COMPAT_getRefinedTurnState(g.players[0].id)
+        .COMPAT_getRefinedMaskedTurnState(g.players[0].id)
         .maskedPlayerViews[0].hand.slice(0, 2)
         .map(c => c.possibleCards),
     ).toEqual([
@@ -231,7 +231,7 @@ describe('Third three-player game', () => {
     // Now, p0 knows they have D2/E2/E2 or D2/D2/E2 in some order.
     expect(
       g
-        .COMPAT_getRefinedTurnState(g.players[0].id)
+        .COMPAT_getRefinedMaskedTurnState(g.players[0].id)
         .maskedPlayerViews[0].hand.slice(0, 3)
         .map(c => c.possibleCards),
     ).toEqual([

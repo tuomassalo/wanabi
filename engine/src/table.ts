@@ -20,6 +20,11 @@ export class Table {
     // NB: why does fromEntries need `as`
     return Object.fromEntries(Object.entries(this.table).map(([c, pile]) => [c, pile.toJSON()])) as TTableState
   }
+  getCards(): Card[] {
+    return Object.values(this.table)
+      .map(p => p.cards)
+      .flat()
+  }
   has(card: Card) {
     return this.table[card.color].size >= card.num
   }

@@ -53,11 +53,12 @@ export class Hand {
 export class MaskedPlayerView {
   isMe: boolean
   hand: MaskedCard[]
+  extraMysticalHand?: MaskedCard[]
   constructor(s: TMaskedPlayerViewState) {
     this.hand = s.hand.map(c => new MaskedCard(c))
     this.isMe = s.isMe
   }
   toJSON(): TMaskedPlayerViewState {
-    return {hand: this.hand.map(c => c.toJSON()), isMe: this.isMe}
+    return {hand: this.hand.map(c => c.toJSON()), isMe: this.isMe, extraMysticalHand: this.extraMysticalHand}
   }
 }

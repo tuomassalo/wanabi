@@ -143,6 +143,18 @@ export default function WGame({game}: {game: engine.MaskedGame}) {
             )
           const highlightLatestHint = action.type === 'HINT' && action.toPlayerIdx === idx
 
+          const getExtraMysticalHand = () => {
+            if (phv.extraMysticalHand) {
+              if (state.speculativeHint) {
+                refineCards(game, game.currentTurn)
+              } else {
+                return refineCards(game, phv.extraMysticalHand.cards)
+              }
+            } else {
+              return []
+            }
+          }
+
           return (
             <div key={idx} className={`WPlayer ${idx === inTurn ? 'WPlayer-inturn' : ''}`}>
               <h3>
@@ -160,7 +172,7 @@ export default function WGame({game}: {game: engine.MaskedGame}) {
               ) : (
                 <WOtherHand
                   cards={refineCards(game, phv.hand.cards)}
-                  extraMysticalHand={phv.extraMysticalHand ? refineCards(game, phv.extraMysticalHand.cards) : []}
+                  extraMysticalHand={getExtraMysticalHand()}
                   playerIdx={idx}
                   hintsAvailable={hintCount > 0}
                   highlightLatestHint={highlightLatestHint}

@@ -1,5 +1,5 @@
 import {createDeck} from './helpers'
-import {Game} from '../src/game'
+import {Game, MaskedTurn} from '../src/game'
 
 function createTestGame() {
   const g = new Game({
@@ -32,11 +32,11 @@ function createTestGame() {
 describe('History', () => {
   it('should show previous turns correctly for p0', () => {
     const g = createTestGame()
-    const turns1 = g.getPreviousTurns(g.players[0].id)
+    const turns1 = g.getPreviousTurns(g.players[0].id).map(t => new MaskedTurn(t, g.players).getRefinedState())
 
-    const turns2 = new Game({game: JSON.parse(JSON.stringify(g)), from: 'SERIALIZED_GAME'}).getPreviousTurns(
-      g.players[0].id,
-    )
+    const turns2 = new Game({game: JSON.parse(JSON.stringify(g)), from: 'SERIALIZED_GAME'})
+      .getPreviousTurns(g.players[0].id)
+      .map(t => new MaskedTurn(t, g.players).getRefinedState())
 
     for (const turns of [turns1, turns2]) {
       expect(turns[0]).toEqual({
@@ -199,7 +199,7 @@ describe('History', () => {
 
   it('should show previous turns correctly for p1', () => {
     const g = createTestGame()
-    const turns = g.getPreviousTurns(g.players[1].id)
+    const turns = g.getPreviousTurns(g.players[1].id).map(t => new MaskedTurn(t, g.players).getRefinedState())
 
     expect(turns[0]).toEqual({
       action: {type: 'START'},

@@ -284,7 +284,7 @@ export class Turn extends BaseTurn {
   }
 }
 export class MaskedTurn extends BaseTurn {
-  maskedPlayerViews: TMaskedPlayerViewState[]
+  maskedPlayerViews: MaskedPlayerView[]
   stockSize: number
   constructor(state: TMaskedTurnState, players: TPlayerState[]) {
     super(state, players)
@@ -293,6 +293,28 @@ export class MaskedTurn extends BaseTurn {
   }
   get inTurn() {
     return this.turnNumber % this._players.length
+  }
+
+  getRefinedState(): TRefinedMaskedTurnState {
+    const refined = this.maskedPlayerViews.map((_, idx) => refineHand(this, idx))
+    for (const [idx, mc] of refined.entries()) {
+      if (this.maskedPlayerViews[idx].isMe) {
+        this.maskedPlayerViews[idx].hand = mc
+      } else {
+        this.maskedPlayerViews[idx].hand = resolveActionability(
+          this.maskedPlayerViews[idx].hand.map(mc => new MaskedCard(mc)),
+          this.table,
+          this.discardPile,
+        )
+        this.maskedPlayerViews[idx].extraMysticalHand = JSON.parse(JSON.stringify(mc))
+      }
+    }
+
+    const ret = JSON.parse(JSON.stringify(this)) // remove undefined values
+    ret.inTurn = this.inTurn
+    ret.score = this.score
+    delete ret._players
+    return ret
   }
 }
 
@@ -323,27 +345,23 @@ const defaultTurn0Properties = {
   inTurn: 0,
 }
 
-function refineHand(turn: TMaskedTurnState, getMaskedHandIdx: number): MaskedCard[] {
+function refineHand(turn: MaskedTurn, getMaskedHandIdx: number): MaskedCard[] {
   // NB: turn does not include own hand cards that are resolved
   const getRevealedCards = (...excludePlayerIndices: number[]): Card[] =>
     [
       // discard pile
-      turn.discardPile.map(c => new Card(c)),
+      turn.discardPile.cards,
       // table
-      Object.values(turn.table)
-        .flat()
-        .map(c => new Card(c)), // TODO: does it have 'em all or just the top one per pile?
+      turn.table.getCards(),
       // hands of other players
-      turn.maskedPlayerViews
-        .filter((_, idx) => !excludePlayerIndices.includes(idx))
-        .flatMap(mh => mh.hand.map(mc => new Card({color: mc.color as TColor, num: mc.num as TNum}))),
+      turn.maskedPlayerViews.filter((_, idx) => !excludePlayerIndices.includes(idx)).flatMap(mh => mh.hand),
     ].flat()
 
   const meIdx = turn.maskedPlayerViews.findIndex(mh => mh.isMe) as number
   const {hand} = turn.maskedPlayerViews[getMaskedHandIdx]
 
   const [myDemystifiedHand, myCardsRevealedToMe] = demystify(
-    hand.map(c => new MaskedCard({hints: c.hints})),
+    hand.map(c => new MaskedCard({hints: c.hints})), // remove all existing derived information
     getRevealedCards(meIdx),
   )
   // console.warn('mDH', ...myDemystifiedHand)
@@ -375,14 +393,11 @@ function refineHand(turn: TMaskedTurnState, getMaskedHandIdx: number): MaskedCar
     )[0]
   }
 
-  const table = new Table(turn.table)
-  const discardPile = new Pile(turn.discardPile)
-
   if (turn.maskedPlayerViews[getMaskedHandIdx].isMe) {
-    return resolveActionability(myDemystifiedHand, table, discardPile)
+    return resolveActionability(myDemystifiedHand, turn.table, turn.discardPile)
   } else {
     // mystery view
-    return resolveActionability(demystifyOtherHand(), table, discardPile)
+    return resolveActionability(demystifyOtherHand(), turn.table, turn.discardPile)
   }
 }
 
@@ -708,24 +723,15 @@ export class Game {
   }
 
   // just for the engine tests
-  COMPAT_getRefinedTurnState(playerId: TPlayerId): TRefinedMaskedTurnState {
-    const ret = this.currentTurn.getState(playerId) as TRefinedMaskedTurnState
+  COMPAT_getRefinedMaskedTurnState(playerId: TPlayerId): TRefinedMaskedTurnState {
+    const maskedGame = new MaskedGame({
+      gameId: this.gameId,
+      currentTurn: this.currentTurn.getState(playerId),
+      playedActions: [], // this.turns.map(t => ({action: t.action, timestamp: t.timestamp})),
+      players: this.players.map(p => ({...p.toJSON(), id: p.id === playerId ? p.id : 'REDACTED'})),
+    })
 
-    const refined = ret.maskedPlayerViews.map((_, idx) => refineHand(ret as TMaskedTurnState, idx))
-    for (const [idx, mc] of refined.entries()) {
-      if (ret.maskedPlayerViews[idx].isMe) {
-        ret.maskedPlayerViews[idx].hand = mc
-      } else {
-        ret.maskedPlayerViews[idx].hand = resolveActionability(
-          ret.maskedPlayerViews[idx].hand.map(mc => new MaskedCard(mc)),
-          this.currentTurn.table,
-          this.currentTurn.discardPile,
-        )
-        ret.maskedPlayerViews[idx].extraMysticalHand = mc
-      }
-    }
-    // remove undefined values
-    return JSON.parse(JSON.stringify(ret))
+    return maskedGame.currentTurn.getRefinedState()
   }
 
   // this returns information that is public for a player
