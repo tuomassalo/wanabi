@@ -72,3 +72,10 @@ export function resolveActionability(myHand: MaskedCard[], table: Table, discard
 
   return myHand
 }
+
+export function resolveActionabilityD(...args: any) {
+  console.warn('CALLING', ...args)
+  const ret = resolveActionability.apply(null, args)
+  console.warn('RETURNING', ret)
+  return ret
+}

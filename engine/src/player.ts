@@ -1,4 +1,4 @@
-import {MaskedHand} from './hand'
+import {MaskedPlayerView} from './hand'
 import {TMaskedCardState, MaskedCard} from './card'
 
 export type TPlayerId = string
@@ -9,17 +9,6 @@ export interface TPlayerState {
   isConnected: boolean
   id: TPlayerId // NB: might be redacted
 }
-
-export interface TMePlayerHandViewState {
-  isMe: true
-  hand: TMaskedCardState[]
-}
-export interface TOtherPlayerHandViewState {
-  isMe: false
-  hand: TMaskedCardState[] // actually, it's complete, not masked, but this is for type simplicity
-  extraMysticalHand: TMaskedCardState[]
-}
-export type TPlayerHandViewState = TMePlayerHandViewState | TOtherPlayerHandViewState
 
 export class Player {
   name: string
@@ -44,59 +33,59 @@ export class Player {
   }
 }
 
-export class PlayerHandView {
-  hand: MaskedHand
-  isMe: boolean
-  extraMysticalHand?: MaskedHand
-  constructor(p: TPlayerHandViewState) {
-    // this.idx = p.idx
-    // this.name = p.name
-    this.hand = new MaskedHand(p.hand)
-    // this.id = p.id
-    this.isMe = p.isMe
-    // this.isConnected = p.isConnected
-    if (!p.isMe) this.extraMysticalHand = new MaskedHand(p.extraMysticalHand)
-  }
-  static meFromPlayer(hand: TMaskedCardState[]): PlayerHandView {
-    return new PlayerHandView({
-      hand,
-      isMe: true,
-    })
-  }
-  static otherFromPlayer(hand: MaskedCard[], extraMysticalHand: TMaskedCardState[]): PlayerHandView {
-    //
-    // hand.forEach((c, i) => {
-    //   c.possibleCards = demystifiedHand[i].possibleCards
-    // })
+// export class PlayerHandView {
+//   hand: MaskedPlayerView
+//   isMe: boolean
+//   extraMysticalHand?: MaskedPlayerView
+//   constructor(p: TPlayerHandViewState) {
+//     // this.idx = p.idx
+//     // this.name = p.name
+//     this.hand = new MaskedPlayerView(p.hand)
+//     // this.id = p.id
+//     this.isMe = p.isMe
+//     // this.isConnected = p.isConnected
+//     if (!p.isMe) this.extraMysticalHand = new MaskedPlayerView(p.extraMysticalHand)
+//   }
+//   static meFromPlayer(hand: TMaskedCardState[]): PlayerHandView {
+//     return new PlayerHandView({
+//       hand,
+//       isMe: true,
+//     })
+//   }
+//   static otherFromPlayer(hand: MaskedCard[], extraMysticalHand: TMaskedCardState[]): PlayerHandView {
+//     //
+//     // hand.forEach((c, i) => {
+//     //   c.possibleCards = demystifiedHand[i].possibleCards
+//     // })
 
-    return new PlayerHandView({
-      hand,
-      isMe: false,
-      extraMysticalHand,
-    })
-  }
-  static outsiderFromPlayer(p: Player): PlayerHandView {
-    return new PlayerHandView({
-      ...p,
-      hand: [], // look, no hand(s)
-      isMe: false,
-      extraMysticalHand: [],
-    })
-  }
-  toJSON(): TPlayerHandViewState {
-    return this.isMe
-      ? {
-          // name: this.name,
-          hand: this.hand.toJSON(),
-          // idx: this.idx,
-          isMe: true,
-        }
-      : {
-          // name: this.name,
-          hand: this.hand.toJSON(),
-          // idx: this.idx,
-          isMe: false,
-          extraMysticalHand: (this.extraMysticalHand as MaskedHand).toJSON(),
-        }
-  }
-}
+//     return new PlayerHandView({
+//       hand,
+//       isMe: false,
+//       extraMysticalHand,
+//     })
+//   }
+//   static outsiderFromPlayer(p: Player): PlayerHandView {
+//     return new PlayerHandView({
+//       ...p,
+//       hand: [], // look, no hand(s)
+//       isMe: false,
+//       extraMysticalHand: [],
+//     })
+//   }
+//   toJSON(): TPlayerHandViewState {
+//     return this.isMe
+//       ? {
+//           // name: this.name,
+//           hand: this.hand.toJSON(),
+//           // idx: this.idx,
+//           isMe: true,
+//         }
+//       : {
+//           // name: this.name,
+//           hand: this.hand.toJSON(),
+//           // idx: this.idx,
+//           isMe: false,
+//           extraMysticalHand: (this.extraMysticalHand as MaskedPlayerView).toJSON(),
+//         }
+//   }
+// }

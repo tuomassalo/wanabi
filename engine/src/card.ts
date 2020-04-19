@@ -87,6 +87,12 @@ export class Card extends BaseCard {
     }
   }
   matchesHints(hints: THintResultState[]) {
+    // console.warn(
+    //   'MATCHESHINTS',
+    //   hints,
+    //   this.value,
+    //   hints.every(h => (h.result ? this.looksLike(h.is) : !this.looksLike(h.is))),
+    // )
     return hints.every(h => (h.result ? this.looksLike(h.is) : !this.looksLike(h.is)))
   }
   equals(subject: Card) {

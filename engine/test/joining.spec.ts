@@ -6,14 +6,14 @@ describe('A new empty game', () => {
   let pg: Game, pg2: Game
   it('should look emptyish with only one player', () => {
     pg = Game.createPendingGame('Athos', 'bogus_id_athos')
-    expect(pg.getTurnState(pg.players[0].id)).toEqual({
+    expect(pg.COMPAT_getRefinedTurnState(pg.players[0].id)).toEqual({
       action: {
         type: 'START',
       },
       discardPile: [],
       hintCount: 9,
       inTurn: 0,
-      playerHandViews: [
+      maskedPlayerViews: [
         {
           isMe: true,
           hand: [],
@@ -31,12 +31,12 @@ describe('A new empty game', () => {
   })
   it('should accept more players', () => {
     pg2 = Game.joinPendingGame(pg, 'Porthos', 'bogus_id_porthos')
-    expect(pg2.getTurnState(pg2.players[0].id)).toEqual({
+    expect(pg2.COMPAT_getRefinedTurnState(pg2.players[0].id)).toEqual({
       action: {type: 'START'},
       discardPile: [],
       hintCount: 9,
       inTurn: 0,
-      playerHandViews: [
+      maskedPlayerViews: [
         {
           hand: [],
           isMe: true,
@@ -59,12 +59,12 @@ describe('A new empty game', () => {
   })
   it('should start when starting it', () => {
     const g = Game.startPendingGame(pg2)
-    expect(g.getTurnState(g.players[0].id)).toEqual({
+    expect(g.COMPAT_getRefinedTurnState(g.players[0].id)).toEqual({
       action: {type: 'START'},
       discardPile: [],
       hintCount: 9,
       inTurn: 0,
-      playerHandViews: [
+      maskedPlayerViews: [
         {
           isMe: true,
           hand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],

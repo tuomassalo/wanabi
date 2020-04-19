@@ -12,7 +12,7 @@ describe('A perfect two-player game without any hints or discards', () => {
     ),
   })
   it('should have correct setup', () => {
-    expect(g.getTurnState(g.players[0].id)).toEqual({
+    expect(g.COMPAT_getRefinedTurnState(g.players[0].id)).toEqual({
       // gameId: jasmine.any(String),
       timestamp: jasmine.any(String),
       action: {type: 'START'},
@@ -26,7 +26,7 @@ describe('A perfect two-player game without any hints or discards', () => {
       turnsLeft: null,
       score: 0,
       status: 'RUNNING',
-      playerHandViews: [
+      maskedPlayerViews: [
         {
           isMe: true,
           hand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
@@ -47,7 +47,7 @@ describe('A perfect two-player game without any hints or discards', () => {
   })
   it('should properly alter state after playing a card', () => {
     g.act(g.players[0].id, {type: 'PLAY', cardIdx: 0})
-    expect(g.getTurnState(g.players[1].id)).toEqual({
+    expect(g.COMPAT_getRefinedTurnState(g.players[1].id)).toEqual({
       // gameId: jasmine.any(String),
       timestamp: jasmine.any(String),
       action: {type: 'PLAY', cardIdx: 0, card: 'A1', success: true},
@@ -61,7 +61,7 @@ describe('A perfect two-player game without any hints or discards', () => {
       turnsLeft: null,
       score: 1,
       status: 'RUNNING',
-      playerHandViews: [
+      maskedPlayerViews: [
         {
           isMe: false,
           hand: [
@@ -85,7 +85,7 @@ describe('A perfect two-player game without any hints or discards', () => {
     for (let i = 1; i <= 28; i++) {
       g.act(g.players[i % 2].id, {type: 'PLAY', cardIdx: 0})
     }
-    expect(g.getTurnState(g.players[1].id)).toEqual({
+    expect(g.COMPAT_getRefinedTurnState(g.players[1].id)).toEqual({
       // gameId: jasmine.any(String),
       timestamp: jasmine.any(String),
       action: jasmine.any(Object),
@@ -106,7 +106,7 @@ describe('A perfect two-player game without any hints or discards', () => {
       turnsLeft: null,
       score: 29,
       status: 'RUNNING',
-      playerHandViews: [
+      maskedPlayerViews: [
         {
           isMe: false,
           hand: [knownCard(), knownCard(), knownCard(), knownCard(), knownCard()],
@@ -121,7 +121,7 @@ describe('A perfect two-player game without any hints or discards', () => {
   })
   it('should finish after the last card has been played', () => {
     g.act(g.players[1].id, {type: 'PLAY', cardIdx: 0})
-    expect(g.getTurnState(g.players[1].id)).toEqual({
+    expect(g.COMPAT_getRefinedTurnState(g.players[1].id)).toEqual({
       // gameId: jasmine.any(String),
       timestamp: jasmine.any(String),
       action: jasmine.any(Object),
@@ -142,7 +142,7 @@ describe('A perfect two-player game without any hints or discards', () => {
       turnsLeft: null,
       score: 30,
       status: 'FINISHED',
-      playerHandViews: [
+      maskedPlayerViews: [
         {
           isMe: false,
           hand: [knownCard(), knownCard(), knownCard(), knownCard(), knownCard()],

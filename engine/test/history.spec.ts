@@ -44,7 +44,7 @@ describe('History', () => {
         discardPile: [],
         hintCount: 9,
         inTurn: 0,
-        playerHandViews: [
+        maskedPlayerViews: [
           {hand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}], isMe: true},
           {
             extraMysticalHand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
@@ -73,7 +73,7 @@ describe('History', () => {
         discardPile: [],
         hintCount: 8,
         inTurn: 1,
-        playerHandViews: [
+        maskedPlayerViews: [
           {hand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}], isMe: true},
           {
             extraMysticalHand: [
@@ -143,7 +143,7 @@ describe('History', () => {
         discardPile: [],
         hintCount: 8,
         inTurn: 0,
-        playerHandViews: [
+        maskedPlayerViews: [
           {hand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}], isMe: true},
           {
             extraMysticalHand: [
@@ -206,7 +206,7 @@ describe('History', () => {
       discardPile: [],
       hintCount: 9,
       inTurn: 0,
-      playerHandViews: [
+      maskedPlayerViews: [
         {
           extraMysticalHand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
           hand: [
@@ -234,7 +234,7 @@ describe('History', () => {
       discardPile: [],
       hintCount: 8,
       inTurn: 1,
-      playerHandViews: [
+      maskedPlayerViews: [
         {
           extraMysticalHand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
           hand: [
@@ -307,7 +307,7 @@ describe('History', () => {
       discardPile: [],
       hintCount: 8,
       inTurn: 0,
-      playerHandViews: [
+      maskedPlayerViews: [
         {
           extraMysticalHand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
           hand: [

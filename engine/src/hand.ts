@@ -3,7 +3,17 @@ import {GameError} from './errors'
 import {Pile} from './pile'
 
 export type THandState = TCardState[]
-export type TMaskedHandState = TMaskedCardState[]
+
+export interface TMaskedPlayerViewState {
+  isMe: boolean
+  hand: TMaskedCardState[]
+  extraMysticalHand?: TMaskedCardState[]
+}
+export interface COMPAT_TMaskedOtherPlayerViewState {
+  isMe: boolean
+  hand: TMaskedCardState[]
+  extraMysticalHand: TMaskedCardState[]
+}
 
 export class Hand {
   cards: Card[]
@@ -40,12 +50,14 @@ export class Hand {
 }
 
 // readonly class
-export class MaskedHand {
-  cards: MaskedCard[]
-  constructor(cards: (MaskedCard | TMaskedCardState)[]) {
-    this.cards = cards.map(c => new MaskedCard(c))
+export class MaskedPlayerView {
+  isMe: boolean
+  hand: MaskedCard[]
+  constructor(s: TMaskedPlayerViewState) {
+    this.hand = s.hand.map(c => new MaskedCard(c))
+    this.isMe = s.isMe
   }
-  toJSON(): TMaskedHandState {
-    return this.cards.map(c => c.toJSON())
+  toJSON(): TMaskedPlayerViewState {
+    return {hand: this.hand.map(c => c.toJSON()), isMe: this.isMe}
   }
 }

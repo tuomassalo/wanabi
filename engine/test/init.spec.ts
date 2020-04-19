@@ -8,7 +8,7 @@ describe('A three-player game without any moves', () => {
     expect(g.currentTurn.stock.size).toEqual((3 + 2 + 2 + 2 + 1) * 6 - 3 * 5)
   })
   it('should have correct setup', () => {
-    expect(g.getTurnState(g.players[0].id)).toEqual({
+    expect(g.COMPAT_getRefinedTurnState(g.players[0].id)).toEqual({
       // gameId: jasmine.any(String),
       timestamp: jasmine.any(String),
       action: {type: 'START'},
@@ -22,7 +22,7 @@ describe('A three-player game without any moves', () => {
       turnsLeft: null,
       score: 0,
       status: 'RUNNING',
-      playerHandViews: [
+      maskedPlayerViews: [
         {
           isMe: true,
           hand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
@@ -52,7 +52,7 @@ describe('A three-player game with a custom deck', () => {
     expect(g.currentTurn.stock.size).toEqual((3 + 2 + 2 + 2 + 1) * 6 - 3 * 5)
   })
   it('should have correct setup', () => {
-    expect(g.getTurnState(g.players[0].id)).toEqual({
+    expect(g.COMPAT_getRefinedTurnState(g.players[0].id)).toEqual({
       // gameId: jasmine.any(String),
       timestamp: jasmine.any(String),
       action: {type: 'START'},
@@ -66,7 +66,7 @@ describe('A three-player game with a custom deck', () => {
       score: 0,
       status: 'RUNNING',
       table: {A: [], B: [], C: [], D: [], E: [], X: []},
-      playerHandViews: [
+      maskedPlayerViews: [
         {
           isMe: true,
           hand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
