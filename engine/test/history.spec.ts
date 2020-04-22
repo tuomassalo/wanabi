@@ -32,11 +32,11 @@ function createTestGame() {
 describe('History', () => {
   it('should show previous turns correctly for p0', () => {
     const g = createTestGame()
-    const turns1 = g.getPreviousTurns(g.players[0].id).map(t => new MaskedTurn(t, g.players).getRefinedState())
+    const turns1 = g.getPreviousTurns(g.players[0].id).map(t => new MaskedTurn(t, g.players).getState())
 
     const turns2 = new Game({game: JSON.parse(JSON.stringify(g)), from: 'SERIALIZED_GAME'})
       .getPreviousTurns(g.players[0].id)
-      .map(t => new MaskedTurn(t, g.players).getRefinedState())
+      .map(t => new MaskedTurn(t, g.players).getState())
 
     for (const turns of [turns1, turns2]) {
       expect(turns[0]).toEqual({
@@ -199,7 +199,7 @@ describe('History', () => {
 
   it('should show previous turns correctly for p1', () => {
     const g = createTestGame()
-    const turns = g.getPreviousTurns(g.players[1].id).map(t => new MaskedTurn(t, g.players).getRefinedState())
+    const turns = g.getPreviousTurns(g.players[1].id).map(t => new MaskedTurn(t, g.players).getState())
 
     expect(turns[0]).toEqual({
       action: {type: 'START'},

@@ -36,7 +36,7 @@ export const Wsclient = () => {
     // console.warn('WSSM', data)
 
     if (data.msg === 'M_GameState') {
-      // const activeGameState = data.games.find(g => g.currentTurn.playerHandViews.some(phv => phv.isMe))
+      // const activeGameState = data.games.find(g => g.currentTurn.maskedPlayerViews.some(phv => phv.isMe))
 
       // if (activeGameState) {
       // A game was found with this connection.
@@ -53,7 +53,7 @@ export const Wsclient = () => {
           //  turn change, not when joining or if someone disconnects/reconnects
           if (
             currentTurn.status === 'RUNNING' &&
-            currentTurn.playerHandViews[currentTurn.inTurn].isMe &&
+            currentTurn.maskedPlayerViews[currentTurn.inTurn].isMe &&
             localStorage.getItem('sound') === '1'
           ) {
             const myTurnSound = new Audio('myturn.mp3')
@@ -84,7 +84,7 @@ export const Wsclient = () => {
 
         setRejoinParams({
           gameId: game.gameId,
-          playerIdx: currentTurn.playerHandViews.findIndex(phv => phv.isMe),
+          playerIdx: currentTurn.maskedPlayerViews.findIndex(phv => phv.isMe),
         })
 
         dispatch({type: 'SET_GAME', game})

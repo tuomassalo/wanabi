@@ -290,12 +290,8 @@ export class MaskedTurn extends BaseTurn {
     super(state, players)
     this.maskedPlayerViews = state.maskedPlayerViews.map(p => new MaskedPlayerView(p))
     this.stockSize = state.stockSize
-  }
-  get inTurn() {
-    return this.turnNumber % this._players.length
-  }
 
-  getRefinedState(): TRefinedMaskedTurnState {
+    // refine
     const refined = this.maskedPlayerViews.map((_, idx) => refineHand(this, idx))
     for (const [idx, mc] of refined.entries()) {
       if (this.maskedPlayerViews[idx].isMe) {
@@ -306,10 +302,15 @@ export class MaskedTurn extends BaseTurn {
           this.table,
           this.discardPile,
         )
-        this.maskedPlayerViews[idx].extraMysticalHand = JSON.parse(JSON.stringify(mc))
+        this.maskedPlayerViews[idx].extraMysticalHand = mc
       }
     }
+  }
+  get inTurn() {
+    return this.turnNumber % this._players.length
+  }
 
+  getState(): TRefinedMaskedTurnState {
     const ret = JSON.parse(JSON.stringify(this)) // remove undefined values
     ret.inTurn = this.inTurn
     ret.score = this.score
@@ -731,7 +732,7 @@ export class Game {
       players: this.players.map(p => ({...p.toJSON(), id: p.id === playerId ? p.id : 'REDACTED'})),
     })
 
-    return maskedGame.currentTurn.getRefinedState()
+    return maskedGame.currentTurn.getState()
   }
 
   // this returns information that is public for a player

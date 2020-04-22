@@ -55,7 +55,7 @@ export default function WGame({game}: {game: engine.MaskedGame}) {
     status,
     score,
     table,
-    playerHandViews,
+    maskedPlayerViews,
     stockSize,
     discardPile,
     woundCount,
@@ -64,12 +64,12 @@ export default function WGame({game}: {game: engine.MaskedGame}) {
     inTurn,
     // turnNumber,
   } = visibleTurn
-  // console.warn({vtn: state.visibleTurnNumber, visibleTurn, inTurn, playerHandViews})
+  // console.warn({vtn: state.visibleTurnNumber, visibleTurn, inTurn, maskedPlayerViews})
   // ;(window as any).g = game // for debugging
   const {players} = game
   let gameStatusClass: string = ''
   if (status === 'RUNNING') {
-    if (playerHandViews[inTurn].isMe && visibleTurn === game.currentTurn) {
+    if (maskedPlayerViews[inTurn].isMe && visibleTurn === game.currentTurn) {
       gameStatusClass = ' WGameStatus-myturn'
     }
   } else if (status === 'GAMEOVER') {
@@ -131,7 +131,7 @@ export default function WGame({game}: {game: engine.MaskedGame}) {
           <WDiscardPile discardPile={discardPile} latestAction={action} />
           <WTable table={table} latestAction={action} />
         </div>
-        {playerHandViews.map((phv, idx) => {
+        {maskedPlayerViews.map((phv, idx) => {
           const player = players[idx]
           const getLatestActionIfByThisPlayer = () =>
             idx === (players.length + inTurn - 1) % players.length && action.type !== 'START' ? (
@@ -145,11 +145,11 @@ export default function WGame({game}: {game: engine.MaskedGame}) {
 
           const getExtraMysticalHand = () => {
             if (phv.extraMysticalHand) {
-              if (state.speculativeHint) {
-                refineCards(game, game.currentTurn)
-              } else {
-                return refineCards(game, phv.extraMysticalHand.cards)
-              }
+              // if (state.speculativeHint) {
+              // refineCards(game, game.currentTurn...)
+              // } else {
+              return refineCards(game, phv.extraMysticalHand)
+              // }
             } else {
               return []
             }
@@ -162,16 +162,12 @@ export default function WGame({game}: {game: engine.MaskedGame}) {
                 {player.isConnected ? '' : ' 🔌 '}
               </h3>
               {phv.isMe ? (
-                <WMyHand
-                  cards={refineCards(game, phv.hand.cards)}
-                  playerIdx={idx}
-                  highlightLatestHint={highlightLatestHint}
-                >
+                <WMyHand cards={refineCards(game, phv.hand)} playerIdx={idx} highlightLatestHint={highlightLatestHint}>
                   {getLatestActionIfByThisPlayer()}
                 </WMyHand>
               ) : (
                 <WOtherHand
-                  cards={refineCards(game, phv.hand.cards)}
+                  cards={refineCards(game, phv.hand)}
                   extraMysticalHand={getExtraMysticalHand()}
                   playerIdx={idx}
                   hintsAvailable={hintCount > 0}

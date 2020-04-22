@@ -51,7 +51,7 @@ import {InMenuState} from './Reducer'
 //     turnsLeft: null,
 //     score: 24,
 //     status: 'RUNNING',
-//     playerHandViews: [
+//     maskedPlayerViews: [
 //       {
 //         isMe: false,
 //         extraMysticalHand: [], // bogus

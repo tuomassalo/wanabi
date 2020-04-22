@@ -10,7 +10,7 @@ export default class WPlayerList extends React.Component<{game: MaskedGame}> {
     const rejoin = (playerIdx: number) => {
       wsclient.rejoinGame({gameId: this.props.game.gameId, playerIdx})
     }
-    const amIInThisGame = this.props.game.currentTurn.playerHandViews.some(p => p.isMe)
+    const amIInThisGame = this.props.game.currentTurn.maskedPlayerViews.some(p => p.isMe)
     return (
       <ul className="WPlayerList">
         {this.props.game.players.map(p => (
