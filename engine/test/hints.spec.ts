@@ -27,18 +27,18 @@ function createTestGame() {
 }
 
 describe('Hints', () => {
-  it('should accumulate when discarding but have a max of 9', () => {
+  it('should accumulate when discarding but have a max of ', () => {
     const g = createTestGame()
-    expect(g.COMPAT_getRefinedMaskedTurnState(g.players[0].id).hintCount).toEqual(9)
+    expect(g.COMPAT_getRefinedMaskedTurnState(g.players[0].id).hintCount).toEqual(8)
     // use two hints
     g.act(g.players[0].id, {type: 'HINT', toPlayerIdx: 1, is: 1})
     g.act(g.players[1].id, {type: 'HINT', toPlayerIdx: 0, is: 1})
-    expect(g.COMPAT_getRefinedMaskedTurnState(g.players[0].id).hintCount).toEqual(7)
+    expect(g.COMPAT_getRefinedMaskedTurnState(g.players[0].id).hintCount).toEqual(6)
     g.act(g.players[0].id, {type: 'DISCARD', cardIdx: 0})
     g.act(g.players[1].id, {type: 'DISCARD', cardIdx: 0})
-    expect(g.COMPAT_getRefinedMaskedTurnState(g.players[0].id).hintCount).toEqual(9)
+    expect(g.COMPAT_getRefinedMaskedTurnState(g.players[0].id).hintCount).toEqual(8)
     g.act(g.players[0].id, {type: 'DISCARD', cardIdx: 0})
-    expect(g.COMPAT_getRefinedMaskedTurnState(g.players[0].id).hintCount).toEqual(9)
+    expect(g.COMPAT_getRefinedMaskedTurnState(g.players[0].id).hintCount).toEqual(8)
   })
   it('should run out', () => {
     const g = createTestGame()
@@ -49,12 +49,11 @@ describe('Hints', () => {
     g.act(g.players[0].id, {type: 'HINT', toPlayerIdx: 1, is: 1})
     g.act(g.players[1].id, {type: 'HINT', toPlayerIdx: 0, is: 1})
     g.act(g.players[0].id, {type: 'HINT', toPlayerIdx: 1, is: 1})
-    g.act(g.players[1].id, {type: 'HINT', toPlayerIdx: 0, is: 1})
     expect(g.COMPAT_getRefinedMaskedTurnState(g.players[0].id).hintCount).toEqual(1)
-    g.act(g.players[0].id, {type: 'HINT', toPlayerIdx: 1, is: 1})
+    g.act(g.players[1].id, {type: 'HINT', toPlayerIdx: 0, is: 1})
     expect(g.COMPAT_getRefinedMaskedTurnState(g.players[0].id).hintCount).toEqual(0)
 
-    expect(() => g.act(g.players[1].id, {type: 'HINT', toPlayerIdx: 0, is: 1})).toThrow('NO_HINTS_LEFT')
+    expect(() => g.act(g.players[0].id, {type: 'HINT', toPlayerIdx: 1, is: 1})).toThrow('NO_HINTS_LEFT')
   })
 })
 
@@ -67,7 +66,7 @@ describe('An ongoing game', () => {
       action: jasmine.any(Object),
       stockSize: 60 - 2 * 5 - 2 * 6, // === 16
       discardPile: 'B1,A1,B1,C1,A4,B5,X1'.split(','),
-      hintCount: 9,
+      hintCount: 8,
       woundCount: 1, // one wound
       table: {
         A: 'A1,A2,A3,A4'.split(','),
@@ -92,7 +91,7 @@ describe('An ongoing game', () => {
   it('should show hints for p1', () => {
     const g = createTestGame()
     g.act(g.players[0].id, {type: 'HINT', toPlayerIdx: 1, is: 5})
-    expect(g.COMPAT_getRefinedMaskedTurnState(g.players[1].id).hintCount).toEqual(8)
+    expect(g.COMPAT_getRefinedMaskedTurnState(g.players[1].id).hintCount).toEqual(7)
     expect(g.COMPAT_getRefinedMaskedTurnState(g.players[1].id).maskedPlayerViews[1].hand).toEqual([
       {hints: [{turnNumber: 12, is: 5, result: false}]},
       {hints: [{turnNumber: 12, is: 5, result: false}]},
@@ -115,7 +114,7 @@ describe('An ongoing game', () => {
 
     // give another hint
     g.act(g.players[0].id, {type: 'HINT', toPlayerIdx: 1, is: 'B'})
-    expect(g.COMPAT_getRefinedMaskedTurnState(g.players[1].id).hintCount).toEqual(6)
+    expect(g.COMPAT_getRefinedMaskedTurnState(g.players[1].id).hintCount).toEqual(5)
 
     // still not enough hints
     expect(g.COMPAT_getRefinedMaskedTurnState(g.players[1].id).maskedPlayerViews[1].hand).toEqual([
@@ -194,7 +193,7 @@ describe('An ongoing game', () => {
     g.act(g.players[1].id, {type: 'HINT', toPlayerIdx: 0, is: 1})
 
     g.act(g.players[0].id, {type: 'HINT', toPlayerIdx: 1, is: 2})
-    expect(g.COMPAT_getRefinedMaskedTurnState(g.players[1].id).hintCount).toEqual(4)
+    expect(g.COMPAT_getRefinedMaskedTurnState(g.players[1].id).hintCount).toEqual(3)
 
     // now we have enough hints to possibly identify some cards
     expect(g.COMPAT_getRefinedMaskedTurnState(g.players[1].id).maskedPlayerViews[1].hand).toEqual([

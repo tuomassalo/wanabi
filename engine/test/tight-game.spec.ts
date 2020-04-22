@@ -32,7 +32,7 @@ describe('A tight three-player game', () => {
         .trim()
         .split(/\s+/),
       // gameId: jasmine.any(String),
-      hintCount: 9,
+      hintCount: 8,
       inTurn: 0,
       maskedPlayerViews: [
         {
@@ -159,7 +159,7 @@ describe('A tight three-player game', () => {
         `
         .trim()
         .split(/\s+/),
-      hintCount: 9,
+      hintCount: 8,
       woundCount: 0,
       table: {
         A: 'A1,A2,A3,A4,A5'.split(','),

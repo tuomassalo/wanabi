@@ -11,7 +11,7 @@ describe('A new empty game', () => {
         type: 'START',
       },
       discardPile: [],
-      hintCount: 9,
+      hintCount: 8,
       inTurn: 0,
       maskedPlayerViews: [
         {
@@ -34,7 +34,7 @@ describe('A new empty game', () => {
     expect(pg2.COMPAT_getRefinedMaskedTurnState(pg2.players[0].id)).toEqual({
       action: {type: 'START'},
       discardPile: [],
-      hintCount: 9,
+      hintCount: 8,
       inTurn: 0,
       maskedPlayerViews: [
         {
@@ -62,7 +62,7 @@ describe('A new empty game', () => {
     expect(g.COMPAT_getRefinedMaskedTurnState(g.players[0].id)).toEqual({
       action: {type: 'START'},
       discardPile: [],
-      hintCount: 9,
+      hintCount: 8,
       inTurn: 0,
       maskedPlayerViews: [
         {

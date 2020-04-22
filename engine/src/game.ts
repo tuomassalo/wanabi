@@ -336,7 +336,7 @@ const defaultTurn0Properties = {
   stock: new Pile([]).toJSON(),
   discardPile: new Pile([]).toJSON(),
   hands: [[]], // one empty hand, no hand cards yet
-  hintCount: 9,
+  hintCount: 8,
   woundCount: 0,
   turnNumber: 0,
   turnsLeft: null,
@@ -676,7 +676,7 @@ export class Game {
         const success: boolean = newTurn.table.play(card)
         if (success) {
           // Successful play:
-          if (card.num === 5 && newTurn.hintCount < 9) {
+          if (card.num === 5 && newTurn.hintCount < 8) {
             newTurn.hintCount++
           }
           if (newTurn.score === AllColors.length * AllNums.length) {
@@ -694,7 +694,7 @@ export class Game {
         newTurn.action = {...actionParams, card: card.toJSON(), success}
       } else if (actionParams.type === 'DISCARD') {
         newTurn.discardPile.add(card)
-        if (newTurn.hintCount < 9) newTurn.hintCount++
+        if (newTurn.hintCount < 8) newTurn.hintCount++
         newTurn.action = {...actionParams, card: card.toJSON()}
       }
     }

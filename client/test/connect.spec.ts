@@ -58,7 +58,7 @@ test('connect, createGame', async done => {
       currentTurn: {
         action: {type: 'START'},
         discardPile: [],
-        hintCount: 9,
+        hintCount: 8,
         inTurn: 0,
         maskedPlayerViews: [{hand: [], isMe: true}],
         score: 0,
@@ -93,7 +93,7 @@ test('getGamesState', async done => {
         currentTurn: {
           action: {type: 'START'},
           discardPile: [],
-          hintCount: 9,
+          hintCount: 8,
           inTurn: 0,
           maskedPlayerViews: [],
           score: 0,
@@ -123,7 +123,7 @@ test('joinGame', async done => {
       currentTurn: {
         action: {type: 'START'},
         discardPile: [],
-        hintCount: 9,
+        hintCount: 8,
         inTurn: 0,
         maskedPlayerViews: [
           {hand: [], isMe: false},
@@ -158,7 +158,7 @@ test('startGame', async done => {
       currentTurn: {
         action: {type: 'START'},
         discardPile: [],
-        hintCount: 9,
+        hintCount: 8,
         inTurn: 0,
         maskedPlayerViews: [
           {
@@ -205,7 +205,7 @@ test('act', async done => {
       currentTurn: {
         action: {type: 'DISCARD', card: jasmine.any(String), cardIdx: 2},
         discardPile: [jasmine.any(String)],
-        hintCount: 9,
+        hintCount: 8,
         inTurn: 1,
         maskedPlayerViews: [
           {
@@ -250,7 +250,7 @@ test('act', async done => {
       currentTurn: {
         action: {type: 'DISCARD', card: jasmine.any(String), cardIdx: 2},
         discardPile: [jasmine.any(String)],
-        hintCount: 9,
+        hintCount: 8,
         inTurn: 1,
         maskedPlayerViews: [
           {
@@ -301,7 +301,7 @@ test('An outsider sees the started game, but cannot see any hands', async done =
         currentTurn: {
           action: {type: 'DISCARD', card: jasmine.any(String), cardIdx: 2},
           discardPile: [jasmine.any(String)],
-          hintCount: 9,
+          hintCount: 8,
           inTurn: 1,
           maskedPlayerViews: [], // NB: no hands are shown
           score: 0,
@@ -378,7 +378,7 @@ test('An "outsider" can join a game if someone disconnects', async done => {
       {
         action: {type: 'START'},
         discardPile: [],
-        hintCount: 9,
+        hintCount: 8,
         inTurn: 0,
         maskedPlayerViews: [
           {

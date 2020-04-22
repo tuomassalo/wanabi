@@ -55,7 +55,7 @@ test('connect, createGame', async done => {
         action: {type: 'START'},
         discardPile: [],
         maskedPlayerViews: [{hand: [], isMe: true}],
-        hintCount: 9,
+        hintCount: 8,
         inTurn: 0,
         score: 0,
         status: 'WAITING_FOR_PLAYERS',
@@ -87,7 +87,7 @@ test('joinGame', async done => {
       currentTurn: {
         action: {type: 'START'},
         discardPile: [],
-        hintCount: 9,
+        hintCount: 8,
         inTurn: 0,
         maskedPlayerViews: [
           {hand: [], isMe: false},
@@ -122,7 +122,7 @@ test('startGame', async done => {
       currentTurn: {
         action: {type: 'START'},
         discardPile: [],
-        hintCount: 9,
+        hintCount: 8,
         inTurn: 0,
         maskedPlayerViews: [
           {

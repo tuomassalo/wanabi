@@ -42,7 +42,7 @@ describe('History', () => {
       expect(turns[0]).toEqual({
         action: {type: 'START'},
         discardPile: [],
-        hintCount: 9,
+        hintCount: 8,
         inTurn: 0,
         maskedPlayerViews: [
           {hand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}], isMe: true},
@@ -71,7 +71,7 @@ describe('History', () => {
       expect(turns[1]).toEqual({
         action: {is: 1, matches: [true, true, true, false, false], toPlayerIdx: 1, toPlayerName: 'Omega', type: 'HINT'},
         discardPile: [],
-        hintCount: 8,
+        hintCount: 7,
         inTurn: 1,
         maskedPlayerViews: [
           {hand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}], isMe: true},
@@ -141,7 +141,7 @@ describe('History', () => {
       expect(turns[2]).toEqual({
         action: {card: 'B1', cardIdx: 0, success: true, type: 'PLAY'},
         discardPile: [],
-        hintCount: 8,
+        hintCount: 7,
         inTurn: 0,
         maskedPlayerViews: [
           {hand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}], isMe: true},
@@ -204,7 +204,7 @@ describe('History', () => {
     expect(turns[0]).toEqual({
       action: {type: 'START'},
       discardPile: [],
-      hintCount: 9,
+      hintCount: 8,
       inTurn: 0,
       maskedPlayerViews: [
         {
@@ -232,7 +232,7 @@ describe('History', () => {
     expect(turns[1]).toEqual({
       action: {is: 1, matches: [true, true, true, false, false], toPlayerIdx: 1, toPlayerName: 'Omega', type: 'HINT'},
       discardPile: [],
-      hintCount: 8,
+      hintCount: 7,
       inTurn: 1,
       maskedPlayerViews: [
         {
@@ -305,7 +305,7 @@ describe('History', () => {
     expect(turns[2]).toEqual({
       action: {card: 'B1', cardIdx: 0, success: true, type: 'PLAY'},
       discardPile: [],
-      hintCount: 8,
+      hintCount: 7,
       inTurn: 0,
       maskedPlayerViews: [
         {
