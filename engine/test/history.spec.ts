@@ -1,5 +1,6 @@
 import {createDeck} from './helpers'
-import {Game, MaskedTurn} from '../src/game'
+import {Game} from '../src/game'
+import {MaskedTurn} from '../src/turn'
 
 function createTestGame() {
   const g = new Game({

@@ -1,22 +1,14 @@
 import {Pile} from './pile'
 import {Player, TPlayerId, TPlayerState} from './player'
-import {Card, TColor, TNum, AllColors, AllNums, TCardValueState, MaskedCard, TMaskedCardState} from './card'
-import {Hand, THandState, TMaskedPlayerViewState, COMPAT_TMaskedOtherPlayerViewState, MaskedPlayerView} from './hand'
+import {Card, TColor, TNum, AllColors, AllNums, TCardValueState} from './card'
+import {Hand, THandState, TMaskedPlayerViewState, COMPAT_TMaskedOtherPlayerViewState} from './hand'
 import {Table, TTableState} from './table'
 import {GameError} from './errors'
 import {randomBytes} from 'crypto'
-import {resolveActionability} from './actionability-resolver'
-import {demystify} from './demystifier'
+import {Turn} from './turn'
+import {MaskedGame} from './masked-game'
 
-// a simple function call inspector (as TS does not support non-method function decorators)
-function d(f, ...args) {
-  console.warn(`${f.name} ARGS:`, ...args)
-  const ret = f(...args)
-  console.warn(`${f.name} RETURNED`, ret)
-  return ret
-}
-
-type TGameStatus = 'WAITING_FOR_PLAYERS' | 'RUNNING' | 'GAMEOVER' | 'FINISHED'
+export type TGameStatus = 'WAITING_FOR_PLAYERS' | 'RUNNING' | 'GAMEOVER' | 'FINISHED'
 export type TGameId = string
 
 interface TPlayActionParams {
@@ -148,177 +140,6 @@ export interface M_GameState {
 
 export type WebsocketServerMessage = M_GamesState | M_GameHistory | M_GameState
 
-abstract class BaseTurn {
-  status: TGameStatus
-  action: TResolvedActionState
-  discardPile: Pile
-  hintCount: number
-  woundCount: number
-  table: Table
-  turnNumber: number
-  turnsLeft: number | null // `null` means that the countdown has not started yet.
-  timestamp: string // ISO string
-  _players: Player[]
-
-  constructor(t: TBaseTurnState, players: TPlayerState[]) {
-    this.status = t.status
-    this.action = t.action
-    this.discardPile = new Pile(t.discardPile.map(c => Card.fromValueString(c)))
-    this.hintCount = t.hintCount
-    this.woundCount = t.woundCount
-    this.table = new Table(t.table)
-    this.turnNumber = t.turnNumber
-    this.turnsLeft = typeof t.turnsLeft !== 'undefined' ? t.turnsLeft : null
-    this.timestamp = t.timestamp || new Date().toISOString()
-
-    this._players = players.map(p => new Player(p))
-  }
-  get score() {
-    return this.table.getScore()
-  }
-}
-export class Turn extends BaseTurn {
-  hands: Hand[]
-  stock: Pile
-
-  constructor(t: TTurnState, players: TPlayerState[]) {
-    super(t, players)
-    this.hands = t.hands.map(p => new Hand(p))
-    this.stock = new Pile(t.stock)
-  }
-  clone() {
-    // make a deep copy
-    return new Turn(JSON.parse(JSON.stringify(this.toJSON())), this._players)
-  }
-  get inTurn() {
-    return this.turnNumber % this._players.length
-  }
-
-  toJSON(): TTurnState {
-    return {
-      ...this,
-      _players: undefined, // not wanted
-      stock: this.stock.toJSON(),
-      discardPile: this.discardPile.toJSON(),
-      table: this.table.toJSON(),
-      hands: this.hands.map(p => p.toJSON()),
-    }
-  }
-  get stockSize() {
-    return this.stock.cards.length
-  }
-
-  // const demystifyOtherHand = (ch: Hand, playerIdx: number) => {
-  //   return demystify(
-  //     ch.cards.map(
-  //       c =>
-  //         new MaskedCard({
-  //           hints: c.hints
-  //             // speculativeHint && speculativeHint.toPlayerIdx === playerIdx
-  //             //   ? [
-  //             //       ...c.hints,
-  //             //       {
-  //             //         is: speculativeHint.is,
-  //             //         result: c.looksLike(speculativeHint.is),
-  //             //         turnNumber: 999,
-  //             //       },
-  //             //     ]
-  //             //   : c.hints,
-  //         }),
-  //     ),
-  //     [...myCardsRevealedToMe, ...getRevealedCards(meIdx, playerIdx)],
-  //   )[0]
-  // }
-
-  _getMaskedHands(meIdx: number): TMaskedPlayerViewState[] {
-    // const myHandHints = this.hands[meIdx].cards.map(c => new MaskedCard({hints: c.hints}))
-
-    // NB: this does not include own hand cards that are resolved
-    // const getRevealedCards = (...excludePlayerIndices: number[]) =>
-    //   [
-    //     // discard pile
-    //     this.discardPile.cards,
-    //     // table
-    //     Object.values(this.table.table).flatMap(pile => pile.cards),
-    //     // hands of other players
-    //     this._players
-    //       .filter(p => !excludePlayerIndices.includes(p.idx))
-    //       .flatMap(p => this.hands[p.idx].cards.map(hc => new Card(hc))),
-    //   ].flat()
-
-    // const [myDemystifiedHand, myCardsRevealedToMe] = demystify(myHandHints, getRevealedCards(meIdx))
-
-    return this.hands.map((ch, idx) =>
-      idx === meIdx
-        ? {
-            isMe: true,
-            hand: ch.cards.map(c => new MaskedCard({hints: c.hints})),
-          }
-        : {
-            isMe: false,
-            hand: ch.cards.map(c => new MaskedCard({color: c.color, num: c.num, hints: c.hints})),
-          },
-    )
-  }
-
-  getState(forPlayerId: TPlayerId): TMaskedTurnState {
-    const me = this._players.find(p => p.id === forPlayerId)
-    const isOutsider = !me
-
-    return JSON.parse(
-      JSON.stringify({
-        ...this.toJSON(),
-        /// remove these:
-        _players: undefined,
-        hands: undefined,
-        stock: undefined,
-        ///
-        stockSize: this.stock.size,
-        inTurn: this.inTurn,
-        score: this.score,
-        maskedPlayerViews: isOutsider
-          ? [] // this.players.map(p => MaskedPlayer.outsiderFromPlayer(p))
-          : this._getMaskedHands((me as Player).idx),
-      }),
-    )
-  }
-}
-export class MaskedTurn extends BaseTurn {
-  maskedPlayerViews: MaskedPlayerView[]
-  stockSize: number
-  constructor(state: TMaskedTurnState, players: TPlayerState[]) {
-    super(state, players)
-    this.maskedPlayerViews = state.maskedPlayerViews.map(p => new MaskedPlayerView(p))
-    this.stockSize = state.stockSize
-
-    // refine
-    const refined = this.maskedPlayerViews.map((_, idx) => refineHand(this, idx))
-    for (const [idx, mc] of refined.entries()) {
-      if (this.maskedPlayerViews[idx].isMe) {
-        this.maskedPlayerViews[idx].hand = mc
-      } else {
-        this.maskedPlayerViews[idx].hand = resolveActionability(
-          this.maskedPlayerViews[idx].hand.map(mc => new MaskedCard(mc)),
-          this.table,
-          this.discardPile,
-        )
-        this.maskedPlayerViews[idx].extraMysticalHand = mc
-      }
-    }
-  }
-  get inTurn() {
-    return this.turnNumber % this._players.length
-  }
-
-  getState(): TRefinedMaskedTurnState {
-    const ret = JSON.parse(JSON.stringify(this)) // remove undefined values
-    ret.inTurn = this.inTurn
-    ret.score = this.score
-    delete ret._players
-    return ret
-  }
-}
-
 export interface TExistingGameConstructor {
   from: 'SERIALIZED_GAME'
   game: TCompleteGameState
@@ -346,81 +167,6 @@ const defaultTurn0Properties = {
   inTurn: 0,
 }
 
-function refineHand(turn: MaskedTurn, getMaskedHandIdx: number): MaskedCard[] {
-  // NB: turn does not include own hand cards that are resolved
-  const getRevealedCards = (...excludePlayerIndices: number[]): Card[] =>
-    [
-      // discard pile
-      turn.discardPile.cards,
-      // table
-      turn.table.getCards(),
-      // hands of other players
-      turn.maskedPlayerViews.filter((_, idx) => !excludePlayerIndices.includes(idx)).flatMap(mh => mh.hand),
-    ].flat()
-
-  const meIdx = turn.maskedPlayerViews.findIndex(mh => mh.isMe) as number
-  const {hand} = turn.maskedPlayerViews[getMaskedHandIdx]
-
-  const [myDemystifiedHand, myCardsRevealedToMe] = demystify(
-    hand.map(c => new MaskedCard({hints: c.hints})), // remove all existing derived information
-    getRevealedCards(meIdx),
-  )
-  // console.warn('mDH', ...myDemystifiedHand)
-
-  const demystifyOtherHand = () => {
-    // console.warn(
-    //   111,
-    //   hand.map(c => c.hints),
-    // )
-    return demystify(
-      hand.map(
-        c =>
-          new MaskedCard({
-            hints:
-              // speculativeHint && speculativeHint.toPlayerIdx === playerIdx
-              //   ? [
-              //       ...c.hints,
-              //       {
-              //         is: speculativeHint.is,
-              //         result: c.looksLike(speculativeHint.is),
-              //         turnNumber: 999,
-              //       },
-              //     ]
-              // :
-              c.hints,
-          }),
-      ),
-      [...myCardsRevealedToMe, ...getRevealedCards(meIdx, getMaskedHandIdx)],
-    )[0]
-  }
-
-  if (turn.maskedPlayerViews[getMaskedHandIdx].isMe) {
-    return resolveActionability(myDemystifiedHand, turn.table, turn.discardPile)
-  } else {
-    // mystery view
-    return resolveActionability(demystifyOtherHand(), turn.table, turn.discardPile)
-  }
-}
-
-export class MaskedGame {
-  gameId: TGameId
-  players: Player[]
-  turns: MaskedTurn[]
-  constructor(maskedGameState: TMaskedGameState) {
-    this.gameId = maskedGameState.gameId
-    this.players = maskedGameState.players.map(p => new Player(p))
-
-    this.turns = []
-    this.addTurn(maskedGameState.currentTurn)
-  }
-  get currentTurn(): MaskedTurn {
-    return this.turns[this.turns.length - 1]
-  }
-  // Used by the client when receiving a new turn from the server.
-  addTurn(maskedTurn: TMaskedTurnState) {
-    this.turns[maskedTurn.turnNumber] = new MaskedTurn(maskedTurn, this.players)
-  }
-}
 export class Game {
   turns: Turn[] = []
   gameId: TGameId

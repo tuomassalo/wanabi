@@ -1,4 +1,4 @@
-import {Game, Turn} from '../src/game'
+import {Game} from '../src/game'
 
 import {knownCard} from './helpers'
 
