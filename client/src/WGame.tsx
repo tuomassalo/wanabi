@@ -80,7 +80,7 @@ export default function WGame({game}: {game: MaskedGame}) {
     gameStatusClass = ' WGameStatus-finished'
   }
 
-  const toggleSetting = (key: 'sound' | 'showStats') => {
+  const toggleSetting = (key: 'sound' | 'showStats' | 'showMysteryView') => {
     dispatch({type: 'SET_SETTING', key, value: !state.settings[key]})
   }
 
@@ -89,11 +89,7 @@ export default function WGame({game}: {game: MaskedGame}) {
       <div className="WHeader">
         <span style={{float: 'right'}}>
           <label>
-            <input
-              type="checkbox"
-              onClick={() => document.body.classList.toggle('mysteryview')}
-              id="mystery-view-checkbox"
-            />{' '}
+            <input type="checkbox" onClick={() => toggleSetting('showMysteryView')} id="mystery-view-checkbox" />{' '}
             Mystery View
           </label>
           {/* <label>
@@ -168,8 +164,13 @@ export default function WGame({game}: {game: MaskedGame}) {
                 </WMyHand>
               ) : (
                 <WOtherHand
-                  cards={refineCards(game, phv.hand)}
-                  extraMysticalHand={getExtraMysticalHand()}
+                  cards={
+                    state.speculativeMysteryView && state.speculativeMysteryView.playerIdx === idx
+                      ? JSON.parse(JSON.stringify(state.speculativeMysteryView.hand))
+                      : state.settings.showMysteryView
+                      ? getExtraMysticalHand()
+                      : refineCards(game, phv.hand)
+                  }
                   playerIdx={idx}
                   hintsAvailable={hintCount > 0}
                   highlightLatestHint={highlightLatestHint}

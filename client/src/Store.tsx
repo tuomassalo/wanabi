@@ -7,7 +7,7 @@ const initialState: AppState = {
   settings: {
     sound: localStorage.getItem('sound') === '1',
     showStats: false,
-    // mysteryView: false,
+    showMysteryView: false,
   },
 }
 
