@@ -5,7 +5,7 @@ import {knownCard} from './helpers'
 describe('A new empty game', () => {
   let pg: Game, pg2: Game
   it('should look emptyish with only one player', () => {
-    pg = Game.createPendingGame('Athos', 'bogus_id_athos')
+    pg = Game.createPendingGame({firstPlayerName: 'Athos'}, 'bogus_id_athos')
     expect(pg.COMPAT_getRefinedMaskedTurnState(pg.players[0].id)).toEqual({
       action: {
         type: 'START',

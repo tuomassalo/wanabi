@@ -30,7 +30,7 @@ interface TStartActionParams {
   type: 'START'
 }
 
-type TActionParams = TPlayActionParams | TDiscardActionParams | THintActionParams | TStartActionParams
+export type TActionParams = TPlayActionParams | TDiscardActionParams | THintActionParams | TStartActionParams
 type TPlayableActionParams = TPlayActionParams | TDiscardActionParams | THintActionParams
 
 interface TResolvedStartActionState extends TStartActionParams {} // added by the constructor
@@ -86,6 +86,7 @@ export interface WS_getGamesStateParams {}
 // }
 export interface WS_createGameParams {
   firstPlayerName: string
+  seed?: string
 }
 export interface WS_startGameParams {
   gameId: TGameId
@@ -296,9 +297,9 @@ export class Game {
     return handSize
   }
 
-  static createPendingGame(firstPlayerName: string, firstPlayerId: TPlayerId): Game {
+  static createPendingGame(params: WS_createGameParams, firstPlayerId: TPlayerId): Game {
     const timestamp = new Date().toISOString()
-    const seed = randomBytes(20).toString('hex')
+    const seed = params.seed || randomBytes(20).toString('hex')
     const stock = new Pile(Card.getFullDeck()).shuffle(seed).toJSON()
 
     return new Game({
@@ -315,7 +316,7 @@ export class Game {
         },
         players: [
           new Player({
-            name: firstPlayerName,
+            name: params.firstPlayerName,
             idx: 0,
             id: firstPlayerId,
             isConnected: true,
@@ -362,110 +363,10 @@ export class Game {
     }
   }
 
-  // ACTIONS
-  playNext(playerId: string, actionParams: TActionParams) {
-    // console.warn(1234, {
-    //   type: actionParams.type,
-    //   playerId,
-    //   inTurn: this.inTurn,
-    //   players: this.players,
-    //   turnNumber: this.turnNumber,
-    // })
-
-    const newTurn = this.currentTurn.clone()
-
-    // get current player
-    const me: Player = newTurn._players[newTurn.inTurn]
-    if (!me) {
-      throw new GameError('NO_SUCH_PLAYER', {playerId})
-    }
-    if (playerId !== me.id) {
-      throw new GameError('NOT_MY_TURN', {playerId})
-    }
-
-    if (newTurn.status !== 'RUNNING') {
-      // console.warn(nextTurn)
-      throw new GameError('GAME_ENDED')
-    }
-
-    if (actionParams.type === 'START') {
-      if (this.currentTurn.turnNumber > 0) {
-        throw new GameError('ALREADY_STARTED')
-      }
-      newTurn.action = actionParams
-    } else if (actionParams.type === 'HINT') {
-      if (!newTurn.hintCount) {
-        throw new GameError('NO_HINTS_LEFT')
-      }
-      newTurn.hintCount--
-
-      const hintee = newTurn._players[actionParams.toPlayerIdx]
-      if (!hintee) {
-        throw new GameError('NO_SUCH_PLAYER', actionParams.toPlayerIdx)
-      }
-      if (hintee === me) {
-        throw new GameError('CANNOT_HINT_SELF')
-      }
-
-      newTurn.hands[hintee.idx].addHint({turnNumber: newTurn.turnNumber, is: actionParams.is})
-
-      newTurn.action = {
-        ...actionParams,
-        toPlayerName: hintee.name,
-        matches: newTurn.hands[hintee.idx].cards.map(c => c.hints[c.hints.length - 1].result),
-      }
-    } else {
-      // PLAY or DISCARD
-      const card = newTurn.hands[me.idx].take(actionParams.cardIdx, newTurn.stock)
-
-      if (actionParams.type === 'PLAY') {
-        const success: boolean = newTurn.table.play(card)
-        if (success) {
-          // Successful play:
-          if (card.num === 5 && newTurn.hintCount < 8) {
-            newTurn.hintCount++
-          }
-          if (newTurn.score === AllColors.length * AllNums.length) {
-            newTurn.status = 'FINISHED'
-          }
-        } else {
-          // fail: add wound
-          newTurn.discardPile.add(card) // TODO: add metadata?
-          newTurn.woundCount++
-          // TODO: log
-          if (newTurn.woundCount === 3) {
-            newTurn.status = 'GAMEOVER'
-          }
-        }
-        newTurn.action = {...actionParams, card: card.toJSON(), success}
-      } else if (actionParams.type === 'DISCARD') {
-        newTurn.discardPile.add(card)
-        if (newTurn.hintCount < 8) newTurn.hintCount++
-        newTurn.action = {...actionParams, card: card.toJSON()}
-      }
-    }
-
-    // actually change the turn:
-
-    newTurn.timestamp = new Date().toISOString()
-
-    newTurn.turnNumber++
-    if (newTurn.turnsLeft !== null) newTurn.turnsLeft--
-    if (newTurn.turnsLeft === 0) {
-      // TODO: check if off-by-one
-      newTurn.status = 'FINISHED'
-    } else if (!newTurn.stock.size && newTurn.turnsLeft === null) {
-      // countdown should start now
-      newTurn.turnsLeft = newTurn._players.length
-    }
-
-    return newTurn
-  }
-
   act(playerId: TPlayerId, actionParams: TPlayableActionParams) {
     // console.warn('ACT', {playerId, actionParams, inStock: this.currentTurn.stock.size})
 
-    this.turns.push(this.playNext(playerId, actionParams))
+    this.turns.push(this.currentTurn.playAction(playerId, actionParams))
     this.checkIntegrity()
   }
 

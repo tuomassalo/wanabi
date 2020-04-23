@@ -98,10 +98,14 @@ describe('A three-player game with a custom deck', () => {
   })
 })
 
-//   // it('async', done => {
-//   //   setTimeout(() => {
-//   //     expect(1).toEqual(1)
-//   //     done()
-//   //   }, 3000)
-//   // })
-// })
+describe('A game with a given seed', () => {
+  it('will always have the same stock', () => {
+    const pg = Game.createPendingGame(
+      {firstPlayerName: 'Fortuna', seed: 'ecfad89689ec6780d9838e0a22d731f82d25a3b4'},
+      'bogus_id_fortuna',
+    )
+    expect(pg.currentTurn.stock.toJSON().join(',')).toEqual(
+      'X5,X4,C4,E2,A3,B1,D1,A1,C2,A1,X3,B2,B3,D4,C1,X3,A4,C1,C3,X1,D4,E1,X1,C2,E5,A4,B4,C4,X2,C3,A5,A3,X1,A2,E3,E1,D2,E4,E3,B1,A2,D2,E1,B3,E2,D1,E4,B4,X4,B5,D3,B1,D3,C1,A1,C5,D5,B2,X2,D1',
+    )
+  })
+})
