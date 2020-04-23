@@ -8,7 +8,7 @@ describe('A three-player game without any moves', () => {
     expect(g.currentTurn.stock.size).toEqual((3 + 2 + 2 + 2 + 1) * 6 - 3 * 5)
   })
   it('should have correct setup', () => {
-    expect(g.COMPAT_getRefinedMaskedTurnState(g.players[0].id)).toEqual({
+    expect(g.COMPAT_getMaskedTurnState(g.players[0].id)).toEqual({
       // gameId: jasmine.any(String),
       timestamp: jasmine.any(String),
       action: {type: 'START'},
@@ -52,7 +52,7 @@ describe('A three-player game with a custom deck', () => {
     expect(g.currentTurn.stock.size).toEqual((3 + 2 + 2 + 2 + 1) * 6 - 3 * 5)
   })
   it('should have correct setup', () => {
-    expect(g.COMPAT_getRefinedMaskedTurnState(g.players[0].id)).toEqual({
+    expect(g.COMPAT_getMaskedTurnState(g.players[0].id)).toEqual({
       // gameId: jasmine.any(String),
       timestamp: jasmine.any(String),
       action: {type: 'START'},

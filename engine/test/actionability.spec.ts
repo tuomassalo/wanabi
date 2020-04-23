@@ -29,7 +29,7 @@ fdescribe('When playing color A...', () => {
     g.act(g.players[2].id, {type: 'HINT', toPlayerIdx: 0, is: 'B'}) // none
 
     // now p0 knows that their hand has only A1..A5 cards.
-    expect(g.COMPAT_getRefinedMaskedTurnState(g.players[0].id).maskedPlayerViews[0].hand).toEqual(
+    expect(g.COMPAT_getMaskedTurnState(g.players[0].id).maskedPlayerViews[0].hand).toEqual(
       Array(5).fill({
         color: 'A',
         hints: [
@@ -49,7 +49,7 @@ fdescribe('When playing color A...', () => {
     g.act(g.players[0].id, {type: 'HINT', toPlayerIdx: 2, is: 'B'}) // none
     g.act(g.players[1].id, {type: 'DISCARD', cardIdx: 0}) // discard second A3
 
-    const state = g.COMPAT_getRefinedMaskedTurnState(g.players[0].id)
+    const state = g.COMPAT_getMaskedTurnState(g.players[0].id)
 
     expect(state.discardPile).toEqual(['A3', 'A3'])
 

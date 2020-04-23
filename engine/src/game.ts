@@ -371,7 +371,7 @@ export class Game {
   }
 
   // just for the engine tests
-  COMPAT_getRefinedMaskedTurnState(playerId: TPlayerId): TRefinedMaskedTurnState {
+  COMPAT_getMaskedTurnState(playerId: TPlayerId): TRefinedMaskedTurnState {
     const maskedGame = new MaskedGame({
       gameId: this.gameId,
       currentTurn: this.currentTurn.getState(playerId),
