@@ -1,6 +1,6 @@
 import {Pile} from './pile'
 import {Player, TPlayerId, TPlayerState} from './player'
-import {MaskedCard, Card, AllColors, AllNums} from './card'
+import {MaskedCard, Card, AllColors, AllNums, TNum, TColor, TCardState} from './card'
 import {Hand, TMaskedPlayerViewState, MaskedPlayerView} from './hand'
 import {
   TTurnState,
@@ -118,6 +118,15 @@ export class MaskedTurn extends BaseTurn {
     ret.score = this.score
     delete ret._players
     return ret
+  }
+  getExtraMysticalHandWithSpeculativeHint(toPlayerIdx: number, is: TNum | TColor): MaskedCard[] {
+    const turnCopy = new MaskedTurn(this.getState(), this._players)
+    turnCopy.maskedPlayerViews[toPlayerIdx].hand = turnCopy.maskedPlayerViews[toPlayerIdx].hand.map(mc => {
+      const c = new Card(mc as TCardState) // not my own card, so it's always known
+      c.addHint({is, turnNumber: -1})
+      return new MaskedCard(c)
+    })
+    return refineHand(turnCopy, toPlayerIdx)
   }
 }
 

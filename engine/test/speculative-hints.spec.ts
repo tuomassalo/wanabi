@@ -1,6 +1,7 @@
 import {createDeck} from './helpers'
 import {Game} from '../src/game'
 import {COMPAT_TMaskedOtherPlayerViewState} from '../src/hand'
+import {MaskedGame} from '../src/masked-game'
 
 function createTestGame() {
   const g = new Game({
@@ -31,20 +32,66 @@ describe('Speculative hint', () => {
         .maskedPlayerViews[1] as COMPAT_TMaskedOtherPlayerViewState).extraMysticalHand.map(c => c.hints),
     ).toEqual([[], [], [], [], []])
 
-    // speculative hint
-    // expect(
-    //   (g.COMPAT_getRefinedTurnState(g.players[0].id, {toPlayerIdx: 1, is: 1})
-    //     .maskedPlayerViews[1] as COMPAT_TMaskedOtherPlayerViewState).extraMysticalHand.map(c => c.hints),
-    // ).toEqual([
-    //   [{is: 1, result: true, turnNumber: 999}],
-    //   [{is: 1, result: true, turnNumber: 999}],
-    //   [{is: 1, result: true, turnNumber: 999}],
-    //   [{is: 1, result: false, turnNumber: 999}],
-    //   [{is: 1, result: false, turnNumber: 999}],
-    // ])
+    const maskedGame = new MaskedGame({
+      gameId: g.gameId,
+      currentTurn: g.currentTurn.getState(g.players[0].id),
+      playedActions: [], // g.turns.map(t => ({action: t.action, timestamp: t.timestamp})),
+      players: g.players.map(p => ({...p.toJSON(), id: p.id === g.players[0].id ? p.id : 'REDACTED'})),
+    })
+
+    expect(JSON.parse(JSON.stringify(maskedGame.currentTurn.getExtraMysticalHandWithSpeculativeHint(1, 1)))).toEqual([
+      {
+        actionability: 'PLAYABLE',
+        hints: [{is: 1, result: true, turnNumber: -1}],
+        num: 1,
+        possibleCards: [
+          {count: 3, prob: 1 / 6, value: 'A1'},
+          {count: 3, prob: 1 / 6, value: 'B1'},
+          {count: 3, prob: 1 / 6, value: 'C1'},
+          {count: 3, prob: 1 / 6, value: 'D1'},
+          {count: 3, prob: 1 / 6, value: 'E1'},
+          {count: 3, prob: 1 / 6, value: 'X1'},
+        ],
+      },
+      {
+        actionability: 'PLAYABLE',
+        hints: [{is: 1, result: true, turnNumber: -1}],
+        num: 1,
+        possibleCards: [
+          {count: 3, prob: 1 / 6, value: 'A1'},
+          {count: 3, prob: 1 / 6, value: 'B1'},
+          {count: 3, prob: 1 / 6, value: 'C1'},
+          {count: 3, prob: 1 / 6, value: 'D1'},
+          {count: 3, prob: 1 / 6, value: 'E1'},
+          {count: 3, prob: 1 / 6, value: 'X1'},
+        ],
+      },
+      {
+        actionability: 'PLAYABLE',
+        hints: [{is: 1, result: true, turnNumber: -1}],
+        num: 1,
+        possibleCards: [
+          {count: 3, prob: 1 / 6, value: 'A1'},
+          {count: 3, prob: 1 / 6, value: 'B1'},
+          {count: 3, prob: 1 / 6, value: 'C1'},
+          {count: 3, prob: 1 / 6, value: 'D1'},
+          {count: 3, prob: 1 / 6, value: 'E1'},
+          {count: 3, prob: 1 / 6, value: 'X1'},
+        ],
+      },
+      {hints: [{is: 1, result: false, turnNumber: -1}]},
+      {hints: [{is: 1, result: false, turnNumber: -1}]},
+    ])
   })
   it('should be shown in addition to other given hints', () => {
     g.act(g.players[0].id, {type: 'HINT', toPlayerIdx: 1, is: 'A'})
+
+    const maskedGame = new MaskedGame({
+      gameId: g.gameId,
+      currentTurn: g.currentTurn.getState(g.players[0].id),
+      playedActions: [], // g.turns.map(t => ({action: t.action, timestamp: t.timestamp})),
+      players: g.players.map(p => ({...p.toJSON(), id: p.id === g.players[0].id ? p.id : 'REDACTED'})),
+    })
 
     expect(
       (g.COMPAT_getMaskedTurnState(g.players[0].id)
@@ -57,31 +104,71 @@ describe('Speculative hint', () => {
       [{is: 'A', result: false, turnNumber: 0}],
     ])
 
-    // speculative hint
-    // expect(
-    //   (g.COMPAT_getRefinedTurnState(g.players[0].id, {toPlayerIdx: 1, is: 4})
-    //     .maskedPlayerViews[1] as COMPAT_TMaskedOtherPlayerViewState).extraMysticalHand.map(c => c.hints),
-    // ).toEqual([
-    //   [
-    //     {is: 'A', result: false, turnNumber: 0},
-    //     {is: 4, result: false, turnNumber: 999},
-    //   ],
-    //   [
-    //     {is: 'A', result: false, turnNumber: 0},
-    //     {is: 4, result: false, turnNumber: 999},
-    //   ],
-    //   [
-    //     {is: 'A', result: false, turnNumber: 0},
-    //     {is: 4, result: false, turnNumber: 999},
-    //   ],
-    //   [
-    //     {is: 'A', result: true, turnNumber: 0},
-    //     {is: 4, result: true, turnNumber: 999},
-    //   ],
-    //   [
-    //     {is: 'A', result: false, turnNumber: 0},
-    //     {is: 4, result: false, turnNumber: 999},
-    //   ],
-    // ])
+    expect(JSON.parse(JSON.stringify(maskedGame.currentTurn.getExtraMysticalHandWithSpeculativeHint(1, 1)))).toEqual([
+      {
+        actionability: 'PLAYABLE',
+        hints: [
+          {is: 'A', result: false, turnNumber: 0},
+          {is: 1, result: true, turnNumber: -1},
+        ],
+        num: 1,
+        possibleCards: [
+          {count: 3, prob: 0.25, value: 'B1'},
+          {count: 3, prob: 0.25, value: 'C1'},
+          {count: 3, prob: 0.25, value: 'D1'},
+          {count: 3, prob: 0.25, value: 'E1'},
+        ],
+      },
+      {
+        actionability: 'PLAYABLE',
+        hints: [
+          {is: 'A', result: false, turnNumber: 0},
+          {is: 1, result: true, turnNumber: -1},
+        ],
+        num: 1,
+        possibleCards: [
+          {count: 3, prob: 0.25, value: 'B1'},
+          {count: 3, prob: 0.25, value: 'C1'},
+          {count: 3, prob: 0.25, value: 'D1'},
+          {count: 3, prob: 0.25, value: 'E1'},
+        ],
+      },
+      {
+        actionability: 'PLAYABLE',
+        hints: [
+          {is: 'A', result: false, turnNumber: 0},
+          {is: 1, result: true, turnNumber: -1},
+        ],
+        num: 1,
+        possibleCards: [
+          {count: 3, prob: 0.25, value: 'B1'},
+          {count: 3, prob: 0.25, value: 'C1'},
+          {count: 3, prob: 0.25, value: 'D1'},
+          {count: 3, prob: 0.25, value: 'E1'},
+        ],
+      },
+      {
+        hints: [
+          {is: 'A', result: true, turnNumber: 0},
+          {is: 1, result: false, turnNumber: -1},
+        ],
+        possibleCards: [
+          {actionability: 'UNPLAYABLE', count: 2, prob: 1 / 7, value: 'A2'},
+          {actionability: 'UNPLAYABLE', count: 2, prob: 1 / 7, value: 'A3'},
+          {actionability: 'UNPLAYABLE', count: 2, prob: 1 / 7, value: 'A4'},
+          {actionability: 'UNDISCARDABLE', count: 1, prob: 1 / 14, value: 'A5'},
+          {actionability: 'UNPLAYABLE', count: 2, prob: 1 / 7, value: 'X2'},
+          {actionability: 'UNPLAYABLE', count: 2, prob: 1 / 7, value: 'X3'},
+          {actionability: 'UNPLAYABLE', count: 2, prob: 1 / 7, value: 'X4'},
+          {actionability: 'UNDISCARDABLE', count: 1, prob: 1 / 14, value: 'X5'},
+        ],
+      },
+      {
+        hints: [
+          {is: 'A', result: false, turnNumber: 0},
+          {is: 1, result: false, turnNumber: -1},
+        ],
+      },
+    ])
   })
 })
