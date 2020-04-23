@@ -1,6 +1,6 @@
 import {MaskedCard, TMaskedCardState} from 'wanabi-engine/dist/card'
 import {THintResultState} from 'wanabi-engine/dist/card'
-import {MaskedGame} from 'wanabi-engine'
+import {MaskedGame} from 'wanabi-engine/dist/masked-game'
 
 export interface TRefinedHintResultState extends THintResultState {
   hinterName: string

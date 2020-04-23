@@ -6,6 +6,7 @@ import * as engine from 'wanabi-engine'
 import {InGameState} from './Reducer'
 import {animate} from './animate'
 import {setRejoinParams, getRejoinParams} from './rejoin-storage'
+import {MaskedGame} from 'wanabi-engine/dist/masked-game'
 
 // from https://stackoverflow.com/a/58189464/95357
 function unlockAudio() {
@@ -41,7 +42,7 @@ export const Wsclient = () => {
       // if (activeGameState) {
       // A game was found with this connection.
 
-      const game = new engine.MaskedGame(data.game)
+      const game = new MaskedGame(data.game)
       const currentTurn = game.currentTurn
 
       if (state.phase === 'IN_GAME' && currentTurn.turnNumber > 0) {
@@ -105,7 +106,7 @@ export const Wsclient = () => {
         // no active game (or the rejoining was not possible)
         sessionStorage.removeItem('rejoinParams')
 
-        dispatch({type: 'SET_GAMES', games: data.games.map(g => new engine.MaskedGame(g))})
+        dispatch({type: 'SET_GAMES', games: data.games.map(g => new MaskedGame(g))})
       }
     } else if (data.msg === 'M_GameHistory') {
       data.previousTurns.forEach(t => (getState() as InGameState).game.addTurn(t))

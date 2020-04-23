@@ -1,10 +1,11 @@
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import React from 'react'
-import * as engine from 'wanabi-engine'
+import {MaskedTurn} from 'wanabi-engine/dist/turn'
+import {MaskedGame} from 'wanabi-engine/dist/masked-game'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import Chart from 'react-apexcharts'
 
-export default function WStats({turns, players}: {turns: engine.MaskedTurn[]; players: engine.MaskedGame['players']}) {
+export default function WStats({turns, players}: {turns: MaskedTurn[]; players: MaskedGame['players']}) {
   // const {state} = useContext(Context) as {state: InGameState; dispatch: Dispatch<Action>}
   // const {state, dispatch} = useContext(Context) as {state: InGameState; dispatch: Dispatch<Action>}
 

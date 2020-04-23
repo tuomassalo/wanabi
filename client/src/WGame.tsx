@@ -9,7 +9,6 @@ import WMyHand from './WMyHand'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import WOtherHand from './WOtherHand'
 // import {WebSocketClient} from './websocketclient'
-import * as engine from 'wanabi-engine'
 import {refineCards} from './refiner'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import WTurnSelector from './WTurnSelector'
@@ -22,6 +21,8 @@ import {Context} from './Store'
 import {InGameState, Action} from './Reducer'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import WStats from './WStats'
+import {MaskedGame} from 'wanabi-engine/dist/masked-game'
+import {MaskedTurn} from 'wanabi-engine/dist/turn'
 
 document.body.addEventListener('keydown', event => {
   if (event.keyCode === 77) {
@@ -31,7 +32,7 @@ document.body.addEventListener('keydown', event => {
   }
 })
 
-export default function WGame({game}: {game: engine.MaskedGame}) {
+export default function WGame({game}: {game: MaskedGame}) {
   const {state, dispatch} = useContext(Context) as {state: InGameState; dispatch: Dispatch<Action>}
   // const {state, dispatch} = useContext(Context) as {state: InGameState; dispatch: Dispatch<Action>}
 
@@ -47,7 +48,7 @@ export default function WGame({game}: {game: engine.MaskedGame}) {
 
   // console.warn('vTN', state.visibleTurnNumber)
 
-  const visibleTurn: engine.MaskedTurn = game.turns[state.visibleTurnNumber]
+  const visibleTurn: MaskedTurn = game.turns[state.visibleTurnNumber]
   // console.warn('vT', visibleTurn)
 
   const {

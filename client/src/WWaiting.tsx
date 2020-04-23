@@ -1,5 +1,5 @@
 import React from 'react'
-import {MaskedGame} from 'wanabi-engine'
+import {MaskedGame} from 'wanabi-engine/dist/masked-game'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import WPlayerList from './WPlayerList'
 import {WebSocketClient} from './websocketclient'

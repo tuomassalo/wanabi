@@ -1,7 +1,7 @@
 import React from 'react'
 
 import {WebSocketClient} from './websocketclient'
-import {MaskedGame} from 'wanabi-engine'
+import {MaskedGame} from 'wanabi-engine/dist/masked-game'
 
 declare const wsclient: WebSocketClient
 

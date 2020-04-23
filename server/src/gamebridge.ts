@@ -182,10 +182,10 @@ export async function getGamesState({}: engine.WS_getGamesStateParams, connectio
   // await apig.postToConnection({ConnectionId: connectionId, Data: JSON.stringify(data)}).promise()
 }
 
-export async function createGame({firstPlayerName}: engine.WS_createGameParams, connectionId: string) {
-  const turn0 = engine.Game.createPendingGame(firstPlayerName, connectionId)
+export async function createGame(params: engine.WS_createGameParams, connectionId: string) {
+  const turn0 = engine.Game.createPendingGame(params, connectionId)
 
-  if (firstPlayerName === 'BOBBY_TABLES' && process.env.IS_OFFLINE) {
+  if (params.firstPlayerName === 'BOBBY_TABLES' && process.env.IS_OFFLINE) {
     console.warn('Wiping dev tables.')
 
     for (const {gameId} of await scanGames()) {
