@@ -4,8 +4,7 @@ import {range, sample, random} from 'lodash'
 
 async function animateFullScore() {
   const highestNumber = parseInt((document.querySelector('.WTable > .WCard') as Element).textContent as string, 10)
-  for (const num of [3]) {
-    // range(1, highestNumber + 1).reverse()) {
+  for (const num of range(1, highestNumber + 1).reverse()) {
     for (const pile of Array.from(document.querySelectorAll('.WTable > .WCard'))) {
       const pileBounds = pile.getBoundingClientRect()
       const xSpeed = (sample([-1, 1]) as number) * random(3, 9, true)
