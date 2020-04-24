@@ -77,24 +77,6 @@ div.WOtherHand {
     margin: $cardWidth / 16;
   }
 }
-div.WOtherHand {
-  body.mysteryview & > div.WCardContainer {
-    > div:nth-child(1) {
-      display: none;
-    }
-    > div:nth-child(2) {
-      display: inherit;
-    }
-  }
-  body:not(.mysteryview) & > div.WCardContainer {
-    > div:nth-child(1) {
-      display: inherit;
-    }
-    > div:nth-child(2) {
-      display: none;
-    }
-  }
-}
 
 div.WCard {
   border: 1px solid #8888;

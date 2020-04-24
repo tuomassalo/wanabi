@@ -81,6 +81,7 @@ const Reducer = (state: AppState, action: Action): AppState => {
           visibleTurnNumber: (state as InGameState).visibleTurnNumber || action.game.currentTurn.turnNumber,
           phase: 'IN_GAME',
           game: action.game,
+          speculativeMysteryView: undefined,
         }
       else
         return {
@@ -95,11 +96,13 @@ const Reducer = (state: AppState, action: Action): AppState => {
         ...state,
         game,
         visibleTurnNumber: game.currentTurn.turnNumber,
+        speculativeMysteryView: undefined,
       } as any
     case 'SET_VISIBLE_TURN':
       return {
         ...state,
         visibleTurnNumber: action.turnNumber,
+        speculativeMysteryView: undefined,
       } as any
     case 'SHOW_SPECULATIVE_MYSTERY_VIEW':
       return {

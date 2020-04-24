@@ -49,16 +49,18 @@ export default class WHints extends React.Component<{hints: TRefinedHintResultSt
   render() {
     return (
       <div className="WHints clearfix">
-        {this.props.hints.map((h, idx) => (
-          <Tooltip
-            key={h.turnNumber}
-            tooltip={`Hinted by ${h.hinterName} on turn ${h.turnNumber} (${
-              h.turnsAgo > 1 ? `${h.turnsAgo} turns ago` : 'just now'
-            })`}
-          >
-            <WHint hint={h} highlight={this.props.highlightLatestHint && idx === this.props.hints.length - 1} />
-          </Tooltip>
-        ))}
+        {this.props.hints
+          .filter(h => h.turnNumber !== -1) // workaround: do not show speculative hint since it might jump the view on hover
+          .map((h, idx) => (
+            <Tooltip
+              key={h.turnNumber}
+              tooltip={`Hinted by ${h.hinterName} on turn ${h.turnNumber} (${
+                h.turnsAgo > 1 ? `${h.turnsAgo} turns ago` : 'just now'
+              })`}
+            >
+              <WHint hint={h} highlight={this.props.highlightLatestHint && idx === this.props.hints.length - 1} />
+            </Tooltip>
+          ))}
       </div>
     )
   }
