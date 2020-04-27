@@ -241,29 +241,39 @@ div.WUpToNinePossibleCards {
   border: 1px solid #8888;
   border-radius: 4px;
   box-shadow: rgba(0, 0, 0, 0.3) 2px 2px 6px;
-  padding-top: $cardWidth / 13;
-  padding-left: $cardWidth / 30;
-  > .WCard {
+  padding-top: $cardWidth / 33;
+  padding-left: $cardWidth / 18;
+  > div {
     display: inline-block;
+    position: relative;
+  }
+  .WCard {
     box-shadow: rgba(0, 0, 0, 0.3) 1px 1px 2px;
     border: none;
-    margin: $cardWidth / 80;
+  }
+  .WCard-stacked-1 {
+    position: absolute;
+    top: 3px;
+  }
+  .WCard-stacked-2 {
+    position: absolute;
+    top: 6px;
   }
 }
 
 div.WUpToFourPossibleCards .WCard {
-  width: $cardWidth / 2.4;
-  height: $cardHeight / 2.4;
-  line-height: $cardHeight / 2.4;
-  font-size: 7/12 * $cardHeight / 2.4;
-  // float: left;
+  width: $cardWidth / 2.5;
+  height: $cardHeight / 2.5;
+  line-height: $cardHeight / 2.5;
+  font-size: 7/12 * $cardHeight / 2.5;
+  margin: 0 $cardWidth / 20 $cardWidth / 7 0;
 }
 div.WUpToNinePossibleCards .WCard {
-  width: $cardWidth / 3.6;
-  height: $cardHeight / 3.6;
-  line-height: $cardHeight / 3.6;
-  font-size: 7/12 * $cardHeight / 3.6;
-  // float: left;
+  width: $cardWidth / 4;
+  height: $cardHeight / 4;
+  line-height: $cardHeight / 4;
+  font-size: 7/12 * $cardHeight / 4;
+  margin: 0 $cardWidth / 20 $cardWidth / 9 0;
 }
 
 div.WTable {
