@@ -253,11 +253,11 @@ div.WUpToNinePossibleCards {
   }
   .WCard-stacked-1 {
     position: absolute;
-    top: 3px;
+    top: 3.5px;
   }
   .WCard-stacked-2 {
     position: absolute;
-    top: 6px;
+    top: 7px;
   }
 }
 
@@ -266,14 +266,14 @@ div.WUpToFourPossibleCards .WCard {
   height: $cardHeight / 2.5;
   line-height: $cardHeight / 2.5;
   font-size: 7/12 * $cardHeight / 2.5;
-  margin: 0 $cardWidth / 20 $cardWidth / 7 0;
+  margin: 0 $cardWidth / 20 $cardWidth / 8 0;
 }
 div.WUpToNinePossibleCards .WCard {
-  width: $cardWidth / 4;
-  height: $cardHeight / 4;
-  line-height: $cardHeight / 4;
-  font-size: 7/12 * $cardHeight / 4;
-  margin: 0 $cardWidth / 20 $cardWidth / 9 0;
+  width: $cardWidth / 3.8;
+  height: $cardHeight / 3.8;
+  line-height: $cardHeight / 3.8;
+  font-size: 7/12 * $cardHeight / 3.8;
+  margin: 0 $cardWidth / 30 $cardWidth / 11 0;
 }
 
 div.WTable {
