@@ -1,6 +1,6 @@
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import React from 'react'
-import {MaskedTurn} from 'wanabi-engine/dist/turn'
+import {MaskedTurn} from 'wanabi-engine/dist/masked-turn'
 import {MaskedGame} from 'wanabi-engine/dist/masked-game'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import Chart from 'react-apexcharts'

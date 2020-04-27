@@ -1,22 +1,15 @@
 import {Pile} from './pile'
 import {Player, TPlayerId, TPlayerState} from './player'
-import {MaskedCard, Card, AllColors, AllNums, TNum, TColor, TCardState} from './card'
-import {Hand, TMaskedPlayerViewState, MaskedPlayerView} from './hand'
-import {
-  TTurnState,
-  TMaskedTurnState,
-  TResolvedActionState,
-  TBaseTurnState,
-  TRefinedMaskedTurnState,
-  TGameStatus,
-  TActionParams,
-} from './game'
+import {MaskedCard, Card, AllColors, AllNums} from './card'
+import {Hand, TMaskedPlayerViewState} from './hand'
+import {TTurnState, TMaskedTurnState, TResolvedActionState, TBaseTurnState, TGameStatus, TActionParams} from './game'
 import {Table} from './table'
 import {resolveActionability} from './actionability-resolver'
 import {demystify} from './demystifier'
 import {GameError} from './errors'
+import {MaskedTurn} from './masked-turn'
 
-function refineHand(turn: MaskedTurn, getMaskedHandIdx: number): MaskedCard[] {
+export function refineHand(turn: MaskedTurn, getMaskedHandIdx: number): MaskedCard[] {
   // NB: turn does not include own hand cards that are resolved
   const getRevealedCards = (...excludePlayerIndices: number[]): Card[] =>
     [
@@ -85,51 +78,6 @@ export abstract class BaseTurn {
     return this.table.getScore()
   }
 }
-export class MaskedTurn extends BaseTurn {
-  maskedPlayerViews: MaskedPlayerView[]
-  stockSize: number
-  constructor(state: TMaskedTurnState, players: TPlayerState[]) {
-    super(state, players)
-    this.maskedPlayerViews = state.maskedPlayerViews.map(p => new MaskedPlayerView(p))
-    this.stockSize = state.stockSize
-
-    // refine
-    const refined = this.maskedPlayerViews.map((_, idx) => refineHand(this, idx))
-    for (const [idx, mc] of refined.entries()) {
-      if (this.maskedPlayerViews[idx].isMe) {
-        this.maskedPlayerViews[idx].hand = mc
-      } else {
-        this.maskedPlayerViews[idx].hand = resolveActionability(
-          this.maskedPlayerViews[idx].hand.map(mc => new MaskedCard(mc)),
-          this.table,
-          this.discardPile,
-        )
-        this.maskedPlayerViews[idx].extraMysticalHand = mc
-      }
-    }
-  }
-  get inTurn() {
-    return this.turnNumber % this._players.length
-  }
-
-  getState(): TRefinedMaskedTurnState {
-    const ret = JSON.parse(JSON.stringify(this)) // remove undefined values
-    ret.inTurn = this.inTurn
-    ret.score = this.score
-    delete ret._players
-    return ret
-  }
-  getExtraMysticalHandWithSpeculativeHint(toPlayerIdx: number, is: TNum | TColor): MaskedCard[] {
-    const turnCopy = new MaskedTurn(this.getState(), this._players)
-    turnCopy.maskedPlayerViews[toPlayerIdx].hand = turnCopy.maskedPlayerViews[toPlayerIdx].hand.map(mc => {
-      const c = new Card(mc as TCardState) // not my own card, so it's always known
-      c.addHint({is, turnNumber: -1})
-      return new MaskedCard(c)
-    })
-    return refineHand(turnCopy, toPlayerIdx)
-  }
-}
-
 export class Turn extends BaseTurn {
   hands: Hand[]
   stock: Pile

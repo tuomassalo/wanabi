@@ -22,7 +22,7 @@ import {InGameState, Action} from './Reducer'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import WStats from './WStats'
 import {MaskedGame} from 'wanabi-engine/dist/masked-game'
-import {MaskedTurn} from 'wanabi-engine/dist/turn'
+import {MaskedTurn} from 'wanabi-engine/dist/masked-turn'
 
 document.body.addEventListener('keydown', event => {
   if (event.keyCode === 77) {

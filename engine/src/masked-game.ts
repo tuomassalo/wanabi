@@ -1,6 +1,6 @@
 import {Player} from './player'
 import {TGameId, TMaskedGameState, TMaskedTurnState} from './game'
-import {MaskedTurn} from './turn'
+import {MaskedTurn} from './masked-turn'
 
 export class MaskedGame {
   gameId: TGameId
