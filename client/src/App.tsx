@@ -2,7 +2,7 @@
 import React from 'react'
 import {useContext} from 'react'
 import {Context} from './Store'
-import {WebSocketClient} from './websocketclient'
+// import {WebSocketClient} from './websocketclient'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import WWaiting from './WWaiting'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -120,8 +120,6 @@ import {InMenuState} from './Reducer'
 //   },
 //   playedActions: [],
 // }
-
-declare const wsclient: WebSocketClient
 
 export const App = () => {
   const {state} = useContext(Context) // as [AppState, Dispatch<Action>];

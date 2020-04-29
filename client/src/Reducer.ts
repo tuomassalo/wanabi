@@ -7,6 +7,7 @@ interface CommonState {
     sound: boolean
     showStats: boolean
     showMysteryView: boolean
+    hasNotificationPermission: boolean
   }
 }
 export interface LoadingState extends CommonState {
@@ -30,7 +31,7 @@ export type AppState = LoadingState | InMenuState | InGameState
 export type Action =
   | {
       type: 'SET_SETTING'
-      key: 'sound' | 'showStats' | 'showMysteryView'
+      key: 'sound' | 'showStats' | 'showMysteryView' | 'hasNotificationPermission'
       value: true | false
     }
   | {

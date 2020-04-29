@@ -36,6 +36,11 @@ export const Wsclient = () => {
   w.msgHandler = async (data: engine.WebsocketServerMessage) => {
     // console.warn('WSSM', data)
 
+    const notify = (msg: string) => {
+      // console.warn('Notify: ' + msg)
+      if (document.hidden) new Notification('Wanabi', {body: msg})
+    }
+
     if (data.msg === 'M_GameState') {
       // const activeGameState = data.games.find(g => g.currentTurn.maskedPlayerViews.some(phv => phv.isMe))
 
@@ -46,12 +51,11 @@ export const Wsclient = () => {
       const currentTurn = game.currentTurn
 
       if (state.phase === 'IN_GAME' && currentTurn.turnNumber > 0) {
-        // console.warn('in game')
         if (currentTurn.turnNumber === state.game.currentTurn.turnNumber + 1) {
-          // console.warn('new turn')
+          notify('New turn!')
 
           // This is a new turn in the active game. Only do sound and animation on
-          //  turn change, not when joining or if someone disconnects/reconnects
+          // turn change, not when joining or if someone disconnects/reconnects
           if (
             currentTurn.status === 'RUNNING' &&
             currentTurn.maskedPlayerViews[currentTurn.inTurn].isMe &&
@@ -80,6 +84,11 @@ export const Wsclient = () => {
           dispatch({type: 'SET_GAME', game: state.game})
         }
       } else {
+        if (state.phase === 'IN_GAME') {
+          // implies turnNumber === 0
+          notify('Game starting?')
+        }
+
         // something else than just a new turn in this game that the user was already viewing
         // console.warn('not in game')
 

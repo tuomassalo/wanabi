@@ -8,9 +8,12 @@ import {App} from './App'
 import {Wsclient} from './Wsclient'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import Store from './Store'
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import {WNotificationBanner} from './WNotificationBanner'
 
 ReactDOM.render(
   <Store>
+    <WNotificationBanner />
     <App />
     <Wsclient />
   </Store>,

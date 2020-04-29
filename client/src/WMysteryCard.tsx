@@ -36,7 +36,7 @@ export default class WMysteryCard extends React.Component<{card: TRefinedMaskedC
           {/* NB: bogus index, might break animations */}
           {allPossibleCards.map((pcs, idx0) => {
             return (
-              <div>
+              <div key={idx0}>
                 {pcs
                   .map((pc, idx1) =>
                     idx1 === 0 ? (
