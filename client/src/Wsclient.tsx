@@ -9,18 +9,23 @@ import {setRejoinParams, getRejoinParams} from './rejoin-storage'
 import {MaskedGame} from 'wanabi-engine/dist/masked-game'
 
 // from https://stackoverflow.com/a/58189464/95357
-function unlockAudio() {
-  // const sound = new Audio('myturn.mp3')
+// function unlockAudio() {
+//   // const sound = new Audio('myturn.mp3')
 
-  // sound.play()
-  // sound.pause()
-  // sound.currentTime = 0
+//   // sound.play()
+//   // sound.pause()
+//   // sound.currentTime = 0
 
-  document.body.removeEventListener('click', unlockAudio)
-  document.body.removeEventListener('touchstart', unlockAudio)
+//   document.body.removeEventListener('click', unlockAudio)
+//   document.body.removeEventListener('touchstart', unlockAudio)
+// }
+// document.body.addEventListener('click', unlockAudio)
+// document.body.addEventListener('touchstart', unlockAudio)
+
+const notify = (msg: string, showWhenForeground: boolean = false) => {
+  console.warn('Notify: ' + msg)
+  if (showWhenForeground || document.hidden) new Notification('Wanabi', {body: msg})
 }
-document.body.addEventListener('click', unlockAudio)
-document.body.addEventListener('touchstart', unlockAudio)
 
 export const Wsclient = () => {
   const {state, dispatch} = useContext(Context) // as [AppState, Dispatch<Action>];
@@ -35,11 +40,6 @@ export const Wsclient = () => {
 
   w.msgHandler = async (data: engine.WebsocketServerMessage) => {
     // console.warn('WSSM', data)
-
-    const notify = (msg: string) => {
-      // console.warn('Notify: ' + msg)
-      if (document.hidden) new Notification('Wanabi', {body: msg})
-    }
 
     if (data.msg === 'M_GameState') {
       // const activeGameState = data.games.find(g => g.currentTurn.maskedPlayerViews.some(phv => phv.isMe))
@@ -86,7 +86,7 @@ export const Wsclient = () => {
       } else {
         if (state.phase === 'IN_GAME') {
           // implies turnNumber === 0
-          notify('Game starting?')
+          notify('Game starting...?')
         }
 
         // something else than just a new turn in this game that the user was already viewing
@@ -128,6 +128,8 @@ export const Wsclient = () => {
   if (!(window as any).wsclient) {
     w.wsclient = new WebSocketClient()
     w.wsclient.on('msg', (data: any) => w.msgHandler(data))
+    w.wsclient.on('closing', () => notify('Connection error?', true))
+    w.wsclient.on('error', () => notify('Connection error?', true))
 
     // query the state
     w.wsclient.getGamesState({})
