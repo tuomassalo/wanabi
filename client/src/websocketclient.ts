@@ -12,12 +12,14 @@ export class WebSocketClient extends EventEmitter {
 
     this.websocket.onclose = ({wasClean, code, reason}) => {
       this.emit('closing', 'CLOSE', {wasClean, code, reason})
+      this.opened = false
     }
 
     this.websocket.onerror = error => {
       console.warn('onerror', error)
 
       this.emit('error', 'ERROR', 'An error has occurred. See console for details.')
+      this.opened = false
     }
 
     this.websocket.onmessage = ({data}) => {

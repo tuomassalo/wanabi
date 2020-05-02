@@ -125,14 +125,32 @@ export const Wsclient = () => {
     }
   }
 
-  if (!(window as any).wsclient) {
+  const openWebsocket = () => {
     w.wsclient = new WebSocketClient()
     w.wsclient.on('msg', (data: any) => w.msgHandler(data))
-    w.wsclient.on('closing', () => notify('Connection error?', true))
+    // eslint-disable-next-line @typescript-eslint/no-use-before-define
+    w.wsclient.on('closing', onConnectionError)
     w.wsclient.on('error', () => notify('Connection error?', true))
 
     // query the state
     w.wsclient.getGamesState({})
+  }
+
+  const onConnectionError = async (ev: any) => {
+    console.warn('onConnectionError', ev)
+    notify('Connection error?', true)
+    dispatch({type: 'SET_LOADING'})
+    while (true) {
+      if (!w.wsclient.opened) {
+        openWebsocket()
+        break
+      }
+      await new Promise(r => setTimeout(r, 2000))
+    }
+  }
+
+  if (!(window as any).wsclient) {
+    openWebsocket()
   }
 
   return <div></div>

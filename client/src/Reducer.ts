@@ -35,6 +35,9 @@ export type Action =
       value: true | false
     }
   | {
+      type: 'SET_LOADING'
+    }
+  | {
       type: 'SET_GAMES'
       games: MaskedGame[]
     }
@@ -67,6 +70,11 @@ const Reducer = (state: AppState, action: Action): AppState => {
       return {
         ...state,
         settings: {...state.settings, [action.key]: action.value},
+      }
+    case 'SET_LOADING':
+      return {
+        settings: state.settings,
+        phase: 'LOADING',
       }
     case 'SET_GAMES':
       return {
