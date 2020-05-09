@@ -1,5 +1,5 @@
 import {demystify} from '../src/demystifier'
-import {Card, TColor, TNum, TMyHandCardState, MyHandCard} from '../src/card'
+import {Card, TColor, TNum, TMaskedCardState, MaskedCard} from '../src/card'
 
 interface CreateHint {
   is: TColor | TNum
@@ -11,17 +11,18 @@ interface CreateHandParam {
   num?: TNum
   hints?: CreateHint[]
 }
-function dem(myHand: MyHandCard[], revealedCards: Card[]): TMyHandCardState[] {
-  return JSON.parse(JSON.stringify(demystify(myHand, revealedCards))) as TMyHandCardState[]
+function dem(myHand: MaskedCard[], revealedCards: Card[]): TMaskedCardState[] {
+  return JSON.parse(JSON.stringify(demystify(myHand, revealedCards)[0])) as TMaskedCardState[]
 }
 
-function hand(...cards: CreateHandParam[]): MyHandCard[] {
-  return cards.map(c =>
-    MyHandCard.deserialize({
-      ...c,
-      possibleCards: [],
-      hints: (c.hints || []).map(h => ({...h, turnNumber: 0, result: h.result ?? true})),
-    }),
+function hand(...cards: CreateHandParam[]): MaskedCard[] {
+  return cards.map(
+    c =>
+      new MaskedCard({
+        ...c,
+        possibleCards: [],
+        hints: (c.hints || []).map(h => ({...h, turnNumber: 0, result: h.result ?? true})),
+      }),
   )
 }
 
@@ -40,7 +41,7 @@ function fullDeckMinus(r: string): Card[] {
     .filter(v => /\w/.test(v))
     .map(Card.fromValueString)) {
     left.splice(
-      left.findIndex(f => f.is(c)),
+      left.findIndex(f => f.equals(c)),
       1,
     )
   }
@@ -52,7 +53,20 @@ describe('with no revealed cards', () => {
     expect(dem(hand({hints: []}), [])).toEqual([{hints: []}])
   })
   it("if we say 3, it's a 3", () => {
-    expect(dem(hand({hints: [{is: 3}]}), [])).toEqual([{num: 3, hints: [{is: 3, result: true, turnNumber: 0}]}])
+    expect(dem(hand({hints: [{is: 3}]}), [])).toEqual([
+      {
+        num: 3,
+        hints: [{is: 3, result: true, turnNumber: 0}],
+        possibleCards: [
+          {count: 2, prob: 1 / 6, value: 'A3'},
+          {count: 2, prob: 1 / 6, value: 'B3'},
+          {count: 2, prob: 1 / 6, value: 'C3'},
+          {count: 2, prob: 1 / 6, value: 'D3'},
+          {count: 2, prob: 1 / 6, value: 'E3'},
+          {count: 2, prob: 1 / 6, value: 'X3'},
+        ],
+      },
+    ])
   })
   it('if we say C, still >10 possibilities => no listing', () => {
     expect(dem(hand({hints: [{is: 'C'}]}), [])).toEqual([{hints: [{is: 'C', result: true, turnNumber: 0}]}])
@@ -69,10 +83,10 @@ describe('with no revealed cards', () => {
           {result: false, is: 3, turnNumber: 0},
         ],
         possibleCards: [
-          {value: 'C4', weight: 2},
-          {value: 'C5', weight: 1},
-          {value: 'X4', weight: 2},
-          {value: 'X5', weight: 1},
+          {value: 'C4', prob: 1 / 3, count: 2},
+          {value: 'C5', prob: 1 / 6, count: 1},
+          {value: 'X4', prob: 1 / 3, count: 2},
+          {value: 'X5', prob: 1 / 6, count: 1},
         ],
       },
     ])
@@ -86,8 +100,8 @@ describe('with no revealed cards', () => {
           {is: 4, result: true, turnNumber: 0},
         ],
         possibleCards: [
-          {value: 'D4', weight: 1},
-          {value: 'X4', weight: 1},
+          {value: 'D4', prob: 0.5, count: 2},
+          {value: 'X4', prob: 0.5, count: 2},
         ],
       },
     ])
@@ -117,8 +131,8 @@ describe('with some revealed cards', () => {
           {is: 4, result: true, turnNumber: 0},
         ],
         possibleCards: [
-          {value: 'D4', weight: 2},
-          {value: 'X4', weight: 1},
+          {value: 'D4', prob: 2 / 3, count: 2},
+          {value: 'X4', prob: 1 / 3, count: 1},
         ],
       },
     ])
@@ -157,8 +171,8 @@ describe('information inferred from a complete hit', () => {
         num: 2,
         hints: [{is: 2, result: true, turnNumber: 0}],
         possibleCards: [
-          {value: 'C2', weight: 2},
-          {value: 'X2', weight: 1},
+          {value: 'C2', prob: 2 / 3, count: 2},
+          {value: 'X2', prob: 1 / 3, count: 1},
         ],
       },
     ])
@@ -200,16 +214,16 @@ describe('information inferred from a partial hit', () => {
         num: 2,
         hints: [{is: 2, result: true, turnNumber: 0}],
         possibleCards: [
-          {value: 'B2', weight: 1},
-          {value: 'C2', weight: 1},
+          {value: 'B2', prob: 0.5, count: 1},
+          {value: 'C2', prob: 0.5, count: 1},
         ],
       },
       {
         num: 2,
         hints: [{is: 2, result: true, turnNumber: 0}],
         possibleCards: [
-          {value: 'B2', weight: 1},
-          {value: 'C2', weight: 1},
+          {value: 'B2', prob: 0.5, count: 1},
+          {value: 'C2', prob: 0.5, count: 1},
         ],
       },
       {
@@ -231,24 +245,24 @@ describe('information inferred from a partial hit', () => {
         num: 2,
         hints: [{is: 2, result: true, turnNumber: 0}],
         possibleCards: [
-          {value: 'B2', weight: 1},
-          {value: 'C2', weight: 1},
+          {value: 'B2', prob: 0.5, count: 1},
+          {value: 'C2', prob: 0.5, count: 1},
         ],
       },
       {
         num: 2,
         hints: [{is: 2, result: true, turnNumber: 0}],
         possibleCards: [
-          {value: 'B2', weight: 1},
-          {value: 'C2', weight: 1},
+          {value: 'B2', prob: 0.5, count: 1},
+          {value: 'C2', prob: 0.5, count: 1},
         ],
       },
       {
         num: 3,
         hints: [],
         possibleCards: [
-          {value: 'C3', weight: 1},
-          {value: 'D3', weight: 1},
+          {value: 'C3', prob: 0.5, count: 1},
+          {value: 'D3', prob: 0.5, count: 1},
         ],
       },
     ])
@@ -265,23 +279,23 @@ describe('information inferred from a partial hit', () => {
         num: 2,
         hints: [{is: 2, result: true, turnNumber: 0}],
         possibleCards: [
-          {value: 'B2', weight: 1},
-          {value: 'C2', weight: 1},
+          {value: 'B2', prob: 0.5, count: 1},
+          {value: 'C2', prob: 0.5, count: 1},
         ],
       },
       {
         num: 2,
         hints: [{is: 2, result: true, turnNumber: 0}],
         possibleCards: [
-          {value: 'B2', weight: 1},
-          {value: 'C2', weight: 1},
+          {value: 'B2', prob: 0.5, count: 1},
+          {value: 'C2', prob: 0.5, count: 1},
         ],
       },
       {
         hints: [],
         possibleCards: [
-          {value: 'C3', weight: 1},
-          {value: 'D4', weight: 1},
+          {value: 'C3', prob: 0.5, count: 1},
+          {value: 'D4', prob: 0.5, count: 1},
         ],
       },
     ])
@@ -298,23 +312,184 @@ describe('information inferred from a partial hit', () => {
         num: 2,
         hints: [{is: 2, result: true, turnNumber: 0}],
         possibleCards: [
-          {value: 'B2', weight: 1},
-          {value: 'C2', weight: 1},
+          {value: 'B2', prob: 1 / 2, count: 1},
+          {value: 'C2', prob: 1 / 2, count: 1},
         ],
       },
       {
         num: 2,
         hints: [{is: 2, result: true, turnNumber: 0}],
         possibleCards: [
-          {value: 'B2', weight: 1},
-          {value: 'C2', weight: 1},
+          {value: 'B2', prob: 1 / 2, count: 1},
+          {value: 'C2', prob: 1 / 2, count: 1},
         ],
       },
       {
         hints: [],
         possibleCards: [
-          {value: 'C3', weight: 1},
-          {value: 'D4', weight: 2},
+          {value: 'C3', prob: 1 / 3, count: 1},
+          {value: 'D4', prob: 2 / 3, count: 2},
+        ],
+      },
+    ])
+  })
+})
+
+describe('more cases', () => {
+  it('a D5/X5 is inferred from shown fives', () => {
+    expect(
+      dem(
+        hand(
+          {hints: [{is: 5}, {is: 'E'}, {is: 'D', result: false}]}, // => must be E5
+          {hints: [{is: 5, result: false}, {is: 'D'}]},
+          {hints: [{is: 5}]}, // => must D5/E5/X5, but E5 is taken => must be D5/X5
+        ),
+        revealedCards(
+          [
+            'A1 A1 A1 A2 A2 A3 A3 A4 A4 A5',
+            'B1 B1 B1 B2 B2 B3 B3 B4 B4 B5',
+            'C1 C1 C1 C2 C2 C3 C3 C4 C4 C5',
+            'D1 D1 D1 D2 D2 D3 D3 D4', //    all but D4 D5
+            'E1 E1 E1 E2 E2 E3 E3 E4 E4', // all but E5
+            'X1 X1 X1 X2 X2 X3 X3 X4', //    all but X5
+          ].join(' '),
+        ),
+      ),
+    ).toEqual([
+      {
+        color: 'E',
+        hints: [
+          {is: 5, result: true, turnNumber: 0},
+          {is: 'E', result: true, turnNumber: 0},
+          {is: 'D', result: false, turnNumber: 0},
+        ],
+        num: 5,
+      },
+      {
+        hints: [
+          {is: 5, result: false, turnNumber: 0},
+          {is: 'D', result: true, turnNumber: 0},
+        ],
+        num: 4,
+        possibleCards: [
+          {value: 'D4', prob: 1 / 2, count: 1},
+          {value: 'X4', prob: 1 / 2, count: 1},
+        ],
+      },
+      {
+        hints: [{is: 5, result: true, turnNumber: 0}],
+        num: 5,
+        possibleCards: [
+          {value: 'D5', prob: 1 / 2, count: 1},
+          {value: 'X5', prob: 1 / 2, count: 1},
+        ],
+      },
+    ])
+  })
+  it('fractional possibleCards: if only a single A2 is left, but its probability is twice than of an A1, dont show A2 as weight:2', () => {
+    expect(
+      dem(
+        hand(
+          {hints: [{is: 3, result: false}, {is: 1}]},
+          {hints: [{is: 3, result: false}]},
+          {hints: [{is: 3, result: false}]},
+        ),
+        revealedCards(
+          [
+            'A1 A1    A2    A3 A3 A4 A4 A5',
+            'B1 B1 B1 B2    B3 B3 B4 B4 B5',
+            'C1 C1    C2    C3    C4    C5',
+            'D1 D1 D1 D2 D2 D3 D3 D4 D4 D5',
+            'E1 E1 E1 E2 E2 E3 E3 E4 E4 E5',
+            'X1 X1 X1 X2 X2 X3 X3 X4    X5',
+          ].join(' '),
+        ),
+      ),
+    ).toEqual([
+      {
+        hints: jasmine.any(Array),
+        num: 1,
+        possibleCards: [
+          {value: 'A1', prob: 0.5, count: 1},
+          {value: 'C1', prob: 0.5, count: 1},
+        ],
+      },
+      {
+        hints: jasmine.any(Array),
+        possibleCards: [
+          {value: 'A1', prob: 1 / 12, count: 1},
+          {value: 'A2', prob: 1 / 6, count: 1},
+          {value: 'B2', prob: 1 / 6, count: 1},
+          {value: 'C1', prob: 1 / 12, count: 1},
+          {value: 'C2', prob: 1 / 6, count: 1},
+          {value: 'C4', prob: 1 / 6, count: 1},
+          {value: 'X4', prob: 1 / 6, count: 1},
+        ],
+      },
+      {
+        hints: jasmine.any(Array),
+        possibleCards: [
+          {value: 'A1', prob: 1 / 12, count: 1},
+          {value: 'A2', prob: 1 / 6, count: 1},
+          {value: 'B2', prob: 1 / 6, count: 1},
+          {value: 'C1', prob: 1 / 12, count: 1},
+          {value: 'C2', prob: 1 / 6, count: 1},
+          {value: 'C4', prob: 1 / 6, count: 1},
+          {value: 'X4', prob: 1 / 6, count: 1},
+        ],
+      },
+    ])
+  })
+  it('fractional possibleCards: another case', () => {
+    expect(
+      dem(
+        hand(
+          {hints: []},
+          {hints: []},
+          {hints: []},
+          // {hints: []}, {hints: []}, {hints: []}
+        ),
+        revealedCards(
+          `
+            A1 A1 A1 A2 A2 A3 A3 A4 A4 A5
+            B1 B1 B1 B2 B2 B3 B3 B4 B4 B5
+            C1 C1 C1 C2 C2 C3 C3 C4 C4 C5
+            D1 D1 D1 D2 D2 D3 D3 D4 D4 D5
+            E1 E1 E1 E2 E2 E3 E3 E4 E4 E5
+                     X2 X2 X3 X3
+          `
+            .trim()
+            .split(/\s+/)
+            .join(' '),
+        ),
+      ),
+    ).toEqual([
+      // NB: these fractions are unchecked
+      {
+        color: 'X',
+        hints: [],
+        possibleCards: [
+          {value: 'X1', prob: 35 / 64, count: 3},
+          {value: 'X4', prob: 31 / 96, count: 2},
+          {value: 'X5', prob: 25 / 192, count: 1},
+        ],
+      },
+      {
+        color: 'X',
+        hints: [],
+        possibleCards: [
+          {value: 'X1', prob: 35 / 64, count: 3},
+          {value: 'X4', prob: 31 / 96, count: 2},
+          {value: 'X5', prob: 25 / 192, count: 1},
+        ],
+      },
+      {
+        color: 'X',
+        hints: [],
+        possibleCards: [
+          {value: 'X1', prob: 35 / 64, count: 3},
+          {value: 'X4', prob: 31 / 96, count: 2},
+          {value: 'X5', prob: 25 / 192, count: 1},
         ],
       },
     ])

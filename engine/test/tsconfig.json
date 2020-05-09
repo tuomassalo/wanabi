@@ -1,0 +1,9 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    // allow sloppiness when writing tests
+    // "strict": false
+  },
+  "exclude": ["../src/**/*.ts"],
+  "include": ["./*.spec.ts"]
+}

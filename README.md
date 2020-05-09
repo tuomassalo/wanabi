@@ -40,6 +40,9 @@ sls dynamodb install
 
 npx tsc --watch
 
+# Run `socat` (for allowing local network to join)
+socat TCP-LISTEN:13001,fork TCP:127.0.0.1:3001
+
 # Start the serverless-offline services: api gateway and dynamodb
 npm run localbackend
 
@@ -49,10 +52,16 @@ npm run localbroadcast
 
 ### Deploy
 
-[TODO!]
+```
+
+`./deploy.sh`
 
 ```
-# Deploy to AWS first
-npm run sls -- deploy
 
+### Saving and restoring local games:
+
+```
+aws dynamodb scan --table-name WanabiGames --endpoint-url http://localhost:3003 > mygames.json
+
+aws dynamodb put-item --table-name WanabiGames --endpoint-url http://localhost:3003 --item "$(jq '.Items[0]' < mygames.json)"
 ```

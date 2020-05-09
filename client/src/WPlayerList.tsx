@@ -1,12 +1,30 @@
 import React from 'react'
-import {MaskedPlayer} from 'wanabi-engine/dist/player'
 
-export default class WPlayerList extends React.Component<{players: MaskedPlayer[]}> {
+import {WebSocketClient} from './websocketclient'
+import {MaskedGame} from 'wanabi-engine/dist/masked-game'
+
+declare const wsclient: WebSocketClient
+
+export default class WPlayerList extends React.Component<{game: MaskedGame}> {
   render() {
+    const rejoin = (playerIdx: number) => {
+      wsclient.rejoinGame({gameId: this.props.game.gameId, playerIdx})
+    }
+    const amIInThisGame = this.props.game.currentTurn.maskedPlayerViews.some(p => p.isMe)
     return (
       <ul className="WPlayerList">
-        {this.props.players.map(p => (
-          <li key={p.idx}>{p.name}</li>
+        {this.props.game.players.map(p => (
+          <li key={p.idx}>
+            {p.name}
+            {p.isConnected ? (
+              ''
+            ) : (
+              <span>
+                {' 🔌 '}
+                {amIInThisGame ? '' : <input type="button" value="rejoin" onClick={() => rejoin(p.idx)} />}
+              </span>
+            )}
+          </li>
         ))}
       </ul>
     )

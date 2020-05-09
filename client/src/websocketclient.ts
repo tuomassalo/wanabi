@@ -1,28 +1,29 @@
 import {EventEmitter} from 'events'
 import * as game from 'wanabi-engine'
+import pako from 'pako'
 
 export class WebSocketClient extends EventEmitter {
-  // messages: string[] = []
   websocket: WebSocket
   opened = false
   queue: {action: string; data: any}[] = []
   constructor() {
     super()
-    const endpoint = 'ws://localhost:3001'
-    this.websocket = new WebSocket(endpoint)
+    this.websocket = new WebSocket(process.env.REACT_APP_WS_ENDPOINT as string)
 
     this.websocket.onclose = ({wasClean, code, reason}) => {
       this.emit('closing', 'CLOSE', {wasClean, code, reason})
+      this.opened = false
     }
 
     this.websocket.onerror = error => {
       console.warn('onerror', error)
 
       this.emit('error', 'ERROR', 'An error has occurred. See console for details.')
+      this.opened = false
     }
 
     this.websocket.onmessage = ({data}) => {
-      this.emit('msg', JSON.parse(data))
+      this.emit('msg', JSON.parse(pako.inflate(data, {to: 'string'})))
     }
 
     this.websocket.onopen = () => {
@@ -32,7 +33,7 @@ export class WebSocketClient extends EventEmitter {
         for (const msg of this.queue) {
           this.send(msg.action, msg.data)
         }
-      }, 1000)
+      }, 50)
     }
   }
   send(action: string, data: any) {
@@ -44,12 +45,14 @@ export class WebSocketClient extends EventEmitter {
   }
   disconnect() {
     this.websocket.close()
+
+    // If the websocket was disconnected, reload the window. (But not when testing, since jsdom does not implement location.reload().)
+    if (!/\bjsdom\b/.test(navigator.userAgent)) setTimeout(() => window.location.reload(), 1000)
   }
 
-  // perl -wlne 'print qq!$2(p: game.$1): void { this.send("$2", p) } // prettier-ignore! if /interface (WS_(\w+)Params)\b/' ../engine/src/game.ts | pbcopy
+  // perl -wlne 'print qq!$2(p: game.$1): void { this.send("$2", p) } // prettier-ignore! if /^export interface (WS_(\w+)Params)\b/' ../engine/src/game.ts | pbcopy
   // PASTE AFTER THIS LINE:
   getGamesState(p: game.WS_getGamesStateParams): void { this.send("getGamesState", p) } // prettier-ignore
-  getGameState(p: game.WS_getGameStateParams): void { this.send("getGameState", p) } // prettier-ignore
   createGame(p: game.WS_createGameParams): void { this.send("createGame", p) } // prettier-ignore
   startGame(p: game.WS_startGameParams): void { this.send("startGame", p) } // prettier-ignore
   joinGame(p: game.WS_joinGameParams): void { this.send("joinGame", p) } // prettier-ignore

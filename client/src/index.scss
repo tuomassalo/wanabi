@@ -5,10 +5,18 @@ $colorA: red;
 $colorB: lightgreen;
 $colorC: lightblue;
 $colorD: yellow;
-$colorE: #ffe;
+$colorE: #fffff3;
 
 * {
   box-sizing: border-box;
+}
+
+html,
+body,
+#root,
+.App,
+.App > * {
+  height: 100%;
 }
 
 body {
@@ -16,14 +24,49 @@ body {
   padding: 0;
   margin: 0;
 }
-div.WGameOverview {
-  background: #eee;
+
+.WSpinner {
+  text-align: center;
+  padding-top: 90px;
 }
-div.WGameOverview ul,
-div.WGameOverview li {
+
+.WMenu {
+  color: #ccc;
+  text-align: center;
+  padding-top: $cardHeight;
+}
+input.major {
+  display: block;
+  margin: 10px auto;
+  font-size: 150%;
+  border: 1px solid #ddd;
+  padding: 4px;
+}
+
+div.WGameGlance,
+div.WWaiting {
+  padding: 20px;
+  margin: 20px;
+  color: black;
+  background-color: #ccc;
+  height: auto;
+}
+div.WGameGlance ul,
+div.WGameGlance li {
   display: inline;
   list-style: none;
   padding: 0;
+  margin: 0.2em;
+}
+div.WGameGlance li {
+  border-radius: 5px;
+  padding: 5px;
+  background: #bbb;
+  white-space: nowrap;
+}
+div.WGameGlance-GAMEOVER,
+div.WGameGlance-FINISHED {
+  background: #bbb8;
 }
 
 div.WMyHand,
@@ -34,6 +77,7 @@ div.WOtherHand {
     margin: $cardWidth / 16;
   }
 }
+
 div.WCard {
   border: 1px solid #8888;
   border-radius: 4px;
@@ -43,6 +87,7 @@ div.WCard {
   text-align: center;
   line-height: $cardHeight;
   font-size: 7/12 * $cardHeight;
+  position: relative;
 }
 // used in hints and cards
 .WColor-A {
@@ -61,15 +106,35 @@ div.WCard {
   background-color: $colorE;
 }
 .WColor-X {
-  background: linear-gradient(135deg, orange, yellow, green, cyan, blue, violet);
+  background: linear-gradient(45deg, orange, yellow, rgb(0, 185, 0), cyan, rgb(93, 93, 255), violet);
 }
-body {
+.WColor-undefined {
   background: #ccc;
 }
+body {
+  background: darkgreen;
+}
 
-div.WPlayer-inturn::before {
-  content: '-> ';
+div.WPlayer {
   float: left;
+  padding: 0 0 0 50px;
+  margin-top: $cardHeight/14;
+  margin-right: $cardWidth/10;
+  border-radius: $cardWidth/5;
+  border: 10px solid #ddd;
+  background: #ddd;
+  h3 {
+    position: absolute;
+    transform-origin: 0 0;
+    transform: rotate(90deg) translate(-10px, 20px);
+  }
+  &.WPlayer-inturn {
+    border-color: white;
+  }
+  // &.WPlayer-inturn h3::before {
+  //   content: '➡ ';
+  //   float: left;
+  // }
 }
 
 .WHints {
@@ -111,76 +176,111 @@ div.WPlayer-inturn::before {
   }
 }
 
-.WHintButtons input {
-  width: 30px;
-  height: 30px;
-  margin: 3px;
+.WHintButtons {
+  display: none;
+  input {
+    vertical-align: middle;
+    width: 30px;
+    height: 30px;
+    margin: 3px;
+    border: 0;
+    &:hover {
+      outline: 2px solid rgba(255, 255, 255, 0.8);
+    }
+  }
 }
 
 .WMyCardActionButtons {
+  display: none;
   margin-bottom: 4px;
   input {
     width: 100%;
+    height: 2.5em;
+    margin-bottom: 3px;
+    border: 0;
   }
+}
+
+.WGame .WHintButtons,
+.WGame .WMyCardActionButtons {
+  display: none;
+}
+
+.WGameStatus-myturn .WHintButtons,
+.WGameStatus-myturn .WMyCardActionButtons {
+  display: inherit;
 }
 
 .WHeader {
   background: white;
   padding: 10px;
 
+  span {
+    white-space: nowrap;
+  }
   em {
     font-style: normal;
     font-weight: bold;
     padding-right: 30px;
   }
+  input[value='X'] {
+    margin-left: 25px;
+  }
 }
 
 .WGame {
   padding: 10px;
+  height: 100%;
 }
 
 div.WUpToFourPossibleCards,
 div.WUpToNinePossibleCards {
+  position: relative;
   width: $cardWidth;
   height: $cardHeight;
   border: 1px solid #8888;
   border-radius: 4px;
   box-shadow: rgba(0, 0, 0, 0.3) 2px 2px 6px;
-  padding-top: $cardWidth / 13;
-  padding-left: $cardWidth / 30;
-  > .WCard {
+  padding-top: $cardWidth / 33;
+  padding-left: $cardWidth / 18;
+  > div {
     display: inline-block;
+    position: relative;
+  }
+  .WCard {
     box-shadow: rgba(0, 0, 0, 0.3) 1px 1px 2px;
     border: none;
-    margin: $cardWidth / 80;
+  }
+  .WCard-stacked-1 {
+    position: absolute;
+    top: 3.5px;
+  }
+  .WCard-stacked-2 {
+    position: absolute;
+    top: 7px;
   }
 }
 
 div.WUpToFourPossibleCards .WCard {
-  width: $cardWidth / 2.4;
-  height: $cardHeight / 2.4;
-  line-height: $cardHeight / 2.4;
-  font-size: 7/12 * $cardHeight / 2.4;
-  // float: left;
+  width: $cardWidth / 2.5;
+  height: $cardHeight / 2.5;
+  line-height: $cardHeight / 2.5;
+  font-size: 7/12 * $cardHeight / 2.5;
+  margin: 0 $cardWidth / 20 $cardWidth / 8 0;
 }
 div.WUpToNinePossibleCards .WCard {
-  width: $cardWidth / 3.6;
-  height: $cardHeight / 3.6;
-  line-height: $cardHeight / 3.6;
-  font-size: 7/12 * $cardHeight / 3.6;
-  // float: left;
+  width: $cardWidth / 3.8;
+  height: $cardHeight / 3.8;
+  line-height: $cardHeight / 3.8;
+  font-size: 7/12 * $cardHeight / 3.8;
+  margin: 0 $cardWidth / 30 $cardWidth / 11 0;
 }
 
-div.WGreen {
-  background: darkgreen;
-  padding: $cardWidth / 5;
-  border-radius: $cardWidth/5;
-  div.WTable {
-    > div {
-      display: inline-block;
-      vertical-align: top;
-      margin: $cardWidth / 16;
-    }
+div.WTable {
+  > div {
+    display: inline-block;
+    vertical-align: top;
+    margin: 0 $cardWidth / 16 $cardWidth / 16 0;
   }
 }
 
@@ -206,4 +306,202 @@ div.WGreen {
     font-size: 7/12 * $cardHeight / 2.4;
     margin: $cardWidth / 40;
   }
+}
+
+.WActionDescription {
+  .WCard,
+  .WHint {
+    display: inline-block;
+    width: $cardWidth / 4.5;
+    height: $cardHeight / 4.5;
+    line-height: $cardHeight / 4.5;
+    font-size: 7/12 * $cardHeight / 4.5;
+    margin: $cardWidth / 40;
+  }
+  .WHint {
+    display: inline-block;
+    float: none;
+  }
+  .WPlayer & {
+    display: block !important;
+    text-align: center;
+  }
+}
+
+.WIsLatestAction {
+  // outline: 2px solid red;
+  animation: highlight 800ms ease;
+  animation-iteration-count: 5;
+  outline: 10px solid transparent;
+}
+@keyframes highlight {
+  0% {
+    box-shadow: none;
+  }
+  50% {
+    box-shadow: 0px 0px 4px 6px orange;
+  }
+  100% {
+    box-shadow: none;
+  }
+}
+
+.WCard-PLAYABLE::after,
+.WCard-UNPLAYABLE::after,
+.WCard-DISCARDABLE::after,
+.WCard-UNDISCARDABLE::after {
+  position: absolute;
+  font-size: 16px;
+  top: 14px;
+  right: 4px;
+  line-height: 0;
+  z-index: 2;
+}
+
+.WCard-PLAYABLE::after {
+  content: '▶';
+  color: #0c0;
+  text-shadow: black 0 0 1px;
+}
+.WCard-DISCARDABLE::after {
+  content: '❌';
+  text-shadow: 0px 0px 1px black;
+}
+.WCard-UNDISCARDABLE::after {
+  content: '⭐';
+  text-shadow: black 0 0 2px;
+}
+
+.WUpToFourPossibleCards .WCard::after {
+  font-size: 12px;
+  top: 7px;
+  right: -2px;
+}
+.WUpToNinePossibleCards .WCard::after {
+  font-size: 10px;
+  top: 6px;
+  right: -2px;
+}
+
+// animations
+.WCard-ghost {
+  position: absolute !important;
+  animation: play-or-discard-card 1000ms ease forwards;
+  transform-origin: 0 0;
+}
+@keyframes play-or-discard-card {
+  from {
+    transform: translate(0 0) scale(1) rotate(0deg);
+  }
+  to {
+    transform: translate(var(--movecardTranslateXEnd), var(--movecardTranslateYEnd)) scale(var(--movecardScaleEnd))
+      rotate(var(--movecardRotateEnd));
+  }
+}
+
+.WCard-slide-left {
+  animation: slide-card-left 1000ms ease forwards;
+}
+@keyframes slide-card-left {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(var(--cardDstOffsetXEnd));
+  }
+}
+
+.WGameStatus-gameover {
+  background: red;
+}
+.WGameStatus-finished {
+  background: #8a8;
+  filter: saturate(70%);
+}
+
+.WCard-flip-1,
+.WCard-flip-2 {
+  perspective: 600px;
+  position: absolute !important;
+  transform-style: preserve-3d;
+  transform-origin: 50% 50% !important;
+}
+.WCard-flip-1 > div {
+  animation: flip-card-1 200ms ease forwards;
+}
+@keyframes flip-card-1 {
+  from {
+    transform: rotateY(0deg);
+  }
+  to {
+    transform: rotateY(90deg);
+  }
+}
+.WCard-flip-2 > div {
+  animation: flip-card-2 200ms ease forwards;
+}
+@keyframes flip-card-2 {
+  from {
+    transform: rotateY(270deg);
+  }
+  to {
+    transform: rotateY(360deg);
+  }
+}
+
+.popup-content {
+  width: auto !important;
+  z-index: 3 !important;
+  padding: 0 !important;
+  background: #ddd !important;
+  > div:nth-child(1) {
+    display: none;
+  }
+}
+
+.WTurnSelector-label {
+  cursor: pointer;
+}
+
+.WTurnSelector {
+  max-height: 90vh;
+  overflow: scroll;
+  table {
+    border-collapse: collapse;
+    margin-top: 8px;
+    tr:hover {
+      cursor: pointer;
+      background: #eee;
+    }
+    tr.visible-turn {
+      background: white !important;
+      cursor: initial !important;
+    }
+    td {
+      padding-right: 0.2em;
+    }
+    td:first-child {
+      padding-left: 1em;
+    }
+    td:last-child {
+      padding-right: 1em;
+    }
+    .WActionDescription {
+      text-align: left;
+      .WCard {
+        border: none;
+      }
+    }
+    font-weight: normal;
+  }
+}
+
+.WStats {
+  background: white;
+}
+
+.WNotificationBanner {
+  padding: 4px;
+  background: #0074e8;
+  height: auto;
 }

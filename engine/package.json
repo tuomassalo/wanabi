@@ -20,6 +20,7 @@
     "@types/json-stable-stringify": "1.0.32",
     "@types/lodash": "4.14.149",
     "@types/node": "12.12.21",
+    "@types/seedrandom": "2.4.28",
     "jest": "24.9.0",
     "nodemon": "2.0.2",
     "ts-jest": "24.3.0",
@@ -28,8 +29,9 @@
     "typescript": "3.7.3"
   },
   "dependencies": {
+    "json-stable-stringify": "1.0.1",
     "lodash": "4.17.15",
-    "json-stable-stringify": "1.0.1"
+    "seedrandom": "3.0.5"
   },
   "browserslist": {
     "production": [

@@ -1,7 +1,8 @@
-import * as AWS from 'aws-sdk'
+import {DocumentClient} from 'aws-sdk/lib/dynamodb/document_client'
+import * as dynamodbClient from 'serverless-dynamodb-client'
 import * as gamebridge from './gamebridge'
 
-const dynamodb = new AWS.DynamoDB.DocumentClient({endpoint: 'http://localhost:8000'})
+const dynamodb: DocumentClient = dynamodbClient.doc
 
 const connectionTable = 'WanabiConnections'
 
@@ -12,7 +13,14 @@ export const handler = async function(event: any, context: any) {
     body,
     requestContext: {connectionId, routeKey},
   } = event
-  console.log(`EVENT: ${event.requestContext.routeKey} ${connectionId}`)
+  console.log(`EVENT: ${event.requestContext.routeKey} ${connectionId}`, body, connectionId, routeKey)
+
+  // quick workaround for prod
+  let routeKey2
+  try {
+    routeKey2 = JSON.parse(body).action
+  } catch (e) {}
+
   try {
     switch (routeKey) {
       case '$connect':
@@ -30,19 +38,16 @@ export const handler = async function(event: any, context: any) {
         break
 
       case '$disconnect':
-        await dynamodb
-          .delete({
-            TableName: connectionTable,
-            Key: {connectionId},
-          })
-          .promise()
+        await dynamodb.delete({TableName: connectionTable, Key: {connectionId}}).promise()
+
+        await gamebridge.purgeGames()
         break
 
       case '$default':
       default:
-        console.warn('DEFAULT', {routeKey, connectionId, body})
+        console.warn('DEFAULT', {routeKey, routeKey2, connectionId, body})
 
-        await gamebridge[routeKey](JSON.parse(body).data, connectionId)
+        await gamebridge[routeKey2 || routeKey](JSON.parse(body).data, connectionId)
     }
   } catch (e) {
     console.warn('ERROR', e)

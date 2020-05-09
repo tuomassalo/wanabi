@@ -2,30 +2,29 @@ import React from 'react'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import WCard from './WCard'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import WHints from './WHints'
+import WMysteryCard from './WMysteryCard'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import WOtherHandActionButtons from './WOtherHandActionButtons'
+import WHints from './WHints'
+import {TRefinedMaskedCardState} from './refiner'
 
-import {WebSocketClient} from './websocketclient'
-import {HandCard} from 'wanabi-engine/dist/card'
-
-declare const wsclient: WebSocketClient
-
-export default class WOtherHand extends React.Component<{cards: HandCard[]; playerIdx: number}> {
-  // startGame = () => {
-  //   wsclient.startGame({gameId: this.props.currentTurn.gameId})
-  // }
-
+export default class WOtherHand extends React.Component<{
+  cards: TRefinedMaskedCardState[]
+  playerIdx: number
+  hintsAvailable: boolean
+  highlightLatestHint: boolean
+}> {
   render() {
     return (
       <div className="WOtherHand">
-        {this.props.cards.map(c => (
-          <div>
-            <WCard key={Math.random()} card={c} />
-            <WHints hints={c.hints} />
+        {/* NB: bogus index, might break animations */}
+        {this.props.cards.map((c, idx) => (
+          <div className="WCardContainer" id={`card-${this.props.playerIdx}-${idx}`} key={idx}>
+            {/* <WCard key={Math.random()} card={new Card(c.value as string)} actionability={c.actionability} /> */}
+            <WMysteryCard card={c} />
+            <WHints hints={c.hints} highlightLatestHint={this.props.highlightLatestHint} />
           </div>
         ))}
-        <WOtherHandActionButtons playerIdx={this.props.playerIdx} />
+        {this.props.children}
       </div>
     )
   }

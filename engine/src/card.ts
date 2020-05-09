@@ -2,30 +2,31 @@ import {SyntaxError} from './errors'
 
 export type TColor = 'A' | 'B' | 'C' | 'D' | 'E' | 'X'
 export type TNum = 1 | 2 | 3 | 4 | 5
-export type TCardState = string // e.g. 'C2'
+
+export type TActionability = 'PLAYABLE' | 'UNPLAYABLE' | 'DISCARDABLE' | 'UNDISCARDABLE'
 
 export interface TPossibleCardState {
-  value: TCardState
-  weight: number // 0 .. 1, but in practice something like 0.2 .. 0.8
-}
-export interface TMyHandCardState {
-  color?: TColor
-  num?: TNum
-  hints: THintResultState[]
-  possibleCards?: TPossibleCardState[]
-  // TODO: (or maybe as getters)
-  // isKnown: boolean
-  // isPlayable: boolean
-  // isDiscardable: boolean
+  value: TCardValueState
+  prob: number // < 1
+  count: number // the number of unreveled cards with this value, that is: 1, 2 or 3
+  actionability?: TActionability
 }
 
-// Same, but we always know the card
-export interface THandCardState extends TMyHandCardState {
+export interface TCardState {
   color: TColor
   num: TNum
-  hints: THintResultState[]
-  possibleCards?: TPossibleCardState[]
+  hints?: THintResultState[]
 }
+
+export interface TMaskedCardState {
+  color?: TColor
+  num?: TNum
+  hints?: THintResultState[]
+  possibleCards?: TPossibleCardState[]
+  actionability?: TActionability
+}
+
+export type TCardValueState = string
 
 export interface THintState {
   turnNumber: number // allows finding more information from the log
@@ -40,119 +41,117 @@ export const AllNums: TNum[] = [1, 2, 3, 4, 5]
 
 export const NumDistribution: TNum[] = [1, 1, 1, 2, 2, 3, 3, 4, 4, 5]
 
-function parseValueString(str: string): [TColor, TNum] {
+function parseValueString(str: string): TCardState {
   if (/^([ABCDEX])([1-5])$/.test(str)) {
-    return [RegExp.$1 as TColor, +RegExp.$2 as TNum]
+    return {color: RegExp.$1 as TColor, num: +RegExp.$2 as TNum}
   } else {
     throw new SyntaxError('INVALID_VALUE_STRING', str)
   }
 }
 
-export class Card {
+abstract class BaseCard {
   color: TColor
   num: TNum
-  constructor(color: TColor, num: TNum) {
-    this.color = color
-    this.num = num
+  hints: THintResultState[] = []
+
+  constructor(c: TCardState | TCardValueState) {
+    if (typeof c === 'string') {
+      const {color, num} = parseValueString(c)
+      this.color = color
+      this.num = num
+    } else {
+      this.color = c.color
+      this.num = c.num
+      this.hints = c.hints || []
+    }
   }
-  static fromValueString(str: string) {
-    return new Card(...parseValueString(str))
-  }
-  toString() {
+  get value() {
     return this.color + this.num
   }
-  toJSON(): any {
-    return this.toString() // {color: this.color, num: this.num}
+}
+export class Card extends BaseCard {
+  static fromValueString(str: string): Card {
+    return new Card(parseValueString(str))
   }
   static getFullDeck(): Card[] {
-    return AllColors.flatMap(c => NumDistribution.map((n: TNum) => new Card(c, n)))
+    return AllColors.flatMap(color => NumDistribution.map((num: TNum) => new Card({color, num})))
   }
-  matchesHints(hints: THintResultState[]) {
-    return hints.every(h => (h.result ? this.is(h.is) : !this.is(h.is)))
+  toJSON(): TCardValueState {
+    return this.color + this.num
   }
-  is(subject: Card | TCardState | TColor | TNum): boolean {
-    if (typeof subject === 'number') {
-      return this.num === subject
-    } else if (typeof subject === 'string') {
-      return this.color === subject || this.color === 'X'
-    } else {
-      return this.color === subject.color && this.num === subject.num
-    }
-  }
-}
-
-export class PossibleCard extends Card {
-  weight: number
-  constructor(pc: TPossibleCardState) {
-    super(...parseValueString(pc.value))
-    this.weight = pc.weight
-  }
-  static deserialize(pc: TPossibleCardState) {
-    return new this(pc)
-  }
-  toJSON(): any {
-    return {value: this.color + this.num, weight: this.weight}
-  }
-}
-
-export class MyHandCard {
-  hints: THintResultState[] = []
-  possibleCards?: PossibleCard[]
-  color?: TColor
-  num?: TNum
-  // static fromHandCard(hc: HandCard) {
-
-  // }
-  constructor(hc: HandCard | TMyHandCardState) {
-    if (hc instanceof HandCard) {
-      this.hints = hc.hints
-    } else {
-      this.hints = hc.hints
-      this.possibleCards = hc.possibleCards ? hc.possibleCards.map(pc => PossibleCard.deserialize(pc)) : undefined
-      this.color = hc.color
-      this.num = hc.num
-    }
-  }
-  static deserialize(mhcs: TMyHandCardState) {
-    return new this(mhcs)
-  }
-  toJSON(): any {
+  serializeWithHints(): TCardState {
     return {
       color: this.color,
       num: this.num,
-      possibleCards: this.possibleCards?.length ? this.possibleCards : undefined,
+      hints: this.hints,
+    }
+  }
+  matchesHints(hints: THintResultState[]) {
+    // console.warn(
+    //   'MATCHESHINTS',
+    //   hints,
+    //   this.value,
+    //   hints.every(h => (h.result ? this.looksLike(h.is) : !this.looksLike(h.is))),
+    // )
+    return hints.every(h => (h.result ? this.looksLike(h.is) : !this.looksLike(h.is)))
+  }
+  equals(subject: Card) {
+    return this.color === subject.color && this.num === subject.num
+  }
+  looksLike(subject: TColor | TNum): boolean {
+    if (typeof subject === 'number') {
+      return this.num === subject
+    } else {
+      return this.color === subject || this.color === 'X'
+    }
+  }
+  addHint(hint: THintState) {
+    this.hints.push({
+      ...hint,
+      result: this.color === hint.is || (this.color === 'X' && typeof hint.is === 'string') || this.num === hint.is,
+    })
+  }
+}
+
+export class MaskedCard {
+  color?: TColor
+  num?: TNum
+  possibleCards?: PossibleCard[]
+  actionability?: TActionability
+  hints: THintResultState[] = []
+  constructor(c: TMaskedCardState) {
+    this.color = c.color
+    this.num = c.num
+    this.actionability = c.actionability
+    if (c.possibleCards) this.possibleCards = c.possibleCards.map(pc => new PossibleCard(pc))
+    this.hints = c.hints || []
+  }
+  get value() {
+    return this.color && this.num ? this.color + this.num : undefined
+  }
+  toJSON(): TMaskedCardState {
+    return {
+      color: this.color,
+      num: this.num,
+      actionability: this.actionability,
+      possibleCards:
+        this.possibleCards && this.possibleCards.length ? this.possibleCards.map(pc => pc.toJSON()) : undefined,
       hints: this.hints,
     }
   }
 }
 
-export class HandCard extends MyHandCard {
-  hints: THintResultState[] = []
-  color: TColor // not optional
-  num: TNum // not optional
-
-  constructor(hc: THandCardState) {
-    super(hc as TMyHandCardState)
-    this.color = hc.color //redundant, but to make TS happy.
-    this.num = hc.num // redundant, but to make TS happy.
-    this.possibleCards = hc.possibleCards ? hc.possibleCards.map(pc => new PossibleCard(pc)) : undefined
-    this.hints = hc.hints
+export class PossibleCard extends BaseCard {
+  prob: number
+  count: number
+  actionability?: TActionability
+  constructor(pc: TPossibleCardState) {
+    super(pc.value)
+    this.prob = pc.prob
+    this.count = pc.count
+    this.actionability = pc.actionability
   }
-
-  static deserialize(hcs: THandCardState) {
-    return new this(hcs)
+  toJSON(): TPossibleCardState {
+    return {value: this.value, prob: this.prob, count: this.count, actionability: this.actionability}
   }
-
-  static fromCard(c: Card) {
-    return new HandCard({color: c.color, num: c.num, hints: []})
-  }
-  toCard() {
-    return new Card(this.color, this.num)
-  }
-  addHint(hint: THintState) {
-    this.hints.push({...hint, result: this.color === hint.is || this.num === hint.is})
-  }
-  // deserialize(state: THandCardState) {
-
-  // }
 }

@@ -1,32 +1,27 @@
 import {Game} from '../src/game'
 
-import {createDeck, knownCard} from './helpers'
+import {knownCard} from './helpers'
 
 describe('A new empty game', () => {
-  let pg, pg2
+  let pg: Game, pg2: Game
   it('should look emptyish with only one player', () => {
-    pg = Game.createPendingGame('Athos', 'bogus_id_athos')
-    expect(pg.getState(pg.players[0].id)).toEqual({
+    pg = Game.createPendingGame({firstPlayerName: 'Athos'}, 'bogus_id_athos')
+    expect(pg.COMPAT_getMaskedTurnState(pg.players[0].id)).toEqual({
       action: {
         type: 'START',
       },
       discardPile: [],
-      gameId: jasmine.any(String),
-      hintCount: 9,
+      hintCount: 8,
       inTurn: 0,
-      players: [
+      maskedPlayerViews: [
         {
-          completeHandCards: [],
-          idx: 0,
           isMe: true,
-          mysteryHandCards: [],
-          name: 'Athos',
+          hand: [],
         },
       ],
       score: 0,
       status: 'WAITING_FOR_PLAYERS',
-      stock: undefined,
-      stockSize: 0,
+      stockSize: 60,
       table: {A: [], B: [], C: [], D: [], E: [], X: []},
       timestamp: jasmine.any(String),
       turnNumber: 0,
@@ -36,32 +31,25 @@ describe('A new empty game', () => {
   })
   it('should accept more players', () => {
     pg2 = Game.joinPendingGame(pg, 'Porthos', 'bogus_id_porthos')
-    expect(pg2.getState(pg2.players[0].id)).toEqual({
+    expect(pg2.COMPAT_getMaskedTurnState(pg2.players[0].id)).toEqual({
       action: {type: 'START'},
       discardPile: [],
-      gameId: jasmine.any(String),
-      hintCount: 9,
+      hintCount: 8,
       inTurn: 0,
-      players: [
+      maskedPlayerViews: [
         {
-          completeHandCards: [],
-          idx: 0,
+          hand: [],
           isMe: true,
-          mysteryHandCards: [],
-          name: 'Athos',
         },
         {
-          completeHandCards: [],
-          idx: 1,
+          hand: [],
+          extraMysticalHand: [],
           isMe: false,
-          mysteryHandCards: [],
-          name: 'Porthos',
         },
       ],
       score: 0,
       status: 'WAITING_FOR_PLAYERS',
-      stock: undefined,
-      stockSize: 0,
+      stockSize: 60,
       table: {A: [], B: [], C: [], D: [], E: [], X: []},
       timestamp: jasmine.any(String),
       turnNumber: 0,
@@ -71,26 +59,20 @@ describe('A new empty game', () => {
   })
   it('should start when starting it', () => {
     const g = Game.startPendingGame(pg2)
-    expect(g.getState(g.players[0].id)).toEqual({
+    expect(g.COMPAT_getMaskedTurnState(g.players[0].id)).toEqual({
       action: {type: 'START'},
       discardPile: [],
-      gameId: jasmine.any(String),
-      hintCount: 9,
+      hintCount: 8,
       inTurn: 0,
-      players: [
+      maskedPlayerViews: [
         {
-          completeHandCards: [],
-          idx: 0,
           isMe: true,
-          mysteryHandCards: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
-          name: 'Athos',
+          hand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
         },
         {
-          completeHandCards: [knownCard(), knownCard(), knownCard(), knownCard(), knownCard()],
-          idx: 1,
+          extraMysticalHand: jasmine.any(Array),
+          hand: [knownCard(), knownCard(), knownCard(), knownCard(), knownCard()],
           isMe: false,
-          mysteryHandCards: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
-          name: 'Porthos',
         },
       ],
       score: 0,

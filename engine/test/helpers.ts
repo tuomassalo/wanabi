@@ -53,7 +53,7 @@ export function createDeck(topValues: string): Pile {
     .split(/\s+/)
     .filter(v => /\w/.test(v))
     .map(Card.fromValueString)) {
-    const idx = deckCards.findIndex(f => f.is(c))
+    const idx = deckCards.findIndex(f => f.equals(c))
     if (idx === -1) {
       console.warn('ERROR', c)
       throw new Error('too many cards of type')
@@ -67,7 +67,7 @@ export function createDeck(topValues: string): Pile {
     )
   }
 
-  shuffle(deckCards)
+  // shuffle(deckCards)
   // NB! We give `createDeck()` a list of cards with the top card first, but pile has top card last!
   const deck = new Pile([...topCards, ...deckCards].reverse())
   return deck
@@ -107,19 +107,19 @@ export function knownCard(): any {
   }
 }
 
-export function dbg(g: Game) {
-  for (const [key, cards] of Object.entries({
-    // stock: g.stock.cards,
-    hand0: g.players[0].hand.cards,
-    hand1: g.players[1].hand.cards,
-  })) {
-    console.warn(
-      'DBG',
-      key,
-      cards.map(c => c.toString()),
-    )
-  }
-}
+// export function dbg(g: Game) {
+//   for (const [key, cards] of Object.entries({
+//     // stock: g.stock.cards,
+//     hand0: g.players[0].hand.cards,
+//     hand1: g.players[1].hand.cards,
+//   })) {
+//     console.warn(
+//       'DBG',
+//       key,
+//       cards.map(c => c.toString()),
+//     )
+//   }
+// }
 
 export function createTightGame() {
   // First player always plays their first card, second player discards.

@@ -1,24 +1,28 @@
 import React from 'react'
-import {MaskedTurn} from 'wanabi-engine'
+import {MaskedGame} from 'wanabi-engine/dist/masked-game'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import WGameOverview from './WGameOverview'
+import WGameGlance from './WGameGlance'
 import {promptPlayerName} from './helpers'
 import {WebSocketClient} from './websocketclient'
 
 declare const wsclient: WebSocketClient
 
-export default class WMenu extends React.Component<{games: MaskedTurn[]}> {
-  createGame = () => {
-    wsclient.createGame({firstPlayerName: promptPlayerName()})
+export default class WMenu extends React.Component<{games: MaskedGame[]}> {
+  createGame = (event: any) => {
+    let seed = undefined
+    if (event.shiftKey) {
+      seed = prompt('Seed?') || undefined
+    }
+    const firstPlayerName: string | undefined = promptPlayerName()
+    if (firstPlayerName) wsclient.createGame({firstPlayerName, seed})
   }
   render() {
     return (
       <div className="WMenu">
-        <input type="button" onClick={this.createGame} value="Create a new game" />
-        <h1>CHOOSE GAME</h1>
         {this.props.games.map(g => (
-          <WGameOverview key={g.gameId} game={g} />
+          <WGameGlance key={g.gameId} game={g} />
         ))}
+        <input type="button" className="major" onClick={this.createGame} value="Create a new game" />
       </div>
     )
   }
