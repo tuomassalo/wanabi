@@ -129,7 +129,10 @@ export const Wsclient = () => {
     w.wsclient = new WebSocketClient()
     w.wsclient.on('msg', (data: any) => w.msgHandler(data))
     // eslint-disable-next-line @typescript-eslint/no-use-before-define
-    w.wsclient.on('closing', onConnectionError)
+    w.wsclient.on('closing', (ev: any) => {
+      // eslint-disable-next-line @typescript-eslint/no-use-before-define
+      if (!ev.wasClean) onConnectionError(ev)
+    })
     w.wsclient.on('error', () => notify('Connection error?', true))
 
     // query the state
