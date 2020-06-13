@@ -28,6 +28,8 @@ async function scan<I>(
   scanParams: any,
   ExclusiveStartKey?: AWS.DynamoDB.DocumentClient.Key,
 ): Promise<I[]> {
+  // const t0 = +new Date()
+
   const {Items, LastEvaluatedKey} = await dynamodb
     .scan({TableName: tableName, ...scanParams, ExclusiveStartKey})
     .promise()
@@ -36,6 +38,9 @@ async function scan<I>(
 
   // get more if the result was paginated
   if (LastEvaluatedKey) Items.push(...(await scan<I>(tableName, scanParams, LastEvaluatedKey)))
+
+  // const elapsedTime = +new Date() - t0
+  // console.warn(`SCAN_TIME: ${elapsedTime} ms`, tableName, scanParams)
 
   return Items as I[]
 }
@@ -138,6 +143,8 @@ async function updateGame(game: engine.Game, prevTimestamp: string) {
 
   // console.warn({prevTimestamp, updateKeys}, newDataWithColons)
 
+  // const t0 = +new Date()
+
   await dynamodb
     .update({
       TableName: gameTable,
@@ -154,13 +161,17 @@ async function updateGame(game: engine.Game, prevTimestamp: string) {
       ConditionExpression: '#X_timestamp = :oldTimestamp',
     })
     .promise()
+
+  // const elapsedTime = +new Date() - t0
+  // console.warn(`UPDATE_TIME: ${elapsedTime} ms`, {gameId: game.gameId})
 }
 
 async function _getGame(gameId: engine.TGameId): Promise<engine.Game> {
-  const game = (await scanGames()).find(g => g.gameId === gameId) // TODO: do this on server
+  // throws if not found?
+  const game = (await dynamodb.get({TableName: gameTable, Key: {gameId}}).promise()).Item as engine.TCompleteGameState
   if (!game) throw new Error('No game found')
 
-  return game
+  return new engine.Game({from: 'SERIALIZED_GAME', game})
   // return new engine.Game({from: 'SERIALIZED_GAME', game: game.toJSON()})
 }
 
