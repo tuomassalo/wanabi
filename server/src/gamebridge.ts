@@ -254,8 +254,11 @@ export async function rejoinGame({gameId, playerIdx}: engine.WS_rejoinGameParams
   }
 
   if (player.isConnected) {
-    throw new Error('Player is already connected from another connection')
+    // This is commented out to allow "force rejoin"
+    // throw new Error('Player is already connected from another connection')
+    console.warn('Force rejoining', {playerIdx, old: player.id, new: connectionId})
   }
+
   if ((await getAllConnections()).some(cId => cId === player.id)) {
     throw new Error('This connection is already occupied by another player')
   }
