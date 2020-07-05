@@ -47,10 +47,15 @@ const Tooltip = ({children, tooltip, hideArrow, ...props}: any) => (
 
 export default class WHints extends React.Component<{hints: TRefinedHintResultState[]; highlightLatestHint: boolean}> {
   render() {
+    // add a "visibility: none" bogus hint as the last one if no speculative hint is given
+    const hints = [...this.props.hints]
+    if (hints[hints.length - 1]?.turnNumber !== -1) {
+      hints.push({turnNumber: -2, turnsAgo: 0, is: 'A', hinterName: '', result: false})
+    }
     return (
       <div className="WHints clearfix">
-        {this.props.hints
-          .filter(h => h.turnNumber !== -1) // workaround: do not show speculative hint since it might jump the view on hover
+        {hints
+          // .filter(h => h.turnNumber !== -1) // workaround: do not show speculative hint since it might jump the view on hover
           .map((h, idx) => (
             <Tooltip
               key={h.turnNumber}
@@ -58,7 +63,7 @@ export default class WHints extends React.Component<{hints: TRefinedHintResultSt
                 h.turnsAgo > 1 ? `${h.turnsAgo} turns ago` : 'just now'
               })`}
             >
-              <WHint hint={h} highlight={this.props.highlightLatestHint && idx === this.props.hints.length - 1} />
+              <WHint hint={h} highlight={this.props.highlightLatestHint && idx === hints.length - 1} />
             </Tooltip>
           ))}
       </div>
