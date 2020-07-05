@@ -1,6 +1,7 @@
 import * as engine from 'wanabi-engine'
 import {MaskedGame} from 'wanabi-engine/dist/masked-game'
 import {MaskedCard} from 'wanabi-engine/dist/card'
+import {WebSocketClient} from './websocketclient'
 
 interface CommonState {
   settings: {
@@ -9,6 +10,7 @@ interface CommonState {
     showMysteryView: boolean
     hasNotificationPermission: boolean
   }
+  // idleSince: number
 }
 export interface LoadingState extends CommonState {
   phase: 'LOADING'
@@ -65,22 +67,34 @@ export type Action =
 const Reducer = (state: AppState, action: Action): AppState => {
   // console.warn('REDUCING', state, action)
 
+  // HACK! The AWS endpoint closes the websocket after 10 minutes of inactivity.
+  // If the user is still active (usually by browsing through the turn history),
+  // send a keepalive msg to the socket.
+  const wsclient: WebSocketClient = (window as any).wsclient
+  if (wsclient && wsclient.latestMessageTimestamp && Date.now() - wsclient.latestMessageTimestamp > 5 * 60 * 1000) {
+    console.warn('at least five minutes since last wsclient msg, sending a keep-alive msg')
+    wsclient.keepalive({})
+  }
+
   switch (action.type) {
     case 'SET_SETTING':
       return {
         ...state,
         settings: {...state.settings, [action.key]: action.value},
+        // idleSince: +Date.now(),
       }
     case 'SET_LOADING':
       return {
         settings: state.settings,
         phase: 'LOADING',
+        // idleSince: +Date.now(),
       }
     case 'SET_GAMES':
       return {
         settings: state.settings,
         phase: 'IN_MENU',
         games: action.games,
+        // idleSince: +Date.now(),
       }
     case 'SET_GAME':
       if (action.game)
@@ -91,12 +105,14 @@ const Reducer = (state: AppState, action: Action): AppState => {
           phase: 'IN_GAME',
           game: action.game,
           speculativeMysteryView: undefined,
+          // idleSince: +Date.now(),
         }
       else
         return {
           settings: state.settings,
           games: (state as InMenuState).games,
           phase: 'IN_MENU',
+          // idleSince: +Date.now(),
         }
     case 'ADD_TURN':
       const game = (state as InGameState).game
@@ -106,22 +122,26 @@ const Reducer = (state: AppState, action: Action): AppState => {
         game,
         visibleTurnNumber: game.currentTurn.turnNumber,
         speculativeMysteryView: undefined,
+        // idleSince: +Date.now(),
       } as any
     case 'SET_VISIBLE_TURN':
       return {
         ...state,
         visibleTurnNumber: action.turnNumber,
         speculativeMysteryView: undefined,
+        // idleSince: +Date.now(),
       } as any
     case 'SHOW_SPECULATIVE_MYSTERY_VIEW':
       return {
         ...state,
         speculativeMysteryView: {playerIdx: action.playerIdx, hand: action.hand},
+        // idleSince: +Date.now(),
       } as any
     case 'HIDE_SPECULATIVE_MYSTERY_VIEW':
       return {
         ...state,
         speculativeMysteryView: undefined,
+        // idleSince: +Date.now(),
       } as any
     default:
       console.warn(action)

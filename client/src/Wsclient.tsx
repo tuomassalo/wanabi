@@ -142,13 +142,17 @@ export const Wsclient = () => {
   const onConnectionError = async (ev: any) => {
     console.warn('onConnectionError', ev)
     notify('Connection error?', true)
-    dispatch({type: 'SET_LOADING'})
-    while (true) {
-      if (!w.wsclient.opened) {
-        openWebsocket()
-        break
+    if (Date.now() - w.wsclient.latestMessageTimestamp < 9 * 60 * 1000) {
+      dispatch({type: 'SET_LOADING'})
+      while (true) {
+        if (!w.wsclient.opened) {
+          openWebsocket()
+          break
+        }
+        await new Promise(r => setTimeout(r, 2000))
       }
-      await new Promise(r => setTimeout(r, 2000))
+    } else {
+      console.warn('Disconnected after idling.')
     }
   }
 

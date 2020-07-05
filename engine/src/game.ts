@@ -103,6 +103,7 @@ export interface WS_actParams {
   gameId: TGameId
   actionParams: TPlayableActionParams
 }
+export interface WS_keepaliveParams {}
 export interface TMaskedGameState {
   playedActions: {timestamp: string; action: TResolvedActionState}[]
   gameId: TGameId

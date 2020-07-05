@@ -183,6 +183,9 @@ async function _sendTurnHistory(game: engine.Game, connectionId: TConnectionId) 
   })
 }
 
+export async function keepalive({}: engine.WS_keepaliveParams, connectionId: string) {
+  console.warn('Got keepalive msg from ', connectionId)
+}
 export async function getGamesState({}: engine.WS_getGamesStateParams, connectionId: string) {
   await sendState(connectionId)
   // const data: engine.WebsocketServerMessage = {

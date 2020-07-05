@@ -5,6 +5,8 @@ import pako from 'pako'
 export class WebSocketClient extends EventEmitter {
   websocket: WebSocket
   opened = false
+  latestMessageTimestamp = 0
+
   queue: {action: string; data: any}[] = []
   constructor() {
     super()
@@ -23,10 +25,12 @@ export class WebSocketClient extends EventEmitter {
     }
 
     this.websocket.onmessage = ({data}) => {
+      this.latestMessageTimestamp = Date.now()
       this.emit('msg', JSON.parse(pako.inflate(data, {to: 'string'})))
     }
 
     this.websocket.onopen = () => {
+      this.latestMessageTimestamp = Date.now()
       this.emit('opened')
       this.opened = true
       setTimeout(() => {
@@ -37,6 +41,7 @@ export class WebSocketClient extends EventEmitter {
     }
   }
   send(action: string, data: any) {
+    this.latestMessageTimestamp = Date.now()
     if (this.opened) {
       this.websocket.send(JSON.stringify({action, data}))
     } else {
@@ -45,6 +50,8 @@ export class WebSocketClient extends EventEmitter {
   }
   disconnect() {
     this.websocket.close()
+
+    console.warn('DISCONNECTED.')
 
     // If the websocket was disconnected, reload the window. (But not when testing, since jsdom does not implement location.reload().)
     if (!/\bjsdom\b/.test(navigator.userAgent)) setTimeout(() => window.location.reload(), 1000)
@@ -58,4 +65,5 @@ export class WebSocketClient extends EventEmitter {
   joinGame(p: game.WS_joinGameParams): void { this.send("joinGame", p) } // prettier-ignore
   rejoinGame(p: game.WS_rejoinGameParams): void { this.send("rejoinGame", p) } // prettier-ignore
   act(p: game.WS_actParams): void { this.send("act", p) } // prettier-ignore
+  keepalive(p: game.WS_keepaliveParams): void { this.send("keepalive", p) } // prettier-ignore
 }

@@ -124,6 +124,8 @@ export default function WGame({game}: {game: MaskedGame}) {
       </div>
       {state.settings.showStats ? <WStats turns={game.turns} players={game.players} /> : ''}
       <div className="WGame">
+        {/* IDLE FOR: {+Date.now() - state.idleSince}
+        <br></br> */}
         <div className="clearfix">
           <WDiscardPile discardPile={discardPile} latestAction={action} />
           <WTable table={table} latestAction={action} />
