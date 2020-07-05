@@ -15,6 +15,6 @@ cd ..
 
 cd client
 npm run build
-scp -r build/* venko.net:public_html/wanabi/
+scp -r build/* venko.net:/var/www/wanabi.venko.net/
 cd ..
 
