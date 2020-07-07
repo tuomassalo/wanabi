@@ -129,9 +129,24 @@ export const Wsclient = () => {
     w.wsclient = new WebSocketClient()
     w.wsclient.on('msg', (data: any) => w.msgHandler(data))
     // eslint-disable-next-line @typescript-eslint/no-use-before-define
-    w.wsclient.on('closing', (ev: any) => {
+    w.wsclient.on('closing', () => {
+      dispatch({type: 'SET_DISCONNECTED'})
+      console.warn('Disconnected after idling.')
       // eslint-disable-next-line @typescript-eslint/no-use-before-define
-      if (!ev.wasClean) onConnectionError(ev)
+    })
+    w.wsclient.on('reconnecting', async () => {
+      console.warn('reconnecting...')
+
+      await new Promise(r => setTimeout(r, 1000))
+
+      const connectionState = w.wsclient.state
+      console.warn('reconnecting 2', {connectionState})
+      if (connectionState === 'CONNECTING') {
+        console.warn('trying to reconnect', connectionState)
+        dispatch({type: 'SET_LOADING'})
+      } else {
+        console.warn('(reconnected already...?')
+      }
     })
     w.wsclient.on('error', () => notify('Connection error?', true))
 
@@ -139,24 +154,7 @@ export const Wsclient = () => {
     w.wsclient.getGamesState({})
   }
 
-  const onConnectionError = async (ev: any) => {
-    console.warn('onConnectionError', ev)
-    notify('Connection error?', true)
-    if (Date.now() - w.wsclient.latestMessageTimestamp < 9 * 60 * 1000) {
-      dispatch({type: 'SET_LOADING'})
-      while (true) {
-        if (!w.wsclient.opened) {
-          openWebsocket()
-          break
-        }
-        await new Promise(r => setTimeout(r, 2000))
-      }
-    } else {
-      console.warn('Disconnected after idling.')
-    }
-  }
-
-  if (!(window as any).wsclient) {
+  if (!w.wsclient) {
     openWebsocket()
   }
 

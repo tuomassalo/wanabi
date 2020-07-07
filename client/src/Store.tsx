@@ -10,6 +10,7 @@ const initialState: AppState = {
     showMysteryView: false,
     hasNotificationPermission: Notification.permission === 'granted',
   },
+  // connectionStatus: 'opening',
   // idleSince: +Date.now(),
 }
 

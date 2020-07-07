@@ -11,9 +11,13 @@ interface CommonState {
     hasNotificationPermission: boolean
   }
   // idleSince: number
+  // connectionStatus: 'opening' | 'open' | 'closed' // see websocketclient.ts
 }
 export interface LoadingState extends CommonState {
   phase: 'LOADING'
+}
+export interface DisconnectedState extends CommonState {
+  phase: 'DISCONNECTED'
 }
 export interface InMenuState extends CommonState {
   phase: 'IN_MENU'
@@ -28,13 +32,16 @@ export interface InGameState extends CommonState {
     hand: MaskedCard[]
   }
 }
-export type AppState = LoadingState | InMenuState | InGameState
+export type AppState = DisconnectedState | LoadingState | InMenuState | InGameState
 
 export type Action =
   | {
       type: 'SET_SETTING'
       key: 'sound' | 'showStats' | 'showMysteryView' | 'hasNotificationPermission'
       value: true | false
+    }
+  | {
+      type: 'SET_DISCONNECTED'
     }
   | {
       type: 'SET_LOADING'
@@ -71,7 +78,8 @@ const Reducer = (state: AppState, action: Action): AppState => {
   // If the user is still active (usually by browsing through the turn history),
   // send a keepalive msg to the socket.
   const wsclient: WebSocketClient = (window as any).wsclient
-  if (wsclient && wsclient.latestMessageTimestamp && Date.now() - wsclient.latestMessageTimestamp > 5 * 60 * 1000) {
+  const connectionStatus = wsclient?.state || 'CLOSED'
+  if (connectionStatus && Date.now() - wsclient.latestMessageTimestamp > 5 * 60 * 1000) {
     console.warn('at least five minutes since last wsclient msg, sending a keep-alive msg')
     wsclient.keepalive({})
   }
@@ -82,12 +90,21 @@ const Reducer = (state: AppState, action: Action): AppState => {
         ...state,
         settings: {...state.settings, [action.key]: action.value},
         // idleSince: +Date.now(),
+        // connectionStatus,
+      }
+    case 'SET_DISCONNECTED':
+      return {
+        settings: state.settings,
+        phase: 'DISCONNECTED',
+        // idleSince: +Date.now(),
+        // connectionStatus,
       }
     case 'SET_LOADING':
       return {
         settings: state.settings,
         phase: 'LOADING',
         // idleSince: +Date.now(),
+        // connectionStatus,
       }
     case 'SET_GAMES':
       return {
@@ -95,6 +112,7 @@ const Reducer = (state: AppState, action: Action): AppState => {
         phase: 'IN_MENU',
         games: action.games,
         // idleSince: +Date.now(),
+        // connectionStatus,
       }
     case 'SET_GAME':
       if (action.game)
@@ -106,6 +124,7 @@ const Reducer = (state: AppState, action: Action): AppState => {
           game: action.game,
           speculativeMysteryView: undefined,
           // idleSince: +Date.now(),
+          // connectionStatus,
         }
       else
         return {
@@ -113,6 +132,7 @@ const Reducer = (state: AppState, action: Action): AppState => {
           games: (state as InMenuState).games,
           phase: 'IN_MENU',
           // idleSince: +Date.now(),
+          // connectionStatus,
         }
     case 'ADD_TURN':
       const game = (state as InGameState).game
@@ -123,6 +143,7 @@ const Reducer = (state: AppState, action: Action): AppState => {
         visibleTurnNumber: game.currentTurn.turnNumber,
         speculativeMysteryView: undefined,
         // idleSince: +Date.now(),
+        // connectionStatus,
       } as any
     case 'SET_VISIBLE_TURN':
       return {
@@ -130,18 +151,21 @@ const Reducer = (state: AppState, action: Action): AppState => {
         visibleTurnNumber: action.turnNumber,
         speculativeMysteryView: undefined,
         // idleSince: +Date.now(),
+        // connectionStatus,
       } as any
     case 'SHOW_SPECULATIVE_MYSTERY_VIEW':
       return {
         ...state,
         speculativeMysteryView: {playerIdx: action.playerIdx, hand: action.hand},
         // idleSince: +Date.now(),
+        // connectionStatus,
       } as any
     case 'HIDE_SPECULATIVE_MYSTERY_VIEW':
       return {
         ...state,
         speculativeMysteryView: undefined,
         // idleSince: +Date.now(),
+        // connectionStatus,
       } as any
     default:
       console.warn(action)

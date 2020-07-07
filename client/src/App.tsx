@@ -129,6 +129,12 @@ export const App = () => {
         <Loader type="TailSpin" color="#fff5" height={100} width={100} />
       </div>
     )
+  } else if (state.phase === 'DISCONNECTED') {
+    return (
+      <div>
+        Disconnected. <input type="button" onClick={() => document.location.reload()} value="Reconnect" />
+      </div>
+    )
   }
   const phaseComponent =
     state.phase === 'IN_MENU' ? (
