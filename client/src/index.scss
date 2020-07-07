@@ -183,6 +183,10 @@ div.WPlayer {
 
 .WHintButtons {
   display: none;
+  div {
+    float: left;
+    line-height: 33px;
+  }
   input {
     vertical-align: middle;
     width: 30px;

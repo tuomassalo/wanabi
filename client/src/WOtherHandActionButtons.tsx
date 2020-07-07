@@ -38,31 +38,33 @@ export default function WOtherHandActionButtons({
 
   return (
     <div className="WHintButtons">
-      Give Hint:
-      {AllColors.filter(c => c !== 'X').map(is => (
-        <input
-          key={is}
-          type="button"
-          disabled={!hintsAvailable}
-          className={`WColor-${is}`}
-          value=""
-          onMouseEnter={() => showSpeculativeHint(is)}
-          onMouseLeave={() => hideSpeculativeHint()}
-          onClick={() => giveHint(is)}
-        />
-      ))}
-      &nbsp; &nbsp;
-      {([1, 2, 3, 4, 5] as TNum[]).map(is => (
-        <input
-          key={is}
-          type="button"
-          disabled={!hintsAvailable}
-          value={is}
-          onMouseEnter={() => showSpeculativeHint(is)}
-          onMouseLeave={() => hideSpeculativeHint()}
-          onClick={() => giveHint(is)}
-        />
-      ))}
+      <div>Give Hint:&nbsp;</div>
+      <div>
+        {AllColors.filter(c => c !== 'X').map(is => (
+          <input
+            key={is}
+            type="button"
+            disabled={!hintsAvailable}
+            className={`WColor-${is}`}
+            value=""
+            onMouseEnter={() => showSpeculativeHint(is)}
+            onMouseLeave={() => hideSpeculativeHint()}
+            onClick={() => giveHint(is)}
+          />
+        ))}
+        <br />
+        {([1, 2, 3, 4, 5] as TNum[]).map(is => (
+          <input
+            key={is}
+            type="button"
+            disabled={!hintsAvailable}
+            value={is}
+            onMouseEnter={() => showSpeculativeHint(is)}
+            onMouseLeave={() => hideSpeculativeHint()}
+            onClick={() => giveHint(is)}
+          />
+        ))}
+      </div>
     </div>
   )
 }
