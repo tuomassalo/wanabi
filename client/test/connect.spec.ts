@@ -70,6 +70,7 @@ test('connect, createGame', async done => {
         turnsLeft: null,
         woundCount: 0,
       },
+      difficultyParams: {maxHintCount: 8, maxWoundCount: 3},
       players: [{id: jasmine.any(String), idx: 0, isConnected: true, name: 'BOBBY_TABLES'}],
       playedActions: [{action: {type: 'START'}, timestamp: jasmine.any(String)}],
     },
@@ -105,6 +106,7 @@ test('getGamesState', async done => {
           turnsLeft: null,
           woundCount: 0,
         },
+        difficultyParams: {maxHintCount: 8, maxWoundCount: 3},
         playedActions: [{action: {type: 'START'}, timestamp: jasmine.any(String)}],
         players: [{id: 'REDACTED', idx: 0, isConnected: true, name: 'BOBBY_TABLES'}],
       },
@@ -138,6 +140,7 @@ test('joinGame', async done => {
         turnsLeft: null,
         woundCount: 0,
       },
+      difficultyParams: {maxHintCount: 8, maxWoundCount: 3},
       playedActions: [{action: {type: 'START'}, timestamp: jasmine.any(String)}],
       players: [
         {id: 'REDACTED', idx: 0, isConnected: true, name: 'BOBBY_TABLES'},
@@ -163,15 +166,21 @@ test('startGame', async done => {
         maskedPlayerViews: [
           {
             isMe: true,
-            hand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
+            hand: [
+              {hints: jasmine.any(Array)},
+              {hints: jasmine.any(Array)},
+              {hints: jasmine.any(Array)},
+              {hints: jasmine.any(Array)},
+              {hints: jasmine.any(Array)},
+            ],
           },
           {
             hand: [
-              {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
-              {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
-              {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
-              {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
-              {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
+              {num: jasmine.any(Number), color: jasmine.any(String), hints: jasmine.any(Array)},
+              {num: jasmine.any(Number), color: jasmine.any(String), hints: jasmine.any(Array)},
+              {num: jasmine.any(Number), color: jasmine.any(String), hints: jasmine.any(Array)},
+              {num: jasmine.any(Number), color: jasmine.any(String), hints: jasmine.any(Array)},
+              {num: jasmine.any(Number), color: jasmine.any(String), hints: jasmine.any(Array)},
             ],
             isMe: false,
           },
@@ -185,6 +194,7 @@ test('startGame', async done => {
         turnsLeft: null,
         woundCount: 0,
       },
+      difficultyParams: {maxHintCount: 8, maxWoundCount: 3},
       playedActions: [{action: {type: 'START'}, timestamp: jasmine.any(String)}],
       players: [
         {id: jasmine.any(String), idx: 0, isConnected: true, name: 'BOBBY_TABLES'},
@@ -198,14 +208,21 @@ test('startGame', async done => {
 })
 
 test('act', async done => {
-  ws1.act({gameId, actionParams: {type: 'DISCARD', cardIdx: 2}})
+  await new Promise(r => setTimeout(r, 100))
+  ws1.act({gameId, actionParams: {type: 'HINT', toPlayerIdx: 1, is: 1}})
   expect(await waitMsg('ws1')).toEqual({
     game: {
       gameId: jasmine.any(String),
       currentTurn: {
-        action: {type: 'DISCARD', card: jasmine.any(String), cardIdx: 2},
-        discardPile: [jasmine.any(String)],
-        hintCount: 8,
+        action: {
+          type: 'HINT',
+          matches: jasmine.any(Array),
+          toPlayerIdx: 1,
+          toPlayerName: 'Beatrice',
+          is: 1,
+        },
+        discardPile: [],
+        hintCount: 7,
         inTurn: 1,
         maskedPlayerViews: [
           {
@@ -213,28 +230,26 @@ test('act', async done => {
             hand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
           },
           {
-            hand: [
-              {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
-              {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
-              {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
-              {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
-              {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
-            ],
+            hand: jasmine.any(Array),
             isMe: false,
           },
         ],
         score: 0,
         status: 'RUNNING',
-        stockSize: 49,
+        stockSize: 50,
         table: {A: [], B: [], C: [], D: [], E: [], X: []},
         timestamp: jasmine.any(String),
         turnNumber: 1,
         turnsLeft: null,
         woundCount: 0,
       },
+      difficultyParams: {maxHintCount: 8, maxWoundCount: 3},
       playedActions: [
         {action: {type: 'START'}, timestamp: jasmine.any(String)},
-        {action: {type: 'DISCARD', cardIdx: 2, card: jasmine.any(String)}, timestamp: jasmine.any(String)},
+        {
+          action: {type: 'HINT', matches: jasmine.any(Array), toPlayerIdx: 1, toPlayerName: 'Beatrice', is: 1},
+          timestamp: jasmine.any(String),
+        },
       ],
       players: [
         {id: jasmine.any(String), idx: 0, isConnected: true, name: 'BOBBY_TABLES'},
@@ -248,38 +263,54 @@ test('act', async done => {
     game: {
       gameId: jasmine.any(String),
       currentTurn: {
-        action: {type: 'DISCARD', card: jasmine.any(String), cardIdx: 2},
-        discardPile: [jasmine.any(String)],
-        hintCount: 8,
+        action: {type: 'HINT', matches: jasmine.any(Array), toPlayerIdx: 1, toPlayerName: 'Beatrice', is: 1},
+        discardPile: [],
+        hintCount: 7,
         inTurn: 1,
         maskedPlayerViews: [
           {
             hand: [
-              {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
-              {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
-              {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
-              {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
-              {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
+              {num: jasmine.any(Number), color: jasmine.any(String), hints: jasmine.any(Array)},
+              {num: jasmine.any(Number), color: jasmine.any(String), hints: jasmine.any(Array)},
+              {num: jasmine.any(Number), color: jasmine.any(String), hints: jasmine.any(Array)},
+              {num: jasmine.any(Number), color: jasmine.any(String), hints: jasmine.any(Array)},
+              {num: jasmine.any(Number), color: jasmine.any(String), hints: jasmine.any(Array)},
             ],
             isMe: false,
           },
           {
             isMe: true,
-            hand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
+            hand: [
+              {hints: jasmine.any(Array)},
+              {hints: jasmine.any(Array)},
+              {hints: jasmine.any(Array)},
+              {hints: jasmine.any(Array)},
+              {hints: jasmine.any(Array)},
+            ],
           },
         ],
         score: 0,
         status: 'RUNNING',
-        stockSize: 49,
+        stockSize: 50,
         table: {A: [], B: [], C: [], D: [], E: [], X: []},
         timestamp: jasmine.any(String),
         turnNumber: 1,
         turnsLeft: null,
         woundCount: 0,
       },
+      difficultyParams: {maxHintCount: 8, maxWoundCount: 3},
       playedActions: [
         {action: {type: 'START'}, timestamp: jasmine.any(String)},
-        {action: {type: 'DISCARD', cardIdx: 2, card: jasmine.any(String)}, timestamp: jasmine.any(String)},
+        {
+          action: {
+            type: 'HINT',
+            matches: jasmine.any(Array),
+            toPlayerIdx: 1,
+            toPlayerName: 'Beatrice',
+            is: 1,
+          },
+          timestamp: jasmine.any(String),
+        },
       ],
       players: [
         {id: 'REDACTED', idx: 0, isConnected: true, name: 'BOBBY_TABLES'},
@@ -299,23 +330,27 @@ test('An outsider sees the started game, but cannot see any hands', async done =
       {
         gameId: jasmine.any(String),
         currentTurn: {
-          action: {type: 'DISCARD', card: jasmine.any(String), cardIdx: 2},
-          discardPile: [jasmine.any(String)],
-          hintCount: 8,
+          action: {type: 'HINT', matches: jasmine.any(Array), toPlayerIdx: 1, toPlayerName: 'Beatrice', is: 1},
+          discardPile: [],
+          hintCount: 7,
           inTurn: 1,
           maskedPlayerViews: [], // NB: no hands are shown
           score: 0,
           status: 'RUNNING',
-          stockSize: 49,
+          stockSize: 50,
           table: {A: [], B: [], C: [], D: [], E: [], X: []},
           timestamp: jasmine.any(String),
           turnNumber: 1,
           turnsLeft: null,
           woundCount: 0,
         },
+        difficultyParams: {maxHintCount: 8, maxWoundCount: 3},
         playedActions: [
           {action: {type: 'START'}, timestamp: jasmine.any(String)},
-          {action: {type: 'DISCARD', cardIdx: 2, card: jasmine.any(String)}, timestamp: jasmine.any(String)},
+          {
+            action: {type: 'HINT', matches: jasmine.any(Array), toPlayerIdx: 1, toPlayerName: 'Beatrice', is: 1},
+            timestamp: jasmine.any(String),
+          },
         ],
         players: [
           {id: 'REDACTED', idx: 0, isConnected: true, name: 'BOBBY_TABLES'},
@@ -355,16 +390,22 @@ test('An "outsider" can join a game if someone disconnects', async done => {
   expect(msg2.game.currentTurn.maskedPlayerViews).toEqual([
     {
       hand: [
-        {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
-        {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
-        {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
-        {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
-        {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
+        {num: jasmine.any(Number), color: jasmine.any(String), hints: jasmine.any(Array)},
+        {num: jasmine.any(Number), color: jasmine.any(String), hints: jasmine.any(Array)},
+        {num: jasmine.any(Number), color: jasmine.any(String), hints: jasmine.any(Array)},
+        {num: jasmine.any(Number), color: jasmine.any(String), hints: jasmine.any(Array)},
+        {num: jasmine.any(Number), color: jasmine.any(String), hints: jasmine.any(Array)},
       ],
       isMe: false,
     },
     {
-      hand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
+      hand: [
+        {hints: jasmine.any(Array)},
+        {hints: jasmine.any(Array)},
+        {hints: jasmine.any(Array)},
+        {hints: jasmine.any(Array)},
+        {hints: jasmine.any(Array)},
+      ],
       isMe: true,
     },
   ])
@@ -383,16 +424,22 @@ test('An "outsider" can join a game if someone disconnects', async done => {
         maskedPlayerViews: [
           {
             hand: [
-              {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
-              {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
-              {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
-              {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
-              {num: jasmine.any(Number), color: jasmine.any(String), hints: []},
+              {num: jasmine.any(Number), color: jasmine.any(String), hints: jasmine.any(Array)},
+              {num: jasmine.any(Number), color: jasmine.any(String), hints: jasmine.any(Array)},
+              {num: jasmine.any(Number), color: jasmine.any(String), hints: jasmine.any(Array)},
+              {num: jasmine.any(Number), color: jasmine.any(String), hints: jasmine.any(Array)},
+              {num: jasmine.any(Number), color: jasmine.any(String), hints: jasmine.any(Array)},
             ],
             isMe: false,
           },
           {
-            hand: [{hints: []}, {hints: []}, {hints: []}, {hints: []}, {hints: []}],
+            hand: [
+              {hints: jasmine.any(Array)},
+              {hints: jasmine.any(Array)},
+              {hints: jasmine.any(Array)},
+              {hints: jasmine.any(Array)},
+              {hints: jasmine.any(Array)},
+            ],
             isMe: true,
           },
         ],

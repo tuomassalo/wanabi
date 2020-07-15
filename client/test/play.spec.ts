@@ -66,6 +66,7 @@ test('connect, createGame', async done => {
         turnsLeft: null,
         woundCount: 0,
       },
+      difficultyParams: jasmine.any(Object),
       playedActions: [{action: {type: 'START'}, timestamp: jasmine.any(String)}],
       players: [{id: jasmine.any(String), idx: 0, isConnected: true, name: 'BOBBY_TABLES'}],
     },
@@ -102,6 +103,7 @@ test('joinGame', async done => {
         turnsLeft: null,
         woundCount: 0,
       },
+      difficultyParams: jasmine.any(Object),
       playedActions: [{action: {type: 'START'}, timestamp: jasmine.any(String)}],
       players: [
         {id: 'REDACTED', idx: 0, isConnected: true, name: 'BOBBY_TABLES'},
@@ -149,6 +151,7 @@ test('startGame', async done => {
         turnsLeft: null,
         woundCount: 0,
       },
+      difficultyParams: jasmine.any(Object),
       playedActions: [{action: {type: 'START'}, timestamp: jasmine.any(String)}],
       players: [
         {id: jasmine.any(String), idx: 0, isConnected: true, name: 'BOBBY_TABLES'},
@@ -168,21 +171,20 @@ test('act', async done => {
     return ((await waitMsg('ws1')) as game.M_GameState).game.currentTurn
   }
 
-  for (let n = 0; n <= 23; n++) {
-    ws1.act({gameId, actionParams: {type: 'DISCARD', cardIdx: 0}})
+  for (let n = 0; n <= 48; n++) {
+    ws1.act({gameId, actionParams: {type: 'HINT', toPlayerIdx: 1, is: 1}})
 
     turn = await getTurnState()
     expect(turn.turnNumber).toEqual(2 * n + 1)
-    expect(turn.stockSize).toEqual(50 - 2 * n - 1)
     ws2.act({gameId, actionParams: {type: 'DISCARD', cardIdx: 0}})
 
     turn = await getTurnState()
-    expect(turn.stockSize).toEqual(50 - 2 * n - 2)
+    expect(turn.stockSize).toEqual(50 - n - 1)
   }
 
-  ws1.act({gameId, actionParams: {type: 'DISCARD', cardIdx: 0}})
+  ws1.act({gameId, actionParams: {type: 'HINT', toPlayerIdx: 1, is: 1}})
   turn = await getTurnState()
-  expect(turn.turnNumber).toEqual(49)
+  expect(turn.turnNumber).toEqual(99)
   expect(turn.stockSize).toEqual(1)
   expect(turn.turnsLeft).toBeNull()
 
@@ -193,7 +195,7 @@ test('act', async done => {
   // stock is now empty, so turnsLeft starts counting
   expect(turn.turnsLeft).toEqual(2)
 
-  ws1.act({gameId, actionParams: {type: 'DISCARD', cardIdx: 0}})
+  ws1.act({gameId, actionParams: {type: 'HINT', toPlayerIdx: 1, is: 1}})
   turn = await getTurnState()
   expect(turn.turnsLeft).toEqual(1)
 

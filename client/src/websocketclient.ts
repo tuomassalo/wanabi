@@ -2,6 +2,8 @@ import {EventEmitter} from 'events'
 import * as game from 'wanabi-engine'
 import pako from 'pako'
 
+const IS_JSDOM = /\bjsdom\b/.test(navigator.userAgent)
+
 export class WebSocketClient extends EventEmitter {
   websocket: WebSocket
   retries: number
@@ -16,63 +18,61 @@ export class WebSocketClient extends EventEmitter {
   _createWebsocket() {
     clearInterval(this.retryTimer)
     this.retryTimer = setTimeout(() => {
+      // console.warn('retryTimer triggered', this.websocket.readyState)
       this.websocket.close()
       if (--this.retries > 0) {
         console.warn(this.id, 'retrying..., retries=', this.retries)
         this.websocket = this._createWebsocket()
-
-        this.websocket.onclose = ({wasClean, code, reason}) => {
-          const idleTime = Date.now() - this.latestMessageTimestamp
-          console.warn(this.id, 'onclose', {wasClean, code, reason, idleTime})
-          // If the disconnection was due to an idle timeout, emit 'closing'.
-          if (idleTime > 9 * 60 * 1000) {
-            this.emit('closing')
-          } else {
-            this.retries = 4
-            this.websocket = this._createWebsocket()
-            this.emit('reconnecting')
-          }
-        }
-
-        this.websocket.onerror = error => {
-          console.warn(this.id, 'onerror', error)
-
-          this.emit('error', 'ERROR', 'An error has occurred. See console for details.')
-        }
-
-        this.websocket.onmessage = ({data}) => {
-          this.latestMessageTimestamp = Date.now()
-          this.emit('msg', JSON.parse(pako.inflate(data, {to: 'string'})))
-        }
-
-        this.websocket.onopen = () => {
-          console.warn(this.id, 'Clearing timer id', this.retryTimer)
-          clearInterval(this.retryTimer)
-          this.latestMessageTimestamp = Date.now()
-          this.emit('opened')
-          setTimeout(() => {
-            for (const msg of this.queue) {
-              this.send(msg.action, msg.data)
-            }
-          }, 50)
-        }
       } else {
         console.warn(this.id, 'Not retrying anymore')
         this.emit('closing', 'CLOSE', {wasClean: false})
       }
-    }, 5000)
-    console.warn('Timer id', this.retryTimer)
-    return new WebSocket(process.env.REACT_APP_WS_ENDPOINT as string)
-  }
+    }, this.openTimeout)
 
-  // getState() {
-  //   const states = ['CONNECTING', 'OPEN', 'CLOSED', 'CLOSED'] // NB: mapping CLOSING to CLOSED
-  //   return states[this.websocket.readyState]
-  // }
+    const ws = new WebSocket(process.env.REACT_APP_WS_ENDPOINT as string)
+
+    ws.onclose = ({wasClean, code, reason}) => {
+      const idleTime = Date.now() - this.latestMessageTimestamp
+      console.warn(this.id, 'onclose', {wasClean, code, reason, idleTime})
+      // If the disconnection was due to an idle timeout, emit 'closing'.
+      if (idleTime > 9 * 60 * 1000) {
+        this.emit('closing')
+      } else {
+        this.retries = 4
+        this.websocket = this._createWebsocket()
+        this.emit('reconnecting')
+      }
+    }
+
+    ws.onerror = error => {
+      console.warn(this.id, 'onerror', error)
+      this.emit('error', 'ERROR', 'An error has occurred. See console for details.')
+    }
+
+    ws.onmessage = ({data}) => {
+      this.latestMessageTimestamp = Date.now()
+      this.emit('msg', JSON.parse(pako.inflate(data, {to: 'string'})))
+    }
+
+    ws.onopen = () => {
+      console.warn(this.id, 'Clearing timer id', this.retryTimer)
+      clearInterval(this.retryTimer)
+      this.latestMessageTimestamp = Date.now()
+      this.emit('opened')
+      setTimeout(() => {
+        for (const msg of this.queue) {
+          this.send(msg.action, msg.data)
+        }
+      }, 50)
+    }
+    console.warn('Timer id', this.retryTimer)
+    return ws
+  }
 
   constructor() {
     super()
     this.id = Math.random()
+    // console.warn(this.id, 'opening')
     this.retries = 4
     this.websocket = this._createWebsocket()
     this.state = 'CONNECTING'
@@ -94,10 +94,8 @@ export class WebSocketClient extends EventEmitter {
     console.warn('DISCONNECTED.')
 
     // If the websocket was disconnected, reload the window. (.)
-    if (
-      // But not when testing, since jsdom does not implement location.reload()
-      !/\bjsdom\b/.test(navigator.userAgent)
-    ) {
+    // But not when testing, since jsdom does not implement location.reload()
+    if (!IS_JSDOM) {
       setTimeout(() => window.location.reload(), 1000)
     }
   }
