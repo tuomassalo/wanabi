@@ -30,6 +30,11 @@ interface TStartActionParams {
   type: 'START'
 }
 
+export interface DifficultyParams {
+  maxHintCount: number
+  maxWoundCount: number
+}
+
 export type TActionParams = TPlayActionParams | TDiscardActionParams | THintActionParams | TStartActionParams
 type TPlayableActionParams = TPlayActionParams | TDiscardActionParams | THintActionParams
 
@@ -109,6 +114,7 @@ export interface TMaskedGameState {
   gameId: TGameId
   players: (TPlayerState | TPlayerState)[]
   currentTurn: TMaskedTurnState
+  difficultyParams: DifficultyParams
 }
 export interface TCompleteGameState {
   turn0: TTurnState
@@ -117,6 +123,7 @@ export interface TCompleteGameState {
   playedActions: {timestamp: string; action: TResolvedActionState}[]
   players: TPlayerState[]
   timestamp: string
+  difficultyParams: DifficultyParams
 }
 
 export interface TSpeculativeHintState {
@@ -175,6 +182,7 @@ export class Game {
   seed: string
   players: Player[]
   playersById: {[id: string]: Player}
+  difficultyParams: DifficultyParams = {maxHintCount: 8, maxWoundCount: 3}
 
   replay(playedActions: {timestamp: string; action: TResolvedActionState}[]) {
     const resolvedActionToActionParams = (a: TResolvedActionState): TActionParams => {
@@ -303,6 +311,8 @@ export class Game {
     const seed = params.seed || randomBytes(20).toString('hex')
     const stock = new Pile(Card.getFullDeck()).shuffle(seed).toJSON()
 
+    const difficultyParams: DifficultyParams = {maxHintCount: 8, maxWoundCount: 3}
+
     return new Game({
       from: 'SERIALIZED_GAME',
       game: {
@@ -310,6 +320,7 @@ export class Game {
         seed,
         turn0: {
           ...defaultTurn0Properties,
+          hintCount: difficultyParams.maxHintCount,
           stock,
           status: 'WAITING_FOR_PLAYERS',
           action: {type: 'START'},
@@ -325,6 +336,7 @@ export class Game {
         ],
         playedActions: [],
         timestamp,
+        difficultyParams,
       },
     })
   }
@@ -361,13 +373,14 @@ export class Game {
       playedActions: this.turns.map(t => ({action: t.action, timestamp: t.timestamp})),
       timestamp: this.turns[this.turns.length - 1].timestamp,
       players: this.players.map(p => p.toJSON()),
+      difficultyParams: this.difficultyParams,
     }
   }
 
   act(playerId: TPlayerId, actionParams: TPlayableActionParams) {
     // console.warn('ACT', {playerId, actionParams, inStock: this.currentTurn.stock.size})
 
-    this.turns.push(this.currentTurn.playAction(playerId, actionParams))
+    this.turns.push(this.currentTurn.playAction(playerId, actionParams, this.difficultyParams))
     this.checkIntegrity()
   }
 
@@ -378,6 +391,7 @@ export class Game {
       currentTurn: this.currentTurn.getState(playerId),
       playedActions: [], // this.turns.map(t => ({action: t.action, timestamp: t.timestamp})),
       players: this.players.map(p => ({...p.toJSON(), id: p.id === playerId ? p.id : 'REDACTED'})),
+      difficultyParams: this.difficultyParams,
     })
 
     return maskedGame.currentTurn.getState()
@@ -390,6 +404,7 @@ export class Game {
       currentTurn: this.currentTurn.getState(playerId),
       playedActions: this.turns.map(t => ({action: t.action, timestamp: t.timestamp})),
       players: this.players.map(p => ({...p.toJSON(), id: p.id === playerId ? p.id : 'REDACTED'})),
+      difficultyParams: this.difficultyParams,
     }
   }
 

@@ -2,7 +2,15 @@ import {Pile} from './pile'
 import {Player, TPlayerId, TPlayerState} from './player'
 import {MaskedCard, Card, AllColors, AllNums} from './card'
 import {Hand, TMaskedPlayerViewState} from './hand'
-import {TTurnState, TMaskedTurnState, TResolvedActionState, TBaseTurnState, TGameStatus, TActionParams} from './game'
+import {
+  TTurnState,
+  TMaskedTurnState,
+  TResolvedActionState,
+  TBaseTurnState,
+  TGameStatus,
+  TActionParams,
+  DifficultyParams,
+} from './game'
 import {Table} from './table'
 import {resolveActionability} from './actionability-resolver'
 import {demystify} from './demystifier'
@@ -140,7 +148,7 @@ export class Turn extends BaseTurn {
       }),
     )
   }
-  playAction(playerId: string, actionParams: TActionParams): Turn {
+  playAction(playerId: string, actionParams: TActionParams, {maxHintCount, maxWoundCount}: DifficultyParams): Turn {
     // console.warn(1234, {
     //   type: actionParams.type,
     //   playerId,
@@ -199,7 +207,7 @@ export class Turn extends BaseTurn {
         const success: boolean = newTurn.table.play(card)
         if (success) {
           // Successful play:
-          if (card.num === 5 && newTurn.hintCount < 8) {
+          if (card.num === 5 && newTurn.hintCount < maxHintCount) {
             newTurn.hintCount++
           }
           if (newTurn.score === AllColors.length * AllNums.length) {
@@ -210,13 +218,13 @@ export class Turn extends BaseTurn {
           newTurn.discardPile.add(card) // TODO: add metadata?
           newTurn.woundCount++
           // TODO: log
-          if (newTurn.woundCount === 3) {
+          if (newTurn.woundCount === maxWoundCount) {
             newTurn.status = 'GAMEOVER'
           }
         }
         newTurn.action = {...actionParams, card: card.toJSON(), success}
       } else if (actionParams.type === 'DISCARD') {
-        if (newTurn.hintCount === 8) {
+        if (newTurn.hintCount === maxHintCount) {
           throw new GameError('CANNOT_DISCARDS_WHEN_MAX_HINTS')
         }
         newTurn.hintCount++
