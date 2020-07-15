@@ -18,6 +18,14 @@ function createTestGame() {
            X1 X2`,
     ),
   })
+  // First, the players consume six hints, so that they can discard cards later.
+  // (This is workaround for not having to rewrite all tests after implementing
+  // `CANNOT_DISCARDS_WHEN_MAX_HINTS`.)
+  for (let i = 1; i <= 3; i++) {
+    g.act(g.players[0].id, {type: 'HINT', is: 1, toPlayerIdx: 1})
+    g.act(g.players[1].id, {type: 'HINT', is: 1, toPlayerIdx: 0})
+  }
+
   // p0 always plays the oldest card from hand, p1 always discards
   for (let i = 1; i <= 6; i++) {
     g.act(g.players[0].id, {type: 'PLAY', cardIdx: 0})
@@ -27,7 +35,7 @@ function createTestGame() {
 }
 
 describe('Hints', () => {
-  it('should accumulate when discarding but have a max of ', () => {
+  it('should accumulate when discarding', () => {
     const g = createTestGame()
     expect(g.COMPAT_getMaskedTurnState(g.players[0].id).hintCount).toEqual(8)
     // use two hints
@@ -37,8 +45,10 @@ describe('Hints', () => {
     g.act(g.players[0].id, {type: 'DISCARD', cardIdx: 0})
     g.act(g.players[1].id, {type: 'DISCARD', cardIdx: 0})
     expect(g.COMPAT_getMaskedTurnState(g.players[0].id).hintCount).toEqual(8)
-    g.act(g.players[0].id, {type: 'DISCARD', cardIdx: 0})
-    expect(g.COMPAT_getMaskedTurnState(g.players[0].id).hintCount).toEqual(8)
+  })
+  it('should not accumulate over 8, error instead', () => {
+    const g = createTestGame()
+    expect(() => g.act(g.players[0].id, {type: 'DISCARD', cardIdx: 0})).toThrow('CANNOT_DISCARDS_WHEN_MAX_HINTS')
   })
   it('should run out', () => {
     const g = createTestGame()
@@ -76,7 +86,7 @@ describe('An ongoing game', () => {
         E: [],
         X: [],
       },
-      turnNumber: 2 * 6,
+      turnNumber: 18,
       inTurn: 0,
       turnsLeft: null,
       score: 5,
@@ -93,20 +103,20 @@ describe('An ongoing game', () => {
     g.act(g.players[0].id, {type: 'HINT', toPlayerIdx: 1, is: 5})
     expect(g.COMPAT_getMaskedTurnState(g.players[1].id).hintCount).toEqual(7)
     expect(g.COMPAT_getMaskedTurnState(g.players[1].id).maskedPlayerViews[1].hand).toEqual([
-      {hints: [{turnNumber: 12, is: 5, result: false}]},
-      {hints: [{turnNumber: 12, is: 5, result: false}]},
-      {hints: [{turnNumber: 12, is: 5, result: false}]},
-      {hints: [{turnNumber: 12, is: 5, result: false}]},
-      {hints: [{turnNumber: 12, is: 5, result: false}]},
+      {hints: [{turnNumber: 18, is: 5, result: false}]},
+      {hints: [{turnNumber: 18, is: 5, result: false}]},
+      {hints: [{turnNumber: 18, is: 5, result: false}]},
+      {hints: [{turnNumber: 18, is: 5, result: false}]},
+      {hints: [{turnNumber: 18, is: 5, result: false}]},
     ])
 
     // the hints received by p1 are also visible to p0
     expect(g.COMPAT_getMaskedTurnState(g.players[0].id).maskedPlayerViews[1].hand).toEqual([
-      {color: 'B', num: 1, actionability: 'PLAYABLE', hints: [{turnNumber: 12, is: 5, result: false}]},
-      {color: 'B', num: 2, actionability: 'UNPLAYABLE', hints: [{turnNumber: 12, is: 5, result: false}]},
-      {color: 'B', num: 2, actionability: 'UNPLAYABLE', hints: [{turnNumber: 12, is: 5, result: false}]},
-      {color: 'D', num: 4, actionability: 'UNPLAYABLE', hints: [{turnNumber: 12, is: 5, result: false}]},
-      {color: 'X', num: 2, actionability: 'UNPLAYABLE', hints: [{turnNumber: 12, is: 5, result: false}]},
+      {color: 'B', num: 1, actionability: 'PLAYABLE', hints: [{turnNumber: 18, is: 5, result: false}]},
+      {color: 'B', num: 2, actionability: 'UNPLAYABLE', hints: [{turnNumber: 18, is: 5, result: false}]},
+      {color: 'B', num: 2, actionability: 'UNPLAYABLE', hints: [{turnNumber: 18, is: 5, result: false}]},
+      {color: 'D', num: 4, actionability: 'UNPLAYABLE', hints: [{turnNumber: 18, is: 5, result: false}]},
+      {color: 'X', num: 2, actionability: 'UNPLAYABLE', hints: [{turnNumber: 18, is: 5, result: false}]},
     ])
 
     // we are not interested in the results here
@@ -120,8 +130,8 @@ describe('An ongoing game', () => {
     expect(g.COMPAT_getMaskedTurnState(g.players[1].id).maskedPlayerViews[1].hand).toEqual([
       {
         hints: [
-          {turnNumber: 12, is: 5, result: false},
-          {turnNumber: 14, is: 'B', result: true},
+          {turnNumber: 18, is: 5, result: false},
+          {turnNumber: 20, is: 'B', result: true},
         ],
         possibleCards: [
           {count: 1, prob: 1 / 13, value: 'B1', actionability: 'PLAYABLE'},
@@ -136,8 +146,8 @@ describe('An ongoing game', () => {
       },
       {
         hints: [
-          {turnNumber: 12, is: 5, result: false},
-          {turnNumber: 14, is: 'B', result: true},
+          {turnNumber: 18, is: 5, result: false},
+          {turnNumber: 20, is: 'B', result: true},
         ],
         possibleCards: [
           {count: 1, prob: 1 / 13, value: 'B1', actionability: 'PLAYABLE'},
@@ -152,8 +162,8 @@ describe('An ongoing game', () => {
       },
       {
         hints: [
-          {turnNumber: 12, is: 5, result: false},
-          {turnNumber: 14, is: 'B', result: true},
+          {turnNumber: 18, is: 5, result: false},
+          {turnNumber: 20, is: 'B', result: true},
         ],
         possibleCards: [
           {count: 1, prob: 1 / 13, value: 'B1', actionability: 'PLAYABLE'},
@@ -168,14 +178,14 @@ describe('An ongoing game', () => {
       },
       {
         hints: [
-          {turnNumber: 12, is: 5, result: false},
-          {turnNumber: 14, is: 'B', result: false},
+          {turnNumber: 18, is: 5, result: false},
+          {turnNumber: 20, is: 'B', result: false},
         ],
       },
       {
         hints: [
-          {turnNumber: 12, is: 5, result: false},
-          {turnNumber: 14, is: 'B', result: true}, // NB! Is really 'X', but looks truthy as 'B'
+          {turnNumber: 18, is: 5, result: false},
+          {turnNumber: 20, is: 'B', result: true}, // NB! Is really 'X', but looks truthy as 'B'
         ],
         possibleCards: [
           {count: 1, prob: 1 / 13, value: 'B1', actionability: 'PLAYABLE'},
@@ -199,9 +209,9 @@ describe('An ongoing game', () => {
     expect(g.COMPAT_getMaskedTurnState(g.players[1].id).maskedPlayerViews[1].hand).toEqual([
       {
         hints: [
-          {turnNumber: 12, is: 5, result: false},
-          {turnNumber: 14, is: 'B', result: true},
-          {turnNumber: 16, is: 2, result: false},
+          {turnNumber: 18, is: 5, result: false},
+          {turnNumber: 20, is: 'B', result: true},
+          {turnNumber: 22, is: 2, result: false},
         ],
         possibleCards: [
           {value: 'B1', prob: 1 / 9, count: 1, actionability: 'PLAYABLE'},
@@ -215,9 +225,9 @@ describe('An ongoing game', () => {
       {
         num: 2,
         hints: [
-          {turnNumber: 12, is: 5, result: false},
-          {turnNumber: 14, is: 'B', result: true},
-          {turnNumber: 16, is: 2, result: true},
+          {turnNumber: 18, is: 5, result: false},
+          {turnNumber: 20, is: 'B', result: true},
+          {turnNumber: 22, is: 2, result: true},
         ],
         possibleCards: [
           {value: 'B2', prob: 1 / 2, count: 2},
@@ -228,9 +238,9 @@ describe('An ongoing game', () => {
       {
         num: 2,
         hints: [
-          {turnNumber: 12, is: 5, result: false},
-          {turnNumber: 14, is: 'B', result: true},
-          {turnNumber: 16, is: 2, result: true},
+          {turnNumber: 18, is: 5, result: false},
+          {turnNumber: 20, is: 'B', result: true},
+          {turnNumber: 22, is: 2, result: true},
         ],
         possibleCards: [
           {value: 'B2', prob: 1 / 2, count: 2},
@@ -240,16 +250,16 @@ describe('An ongoing game', () => {
       },
       {
         hints: [
-          {turnNumber: 12, is: 5, result: false},
-          {turnNumber: 14, is: 'B', result: false},
-          {turnNumber: 16, is: 2, result: false},
+          {turnNumber: 18, is: 5, result: false},
+          {turnNumber: 20, is: 'B', result: false},
+          {turnNumber: 22, is: 2, result: false},
         ],
       },
       {
         hints: [
-          {turnNumber: 12, is: 5, result: false},
-          {turnNumber: 14, is: 'B', result: true}, // really an 'X'
-          {turnNumber: 16, is: 2, result: true},
+          {turnNumber: 18, is: 5, result: false},
+          {turnNumber: 20, is: 'B', result: true}, // really an 'X'
+          {turnNumber: 22, is: 2, result: true},
         ],
         num: 2,
         possibleCards: [

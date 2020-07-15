@@ -6,6 +6,9 @@ describe('A tight three-player game', () => {
   it('should have proper state after 2*24 turns', () => {
     // p0 always plays the oldest card from hand, p1 always discards
     for (let i = 1; i <= 24; i++) {
+      // This is workaround for not having to rewrite all tests after
+      // implementing `CANNOT_DISCARDS_WHEN_MAX_HINTS`.
+      g.currentTurn.hintCount = 0
       g.act(g.players[0].id, {type: 'PLAY', cardIdx: 0})
       g.act(g.players[1].id, {type: 'DISCARD', cardIdx: 0})
     }
@@ -32,7 +35,7 @@ describe('A tight three-player game', () => {
         .trim()
         .split(/\s+/),
       // gameId: jasmine.any(String),
-      hintCount: 8,
+      hintCount: 1,
       inTurn: 0,
       maskedPlayerViews: [
         {
@@ -155,7 +158,7 @@ describe('A tight three-player game', () => {
         `
         .trim()
         .split(/\s+/),
-      hintCount: 8,
+      hintCount: 3,
       woundCount: 0,
       table: {
         A: 'A1,A2,A3,A4,A5'.split(','),

@@ -20,7 +20,8 @@ function createTestGame() {
 
 fdescribe('When playing color A...', () => {
   const g = createTestGame()
-  fit('First, A1 should be PLAYABLE, A5 UNDISCARDABLE and others UNPLAYABLE', () => {
+  g.currentTurn.hintCount = 4 // to work around CANNOT_DISCARDS_WHEN_MAX_HINTS
+  it('First, A1 should be PLAYABLE, A5 UNDISCARDABLE and others UNPLAYABLE', () => {
     // but first, some hints
     // expect(g.COMPAT_getRefinedTurnState(g.players[0].id).hintCount).toEqual(9)
     // use two hints

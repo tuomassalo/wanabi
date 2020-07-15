@@ -216,8 +216,11 @@ export class Turn extends BaseTurn {
         }
         newTurn.action = {...actionParams, card: card.toJSON(), success}
       } else if (actionParams.type === 'DISCARD') {
+        if (newTurn.hintCount === 8) {
+          throw new GameError('CANNOT_DISCARDS_WHEN_MAX_HINTS')
+        }
+        newTurn.hintCount++
         newTurn.discardPile.add(card)
-        if (newTurn.hintCount < 8) newTurn.hintCount++
         newTurn.action = {...actionParams, card: card.toJSON()}
       }
     }
