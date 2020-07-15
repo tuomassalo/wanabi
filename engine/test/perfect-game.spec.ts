@@ -91,7 +91,7 @@ describe('A perfect two-player game without any hints or discards', () => {
       action: jasmine.any(Object),
       stockSize: 21,
       discardPile: [],
-      hintCount: 8,
+      hintCount: 8, // NB: has not risen over the maximum
       woundCount: 0,
       table: {
         A: 'A1,A2,A3,A4,A5'.split(','),
