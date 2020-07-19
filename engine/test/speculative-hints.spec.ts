@@ -35,6 +35,7 @@ describe('Speculative hint', () => {
     const maskedGame = new MaskedGame({
       gameId: g.gameId,
       currentTurn: g.currentTurn.getState(g.players[0].id),
+      difficultyParams: {maxHintCount: 8, maxWoundCount: 3},
       playedActions: [], // g.turns.map(t => ({action: t.action, timestamp: t.timestamp})),
       players: g.players.map(p => ({...p.toJSON(), id: p.id === g.players[0].id ? p.id : 'REDACTED'})),
     })
@@ -91,6 +92,7 @@ describe('Speculative hint', () => {
       currentTurn: g.currentTurn.getState(g.players[0].id),
       playedActions: [], // g.turns.map(t => ({action: t.action, timestamp: t.timestamp})),
       players: g.players.map(p => ({...p.toJSON(), id: p.id === g.players[0].id ? p.id : 'REDACTED'})),
+      difficultyParams: {maxHintCount: 8, maxWoundCount: 3},
     })
 
     expect(

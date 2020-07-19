@@ -24,6 +24,7 @@ export interface TMaskedCardState {
   hints?: THintResultState[]
   possibleCards?: TPossibleCardState[]
   actionability?: TActionability
+  was?: TCardState // recorded after playing/discarding
 }
 
 export type TCardValueState = string
@@ -119,11 +120,13 @@ export class MaskedCard {
   possibleCards?: PossibleCard[]
   actionability?: TActionability
   hints: THintResultState[] = []
+  was?: Card
   constructor(c: TMaskedCardState) {
     this.color = c.color
     this.num = c.num
     this.actionability = c.actionability
     if (c.possibleCards) this.possibleCards = c.possibleCards.map(pc => new PossibleCard(pc))
+    if (c.was) this.was = new Card(c.was)
     this.hints = c.hints || []
   }
   get value() {
@@ -137,6 +140,7 @@ export class MaskedCard {
       possibleCards:
         this.possibleCards && this.possibleCards.length ? this.possibleCards.map(pc => pc.toJSON()) : undefined,
       hints: this.hints,
+      was: this.was,
     }
   }
 }

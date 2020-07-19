@@ -285,6 +285,21 @@ div.WUpToNinePossibleCards .WCard {
   margin: 0 $cardWidth / 30 $cardWidth / 11 0;
 }
 
+.WWasntCard {
+  opacity: 0.5;
+}
+div.WUpToFourPossibleCards .WWasCard {
+  transform: rotate(10deg) scale(1.1);
+  z-index: 3;
+}
+div.WUpToNinePossibleCards .WWasCard {
+  transform: rotate(10deg) scale(1.2);
+  z-index: 3;
+}
+.WWasCard {
+  transform: rotate(5deg);
+}
+
 div.WTable {
   > div {
     display: inline-block;

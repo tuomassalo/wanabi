@@ -38,12 +38,12 @@ export interface DifficultyParams {
 export type TActionParams = TPlayActionParams | TDiscardActionParams | THintActionParams | TStartActionParams
 type TPlayableActionParams = TPlayActionParams | TDiscardActionParams | THintActionParams
 
-interface TResolvedStartActionState extends TStartActionParams {} // added by the constructor
-interface TResolvedPlayActionState extends TPlayActionParams {
+export interface TResolvedStartActionState extends TStartActionParams {} // added by the constructor
+export interface TResolvedPlayActionState extends TPlayActionParams {
   card: TCardValueState
   success: boolean
 }
-interface TResolvedDiscardActionState extends TDiscardActionParams {
+export interface TResolvedDiscardActionState extends TDiscardActionParams {
   card: TCardValueState
 }
 export interface TResolvedHintActionState extends THintActionParams {

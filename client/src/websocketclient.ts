@@ -51,6 +51,7 @@ export class WebSocketClient extends EventEmitter {
 
     ws.onmessage = ({data}) => {
       this.latestMessageTimestamp = Date.now()
+      // console.warn('MSG', JSON.parse(pako.inflate(data, {to: 'string'})))
       this.emit('msg', JSON.parse(pako.inflate(data, {to: 'string'})))
     }
 

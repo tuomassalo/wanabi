@@ -6,10 +6,7 @@ describe('A perfect two-player game without any hints or discards', () => {
   const g = new Game({
     from: 'NEW_TEST_GAME',
     playerNames: ['Bonnie', 'Clyde'],
-    deck: createDeck(
-      ['A', 'B', 'C', 'D', 'E', 'X'].flatMap(c => [1, 2, 3, 4, 5].map(n => c + n)).join(' '),
-      // NB: No idea why vscode claims that flatMap does not exist  on type 'string[]'
-    ),
+    deck: createDeck(['A', 'B', 'C', 'D', 'E', 'X'].flatMap(c => [1, 2, 3, 4, 5].map(n => c + n)).join(' ')),
   })
   it('should have correct setup', () => {
     expect(g.COMPAT_getMaskedTurnState(g.players[0].id)).toEqual({

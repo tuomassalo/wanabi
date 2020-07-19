@@ -6,7 +6,7 @@ import {TRefinedMaskedCardState} from './refiner'
 
 export default class WMysteryCard extends React.Component<{card: TRefinedMaskedCardState}> {
   render() {
-    const {color, num, possibleCards} = this.props.card
+    const {color, num, possibleCards, was} = this.props.card
     const allPossibleCards: {card: Card; prob: number; actionability?: TActionability}[][] = (possibleCards || []).map(
       pc =>
         Array(pc.count).fill({
@@ -26,6 +26,15 @@ export default class WMysteryCard extends React.Component<{card: TRefinedMaskedC
       //   )
       // } else {
       // show a collection of miniature cards
+
+      const wasCls = (card: Card) => {
+        if (was) {
+          return card.num === was.num && card.color === was.color ? 'WWasCard' : 'WWasntCard'
+        } else {
+          return ''
+        }
+      }
+
       return (
         <div
           className={
@@ -36,7 +45,7 @@ export default class WMysteryCard extends React.Component<{card: TRefinedMaskedC
           {/* NB: bogus index, might break animations */}
           {allPossibleCards.map((pcs, idx0) => {
             return (
-              <div key={idx0}>
+              <div key={idx0} className={wasCls(pcs[0].card)}>
                 {pcs
                   .map((pc, idx1) =>
                     idx1 === 0 ? (
@@ -63,9 +72,10 @@ export default class WMysteryCard extends React.Component<{card: TRefinedMaskedC
       )
       // }
     } else {
-      // too many possible cards - we only know color or num or neither
-
-      return (
+      // the card is completely known OR completely unknown.
+      return was && !(color && num) ? (
+        <div className={`WCard WMysteryCard WWasCard WColor-${was.color}`}>{was.num}</div>
+      ) : (
         <div className={`WCard WCard-${this.props.card.actionability} WMysteryCard WColor-${color}`}>
           {num || '\xa0'}
         </div>
