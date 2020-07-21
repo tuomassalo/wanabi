@@ -7,6 +7,7 @@ import {GameError} from './errors'
 import {randomBytes} from 'crypto'
 import {Turn} from './turn'
 import {MaskedGame} from './masked-game'
+import {shuffle} from 'lodash'
 
 export type TGameStatus = 'WAITING_FOR_PLAYERS' | 'RUNNING' | 'GAMEOVER' | 'FINISHED'
 export type TGameId = string
@@ -30,9 +31,10 @@ interface TStartActionParams {
   type: 'START'
 }
 
-export interface DifficultyParams {
+export interface GameParams {
   maxHintCount: number
   maxWoundCount: number
+  shufflePlayers: 'SHUFFLE_NONE' | 'SHUFFLE_RANDOMIZE' | 'SHUFFLE_RANDOMIZE_AND_ANONYMIZE'
 }
 
 export type TActionParams = TPlayActionParams | TDiscardActionParams | THintActionParams | TStartActionParams
@@ -114,7 +116,7 @@ export interface TMaskedGameState {
   gameId: TGameId
   players: (TPlayerState | TPlayerState)[]
   currentTurn: TMaskedTurnState
-  difficultyParams: DifficultyParams
+  gameParams: GameParams
 }
 export interface TCompleteGameState {
   turn0: TTurnState
@@ -123,7 +125,7 @@ export interface TCompleteGameState {
   playedActions: {timestamp: string; action: TResolvedActionState}[]
   players: TPlayerState[]
   timestamp: string
-  difficultyParams: DifficultyParams
+  gameParams: GameParams
 }
 
 export interface TSpeculativeHintState {
@@ -182,7 +184,7 @@ export class Game {
   seed: string
   players: Player[]
   playersById: {[id: string]: Player}
-  difficultyParams: DifficultyParams = {maxHintCount: 8, maxWoundCount: 3}
+  gameParams: GameParams = {maxHintCount: 8, maxWoundCount: 3, shufflePlayers: 'SHUFFLE_NONE'}
 
   replay(playedActions: {timestamp: string; action: TResolvedActionState}[]) {
     const resolvedActionToActionParams = (a: TResolvedActionState): TActionParams => {
@@ -236,6 +238,7 @@ export class Game {
       this.seed = params.game.seed
       this.players = params.game.players.map(p => new Player(p))
       this.turns = [new Turn(params.game.turn0, params.game.players)]
+      this.gameParams = params.game.gameParams
 
       if (this.currentTurn.status === 'RUNNING' && this.currentTurn.hands[0].cards.length === 0) {
         this.deal()
@@ -311,7 +314,7 @@ export class Game {
     const seed = params.seed || randomBytes(20).toString('hex')
     const stock = new Pile(Card.getFullDeck()).shuffle(seed).toJSON()
 
-    const difficultyParams: DifficultyParams = {maxHintCount: 8, maxWoundCount: 3}
+    const gameParams: GameParams = {maxHintCount: 8, maxWoundCount: 3, shufflePlayers: 'SHUFFLE_NONE'}
 
     return new Game({
       from: 'SERIALIZED_GAME',
@@ -320,7 +323,7 @@ export class Game {
         seed,
         turn0: {
           ...defaultTurn0Properties,
-          hintCount: difficultyParams.maxHintCount,
+          hintCount: gameParams.maxHintCount,
           stock,
           status: 'WAITING_FOR_PLAYERS',
           action: {type: 'START'},
@@ -336,7 +339,7 @@ export class Game {
         ],
         playedActions: [],
         timestamp,
-        difficultyParams,
+        gameParams,
       },
     })
   }
@@ -356,10 +359,31 @@ export class Game {
 
     return new Game({from: 'SERIALIZED_GAME', game: pendingGame.toJSON()})
   }
+  static setPendingGameParams(pendingGame: Game, gameParams: GameParams): Game {
+    const turn0 = pendingGame.turns[0]
+    pendingGame.gameParams = gameParams
+    turn0.status = 'RUNNING'
+
+    return new Game({from: 'SERIALIZED_GAME', game: pendingGame.toJSON()})
+  }
+
   static startPendingGame(pendingGame: Game): Game {
     const turn0 = pendingGame.turns[0]
 
     turn0.status = 'RUNNING'
+
+    if (pendingGame.gameParams.shufflePlayers !== 'SHUFFLE_NONE') {
+      pendingGame.players = shuffle(pendingGame.players)
+      // fix indices
+      for (const [idx, p] of pendingGame.players.entries()) {
+        p.idx = idx
+      }
+      if (pendingGame.gameParams.shufflePlayers === 'SHUFFLE_RANDOMIZE_AND_ANONYMIZE') {
+        for (const [idx, p] of pendingGame.players.entries()) {
+          p.name = 'P' + (idx + 1)
+        }
+      }
+    }
 
     return new Game({from: 'SERIALIZED_GAME', game: pendingGame.toJSON()})
   }
@@ -373,14 +397,14 @@ export class Game {
       playedActions: this.turns.map(t => ({action: t.action, timestamp: t.timestamp})),
       timestamp: this.turns[this.turns.length - 1].timestamp,
       players: this.players.map(p => p.toJSON()),
-      difficultyParams: this.difficultyParams,
+      gameParams: this.gameParams,
     }
   }
 
   act(playerId: TPlayerId, actionParams: TPlayableActionParams) {
     // console.warn('ACT', {playerId, actionParams, inStock: this.currentTurn.stock.size})
 
-    this.turns.push(this.currentTurn.playAction(playerId, actionParams, this.difficultyParams))
+    this.turns.push(this.currentTurn.playAction(playerId, actionParams, this.gameParams))
     this.checkIntegrity()
   }
 
@@ -391,7 +415,7 @@ export class Game {
       currentTurn: this.currentTurn.getState(playerId),
       playedActions: [], // this.turns.map(t => ({action: t.action, timestamp: t.timestamp})),
       players: this.players.map(p => ({...p.toJSON(), id: p.id === playerId ? p.id : 'REDACTED'})),
-      difficultyParams: this.difficultyParams,
+      gameParams: this.gameParams,
     })
 
     return maskedGame.currentTurn.getState()
@@ -404,7 +428,7 @@ export class Game {
       currentTurn: this.currentTurn.getState(playerId),
       playedActions: this.turns.map(t => ({action: t.action, timestamp: t.timestamp})),
       players: this.players.map(p => ({...p.toJSON(), id: p.id === playerId ? p.id : 'REDACTED'})),
-      difficultyParams: this.difficultyParams,
+      gameParams: this.gameParams,
     }
   }
 

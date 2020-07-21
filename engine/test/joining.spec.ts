@@ -1,6 +1,7 @@
 import {Game} from '../src/game'
 
 import {knownCard} from './helpers'
+import {range} from 'lodash'
 
 describe('A new empty game', () => {
   let pg: Game, pg2: Game
@@ -84,5 +85,37 @@ describe('A new empty game', () => {
       turnsLeft: null,
       woundCount: 0,
     })
+  })
+})
+
+describe('A randomized game', () => {
+  it('should look random', () => {
+    const playerNameOrders = range(0, 100).map(() => {
+      const pg = Game.createPendingGame({firstPlayerName: 'First'}, 'bogus_id_first')
+      const pg2 = Game.joinPendingGame(pg, 'Second', 'bogus_id_second')
+      const pg3 = Game.setPendingGameParams(pg2, {
+        maxHintCount: 8,
+        maxWoundCount: 3,
+        shufflePlayers: 'SHUFFLE_RANDOMIZE',
+      })
+      const g = Game.startPendingGame(pg3)
+      return g.players.map(p => p.name).join(',')
+    })
+
+    expect(playerNameOrders.filter(o => o === 'First,Second').length).toBeGreaterThan(0)
+    expect(playerNameOrders.filter(o => o === 'Second,First').length).toBeGreaterThan(0)
+  })
+})
+describe('An anonymized game', () => {
+  it('should look anonymized', () => {
+    const pg = Game.createPendingGame({firstPlayerName: 'First'}, 'bogus_id_first')
+    const pg2 = Game.joinPendingGame(pg, 'Second', 'bogus_id_second')
+    const pg3 = Game.setPendingGameParams(pg2, {
+      maxHintCount: 8,
+      maxWoundCount: 3,
+      shufflePlayers: 'SHUFFLE_RANDOMIZE_AND_ANONYMIZE',
+    })
+    const g = Game.startPendingGame(pg3)
+    expect(g.players.map(p => p.name)).toEqual(['P1', 'P2'])
   })
 })

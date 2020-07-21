@@ -9,7 +9,7 @@ import {
   TBaseTurnState,
   TGameStatus,
   TActionParams,
-  DifficultyParams,
+  GameParams,
 } from './game'
 import {Table} from './table'
 import {resolveActionability} from './actionability-resolver'
@@ -148,7 +148,7 @@ export class Turn extends BaseTurn {
       }),
     )
   }
-  playAction(playerId: string, actionParams: TActionParams, {maxHintCount, maxWoundCount}: DifficultyParams): Turn {
+  playAction(playerId: string, actionParams: TActionParams, {maxHintCount, maxWoundCount}: GameParams): Turn {
     // console.warn(1234, {
     //   type: actionParams.type,
     //   playerId,

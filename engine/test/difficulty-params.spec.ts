@@ -17,6 +17,10 @@ function createTestGame() {
 describe('Difficulty params', () => {
   it('are returned', () => {
     const g = createTestGame()
-    expect(g.getState(g.players[0].id).difficultyParams).toEqual({maxHintCount: 8, maxWoundCount: 3})
+    expect(g.getState(g.players[0].id).gameParams).toEqual({
+      maxHintCount: 8,
+      maxWoundCount: 3,
+      shufflePlayers: 'SHUFFLE_NONE',
+    })
   })
 })
