@@ -84,6 +84,8 @@ export default function WGame({game}: {game: MaskedGame}) {
     dispatch({type: 'SET_SETTING', key, value: !state.settings[key]})
   }
 
+  const {maxHintCount, maxWoundCount} = game.gameParams
+
   return (
     <div className={gameStatusClass}>
       <div className="WHeader">
@@ -110,10 +112,18 @@ export default function WGame({game}: {game: MaskedGame}) {
           Stock: <em>{stockSize}</em>
         </span>
         <span>
-          Hints: <em>{hintCount}</em>
+          Hints:{' '}
+          <em>
+            {hintCount}
+            {maxHintCount === 8 ? '' : <span> / {maxHintCount} </span>}
+          </em>
         </span>
         <span>
-          Wounds: <em>{woundCount}</em>
+          Wounds:{' '}
+          <em>
+            {woundCount}
+            {maxWoundCount === 3 ? '' : <span> / {maxWoundCount} </span>}
+          </em>
         </span>
         <span>
           Score: <em onClick={() => toggleSetting('showStats')}>{score}</em>

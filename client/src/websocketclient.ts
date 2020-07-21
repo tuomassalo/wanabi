@@ -106,6 +106,7 @@ export class WebSocketClient extends EventEmitter {
   getGamesState(p: game.WS_getGamesStateParams): void { this.send("getGamesState", p) } // prettier-ignore
   createGame(p: game.WS_createGameParams): void { this.send("createGame", p) } // prettier-ignore
   startGame(p: game.WS_startGameParams): void { this.send("startGame", p) } // prettier-ignore
+  setGameParams(p: game.WS_setGameParamsParams): void { this.send("setGameParams", p) } // prettier-ignore
   joinGame(p: game.WS_joinGameParams): void { this.send("joinGame", p) } // prettier-ignore
   rejoinGame(p: game.WS_rejoinGameParams): void { this.send("rejoinGame", p) } // prettier-ignore
   act(p: game.WS_actParams): void { this.send("act", p) } // prettier-ignore

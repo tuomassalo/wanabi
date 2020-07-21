@@ -1,15 +1,17 @@
 import {Player} from './player'
-import {TGameId, TMaskedGameState, TMaskedTurnState, TResolvedPlayActionState} from './game'
+import {TGameId, TMaskedGameState, TMaskedTurnState, GameParams} from './game'
 import {MaskedTurn} from './masked-turn'
 import {Card} from './card'
 
 export class MaskedGame {
   gameId: TGameId
   players: Player[]
+  gameParams: GameParams
   turns: MaskedTurn[]
   constructor(maskedGameState: TMaskedGameState) {
     this.gameId = maskedGameState.gameId
     this.players = maskedGameState.players.map(p => new Player(p))
+    this.gameParams = maskedGameState.gameParams
     this.turns = []
     this.addTurn(maskedGameState.currentTurn)
   }

@@ -98,6 +98,10 @@ export interface WS_createGameParams {
 export interface WS_startGameParams {
   gameId: TGameId
 }
+export interface WS_setGameParamsParams {
+  gameId: TGameId
+  gameParams: GameParams
+}
 export interface WS_joinGameParams {
   gameId: TGameId
   newPlayerName: string
@@ -158,24 +162,10 @@ export interface TExistingGameConstructor {
 export interface TNewGameConstructor {
   from: 'NEW_TEST_GAME'
   playerNames: string[]
+  gameParams?: GameParams
   deck?: Pile
   discardPile?: Pile
   table?: Table
-}
-
-const defaultTurn0Properties = {
-  table: new Table().toJSON(),
-  stock: new Pile([]).toJSON(),
-  discardPile: new Pile([]).toJSON(),
-  hands: [[]], // one empty hand, no hand cards yet
-  hintCount: 8,
-  woundCount: 0,
-  turnNumber: 0,
-  turnsLeft: null,
-  // needed only for TypeScript
-  score: 0,
-  stockSize: 0,
-  inTurn: 0,
 }
 
 export class Game {
@@ -185,6 +175,24 @@ export class Game {
   players: Player[]
   playersById: {[id: string]: Player}
   gameParams: GameParams = {maxHintCount: 8, maxWoundCount: 3, shufflePlayers: 'SHUFFLE_NONE'}
+  static defaultGameParams: GameParams = {maxHintCount: 8, maxWoundCount: 3, shufflePlayers: 'SHUFFLE_NONE'}
+
+  static getDefaultTurn0Properties(gameParams: GameParams) {
+    return {
+      table: new Table().toJSON(),
+      stock: new Pile([]).toJSON(),
+      discardPile: new Pile([]).toJSON(),
+      hands: [[]], // one empty hand, no hand cards yet
+      hintCount: gameParams.maxHintCount,
+      woundCount: 0,
+      turnNumber: 0,
+      turnsLeft: null,
+      // needed only for TypeScript
+      score: 0,
+      stockSize: 0,
+      inTurn: 0,
+    }
+  }
 
   replay(playedActions: {timestamp: string; action: TResolvedActionState}[]) {
     const resolvedActionToActionParams = (a: TResolvedActionState): TActionParams => {
@@ -238,7 +246,10 @@ export class Game {
       this.seed = params.game.seed
       this.players = params.game.players.map(p => new Player(p))
       this.turns = [new Turn(params.game.turn0, params.game.players)]
-      this.gameParams = params.game.gameParams
+      this.gameParams = {...Game.defaultGameParams, ...(params.game.gameParams || {})}
+
+      // hack: turn0 hintCount is filled already in createPendingGame, but it might change later.
+      this.turns[0].hintCount = this.gameParams.maxHintCount
 
       if (this.currentTurn.status === 'RUNNING' && this.currentTurn.hands[0].cards.length === 0) {
         this.deal()
@@ -257,11 +268,12 @@ export class Game {
       this.gameId = randomBytes(20).toString('hex')
 
       this.players = playerNames.map((name, idx) => new Player({name, idx, id: `bogus_id_${name}`, isConnected: true}))
+      this.gameParams = {...Game.defaultGameParams, ...(params.gameParams || {})}
 
       this.turns = [
         new Turn(
           {
-            ...defaultTurn0Properties,
+            ...Game.getDefaultTurn0Properties(this.gameParams),
             table: new Table(table ? table.toJSON() : undefined).toJSON(),
             stock: deck.toJSON(),
             discardPile: (discardPile || new Pile([])).toJSON(),
@@ -314,7 +326,7 @@ export class Game {
     const seed = params.seed || randomBytes(20).toString('hex')
     const stock = new Pile(Card.getFullDeck()).shuffle(seed).toJSON()
 
-    const gameParams: GameParams = {maxHintCount: 8, maxWoundCount: 3, shufflePlayers: 'SHUFFLE_NONE'}
+    const gameParams: GameParams = this.defaultGameParams
 
     return new Game({
       from: 'SERIALIZED_GAME',
@@ -322,7 +334,8 @@ export class Game {
         gameId: randomBytes(20).toString('hex'),
         seed,
         turn0: {
-          ...defaultTurn0Properties,
+          ...Game.getDefaultTurn0Properties(gameParams),
+
           hintCount: gameParams.maxHintCount,
           stock,
           status: 'WAITING_FOR_PLAYERS',
@@ -360,9 +373,7 @@ export class Game {
     return new Game({from: 'SERIALIZED_GAME', game: pendingGame.toJSON()})
   }
   static setPendingGameParams(pendingGame: Game, gameParams: GameParams): Game {
-    const turn0 = pendingGame.turns[0]
     pendingGame.gameParams = gameParams
-    turn0.status = 'RUNNING'
 
     return new Game({from: 'SERIALIZED_GAME', game: pendingGame.toJSON()})
   }
@@ -380,7 +391,7 @@ export class Game {
       }
       if (pendingGame.gameParams.shufflePlayers === 'SHUFFLE_RANDOMIZE_AND_ANONYMIZE') {
         for (const [idx, p] of pendingGame.players.entries()) {
-          p.name = 'P' + (idx + 1)
+          p.name = 'Player ' + (idx + 1)
         }
       }
     }

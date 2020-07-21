@@ -35,6 +35,10 @@ body {
   text-align: center;
   padding-top: $cardHeight;
 }
+// prevent jumpiness when adding players
+.WPlayerList {
+  min-height: 120px;
+}
 input.major {
   display: block;
   margin: 10px auto;
@@ -50,6 +54,15 @@ div.WWaiting {
   color: black;
   background-color: #ccc;
   height: auto;
+}
+div.WWaiting {
+  input[type='number'] {
+    width: 4em;
+  }
+  label {
+    display: block;
+    padding-left: 20px;
+  }
 }
 div.WGameGlance ul,
 div.WGameGlance li {

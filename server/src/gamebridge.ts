@@ -248,6 +248,19 @@ export async function act({gameId, actionParams}: engine.WS_actParams, connectio
   await broadcastGamesState()
 }
 
+export async function setGameParams({gameId, gameParams}: engine.WS_setGameParamsParams, connectionId: string) {
+  const pendingGame = await _getGame(gameId)
+  if (pendingGame.currentTurn.status !== 'WAITING_FOR_PLAYERS') throw new Error('GAME_ALREADY_STARTED')
+
+  const g = engine.Game.setPendingGameParams(pendingGame, gameParams)
+
+  // save game status to db
+  await updateGame(g, pendingGame.currentTurn.timestamp)
+
+  // send updated game state to all players
+  await broadcastGamesState()
+}
+
 export async function rejoinGame({gameId, playerIdx}: engine.WS_rejoinGameParams, connectionId: string) {
   const game = await _getGame(gameId)
   const player = game.players[playerIdx]

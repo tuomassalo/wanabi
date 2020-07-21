@@ -24,11 +24,63 @@ export default class WWaiting extends React.Component<{game: MaskedGame}> {
       ) : (
         ''
       )
+
+    const setParams = (key: string) => (evt: React.FormEvent<HTMLInputElement>) => {
+      const val = evt.currentTarget.type === 'number' ? parseInt(evt.currentTarget.value, 10) : evt.currentTarget.value
+      // console.warn('setting', {key, val})
+      const gameParams = {...this.props.game.gameParams, [key]: val}
+      wsclient.setGameParams({gameId: this.props.game.gameId, gameParams})
+    }
+
     return (
       <div className="WWaiting">
         <h3>Waiting for players...</h3>
         Players: <WPlayerList game={this.props.game} />
         {startButton}
+        <hr />
+        <h2>Parameters</h2>
+        <ul>
+          <li>
+            Hints:{' '}
+            <input
+              type="number"
+              min="1"
+              max="10"
+              value={this.props.game.gameParams.maxHintCount}
+              onChange={setParams('maxHintCount')}
+            />{' '}
+            (initial and maximum)
+          </li>
+          <li>
+            Game over after{' '}
+            <input
+              type="number"
+              min="1"
+              max="5"
+              value={this.props.game.gameParams.maxWoundCount}
+              onChange={setParams('maxWoundCount')}
+            />{' '}
+            wounds
+          </li>
+          <li>
+            Player shuffling:
+            {[
+              {value: 'SHUFFLE_NONE', label: 'No shuffling'},
+              {value: 'SHUFFLE_RANDOMIZE', label: 'Shuffle player order'},
+              {value: 'SHUFFLE_RANDOMIZE_AND_ANONYMIZE', label: 'Shuffle player order and anonymize player names'},
+            ].map(o => (
+              <label key={o.value}>
+                <input
+                  type="radio"
+                  value={o.value}
+                  checked={this.props.game.gameParams.shufflePlayers === o.value}
+                  onChange={setParams('shufflePlayers')}
+                />{' '}
+                {o.label}
+              </label>
+            ))}
+          </li>
+        </ul>
       </div>
     )
   }
