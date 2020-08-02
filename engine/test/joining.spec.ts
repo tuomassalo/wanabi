@@ -116,6 +116,6 @@ describe('An anonymized game', () => {
       shufflePlayers: 'SHUFFLE_RANDOMIZE_AND_ANONYMIZE',
     })
     const g = Game.startPendingGame(pg3)
-    expect(g.players.map(p => p.name)).toEqual(['Player 1', 'Player 2'])
+    expect(g.players.map(p => p.name)).toEqual(['Player A', 'Player B'])
   })
 })

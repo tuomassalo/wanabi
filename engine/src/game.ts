@@ -390,8 +390,9 @@ export class Game {
         p.idx = idx
       }
       if (pendingGame.gameParams.shufflePlayers === 'SHUFFLE_RANDOMIZE_AND_ANONYMIZE') {
+        const playerNames = ['A', 'B', 'C', 'D', 'E']
         for (const [idx, p] of pendingGame.players.entries()) {
-          p.name = 'Player ' + (idx + 1)
+          p.name = 'Player ' + playerNames[idx]
         }
       }
     }
