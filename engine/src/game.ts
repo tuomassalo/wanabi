@@ -118,7 +118,7 @@ export interface WS_keepaliveParams {}
 export interface TMaskedGameState {
   playedActions: {timestamp: string; action: TResolvedActionState}[]
   gameId: TGameId
-  players: (TPlayerState | TPlayerState)[]
+  players: TPlayerState[]
   currentTurn: TMaskedTurnState
   gameParams: GameParams
 }
