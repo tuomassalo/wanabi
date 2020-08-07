@@ -66,7 +66,7 @@ test('connect, createGame', async done => {
         turnsLeft: null,
         woundCount: 0,
       },
-      difficultyParams: jasmine.any(Object),
+      gameParams: jasmine.any(Object),
       playedActions: [{action: {type: 'START'}, timestamp: jasmine.any(String)}],
       players: [{id: jasmine.any(String), idx: 0, isConnected: true, name: 'BOBBY_TABLES'}],
     },
@@ -103,7 +103,7 @@ test('joinGame', async done => {
         turnsLeft: null,
         woundCount: 0,
       },
-      difficultyParams: jasmine.any(Object),
+      gameParams: jasmine.any(Object),
       playedActions: [{action: {type: 'START'}, timestamp: jasmine.any(String)}],
       players: [
         {id: 'REDACTED', idx: 0, isConnected: true, name: 'BOBBY_TABLES'},
@@ -151,7 +151,7 @@ test('startGame', async done => {
         turnsLeft: null,
         woundCount: 0,
       },
-      difficultyParams: jasmine.any(Object),
+      gameParams: jasmine.any(Object),
       playedActions: [{action: {type: 'START'}, timestamp: jasmine.any(String)}],
       players: [
         {id: jasmine.any(String), idx: 0, isConnected: true, name: 'BOBBY_TABLES'},

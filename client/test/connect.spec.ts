@@ -70,7 +70,7 @@ test('connect, createGame', async done => {
         turnsLeft: null,
         woundCount: 0,
       },
-      difficultyParams: {maxHintCount: 8, maxWoundCount: 3},
+      gameParams: {maxHintCount: 8, maxWoundCount: 3, shufflePlayers: 'SHUFFLE_NONE'},
       players: [{id: jasmine.any(String), idx: 0, isConnected: true, name: 'BOBBY_TABLES'}],
       playedActions: [{action: {type: 'START'}, timestamp: jasmine.any(String)}],
     },
@@ -106,7 +106,7 @@ test('getGamesState', async done => {
           turnsLeft: null,
           woundCount: 0,
         },
-        difficultyParams: {maxHintCount: 8, maxWoundCount: 3},
+        gameParams: {maxHintCount: 8, maxWoundCount: 3, shufflePlayers: 'SHUFFLE_NONE'},
         playedActions: [{action: {type: 'START'}, timestamp: jasmine.any(String)}],
         players: [{id: 'REDACTED', idx: 0, isConnected: true, name: 'BOBBY_TABLES'}],
       },
@@ -140,7 +140,7 @@ test('joinGame', async done => {
         turnsLeft: null,
         woundCount: 0,
       },
-      difficultyParams: {maxHintCount: 8, maxWoundCount: 3},
+      gameParams: {maxHintCount: 8, maxWoundCount: 3, shufflePlayers: 'SHUFFLE_NONE'},
       playedActions: [{action: {type: 'START'}, timestamp: jasmine.any(String)}],
       players: [
         {id: 'REDACTED', idx: 0, isConnected: true, name: 'BOBBY_TABLES'},
@@ -194,7 +194,7 @@ test('startGame', async done => {
         turnsLeft: null,
         woundCount: 0,
       },
-      difficultyParams: {maxHintCount: 8, maxWoundCount: 3},
+      gameParams: {maxHintCount: 8, maxWoundCount: 3, shufflePlayers: 'SHUFFLE_NONE'},
       playedActions: [{action: {type: 'START'}, timestamp: jasmine.any(String)}],
       players: [
         {id: jasmine.any(String), idx: 0, isConnected: true, name: 'BOBBY_TABLES'},
@@ -243,7 +243,7 @@ test('act', async done => {
         turnsLeft: null,
         woundCount: 0,
       },
-      difficultyParams: {maxHintCount: 8, maxWoundCount: 3},
+      gameParams: {maxHintCount: 8, maxWoundCount: 3, shufflePlayers: 'SHUFFLE_NONE'},
       playedActions: [
         {action: {type: 'START'}, timestamp: jasmine.any(String)},
         {
@@ -298,7 +298,7 @@ test('act', async done => {
         turnsLeft: null,
         woundCount: 0,
       },
-      difficultyParams: {maxHintCount: 8, maxWoundCount: 3},
+      gameParams: {maxHintCount: 8, maxWoundCount: 3, shufflePlayers: 'SHUFFLE_NONE'},
       playedActions: [
         {action: {type: 'START'}, timestamp: jasmine.any(String)},
         {
@@ -344,7 +344,7 @@ test('An outsider sees the started game, but cannot see any hands', async done =
           turnsLeft: null,
           woundCount: 0,
         },
-        difficultyParams: {maxHintCount: 8, maxWoundCount: 3},
+        gameParams: {maxHintCount: 8, maxWoundCount: 3, shufflePlayers: 'SHUFFLE_NONE'},
         playedActions: [
           {action: {type: 'START'}, timestamp: jasmine.any(String)},
           {
