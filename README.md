@@ -38,6 +38,9 @@ npm i
 # first run only: install local dynamodb (creates `.dynamodb` directory)
 sls dynamodb install
 
+# first run only: add `127.0.0.1 wanabihost` to /etc/hosts
+sudo vi /etc/hosts
+
 npx tsc --watch
 
 # Run `socat` (for allowing local network to join)
