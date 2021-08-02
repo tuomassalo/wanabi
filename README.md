@@ -54,7 +54,7 @@ npm run localbroadcast
 
 ```
 
-`./deploy.sh`
+./deploy.sh
 
 ```
 
@@ -65,3 +65,15 @@ aws dynamodb scan --table-name WanabiGames --endpoint-url http://localhost:3003 
 
 aws dynamodb put-item --table-name WanabiGames --endpoint-url http://localhost:3003 --item "$(jq '.Items[0]' < mygames.json)"
 ```
+
+## Known bugs
+
+- If there are no hints left, mystery view cannot be turned off after hovering (at least on Safari)
+
+- Some bugs related to mystery views and browsing the history while a new turn is added
+
+- When browsing the history, hint hover tooltips show wrong information
+
+- In some (unknown) situations, a disconnect is not detected, and the player cannot reconnect
+
+- Browsing the history after ending a 30 point game is impossible without a reload
