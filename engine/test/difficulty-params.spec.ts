@@ -22,6 +22,8 @@ describe('Difficulty params', () => {
       maxHintCount: 8,
       maxWoundCount: 3,
       shufflePlayers: 'SHUFFLE_NONE',
+      useRainbow: true,
+      useBlack: true,
     })
   })
   it('are modifiable', () => {
@@ -31,11 +33,15 @@ describe('Difficulty params', () => {
       maxHintCount: 5,
       maxWoundCount: 1,
       shufflePlayers: 'SHUFFLE_RANDOMIZE',
+      useRainbow: true,
+      useBlack: false,
     })
     expect(g.getState(g.players[0].id).gameParams).toEqual({
       maxHintCount: 5,
       maxWoundCount: 1,
       shufflePlayers: 'SHUFFLE_RANDOMIZE',
+      useRainbow: true,
+      useBlack: false,
     })
     expect(g.getState(g.players[0].id).currentTurn.hintCount).toEqual(5)
 

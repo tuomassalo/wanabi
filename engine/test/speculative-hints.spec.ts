@@ -28,14 +28,21 @@ describe('Speculative hint', () => {
   it('should be shown when no hints given', () => {
     // no hints first
     expect(
-      (g.COMPAT_getMaskedTurnState(g.players[0].id)
-        .maskedPlayerViews[1] as COMPAT_TMaskedOtherPlayerViewState).extraMysticalHand.map(c => c.hints),
+      (
+        g.COMPAT_getMaskedTurnState(g.players[0].id).maskedPlayerViews[1] as COMPAT_TMaskedOtherPlayerViewState
+      ).extraMysticalHand.map(c => c.hints),
     ).toEqual([[], [], [], [], []])
 
     const maskedGame = new MaskedGame({
       gameId: g.gameId,
       currentTurn: g.currentTurn.getState(g.players[0].id),
-      gameParams: {maxHintCount: 8, maxWoundCount: 3, shufflePlayers: 'SHUFFLE_NONE'},
+      gameParams: {
+        maxHintCount: 8,
+        maxWoundCount: 3,
+        shufflePlayers: 'SHUFFLE_NONE',
+        useRainbow: true,
+        useBlack: false,
+      },
       playedActions: [], // g.turns.map(t => ({action: t.action, timestamp: t.timestamp})),
       players: g.players.map(p => ({...p.toJSON(), id: p.id === g.players[0].id ? p.id : 'REDACTED'})),
     })
@@ -92,12 +99,19 @@ describe('Speculative hint', () => {
       currentTurn: g.currentTurn.getState(g.players[0].id),
       playedActions: [], // g.turns.map(t => ({action: t.action, timestamp: t.timestamp})),
       players: g.players.map(p => ({...p.toJSON(), id: p.id === g.players[0].id ? p.id : 'REDACTED'})),
-      gameParams: {maxHintCount: 8, maxWoundCount: 3, shufflePlayers: 'SHUFFLE_NONE'},
+      gameParams: {
+        maxHintCount: 8,
+        maxWoundCount: 3,
+        shufflePlayers: 'SHUFFLE_NONE',
+        useRainbow: true,
+        useBlack: false,
+      },
     })
 
     expect(
-      (g.COMPAT_getMaskedTurnState(g.players[0].id)
-        .maskedPlayerViews[1] as COMPAT_TMaskedOtherPlayerViewState).extraMysticalHand.map(c => c.hints),
+      (
+        g.COMPAT_getMaskedTurnState(g.players[0].id).maskedPlayerViews[1] as COMPAT_TMaskedOtherPlayerViewState
+      ).extraMysticalHand.map(c => c.hints),
     ).toEqual([
       [{is: 'A', result: false, turnNumber: 0}],
       [{is: 'A', result: false, turnNumber: 0}],

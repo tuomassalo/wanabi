@@ -35,6 +35,8 @@ export interface GameParams {
   maxHintCount: number
   maxWoundCount: number
   shufflePlayers: 'SHUFFLE_NONE' | 'SHUFFLE_RANDOMIZE' | 'SHUFFLE_RANDOMIZE_AND_ANONYMIZE'
+  useRainbow: boolean
+  useBlack: boolean
 }
 
 export type TActionParams = TPlayActionParams | TDiscardActionParams | THintActionParams | TStartActionParams
@@ -174,8 +176,20 @@ export class Game {
   seed: string
   players: Player[]
   playersById: {[id: string]: Player}
-  gameParams: GameParams = {maxHintCount: 8, maxWoundCount: 3, shufflePlayers: 'SHUFFLE_NONE'}
-  static defaultGameParams: GameParams = {maxHintCount: 8, maxWoundCount: 3, shufflePlayers: 'SHUFFLE_NONE'}
+  gameParams: GameParams = {
+    maxHintCount: 8,
+    maxWoundCount: 3,
+    shufflePlayers: 'SHUFFLE_NONE',
+    useRainbow: true,
+    useBlack: true,
+  }
+  static defaultGameParams: GameParams = {
+    maxHintCount: 8,
+    maxWoundCount: 3,
+    shufflePlayers: 'SHUFFLE_NONE',
+    useRainbow: true,
+    useBlack: true,
+  }
 
   static getDefaultTurn0Properties(gameParams: GameParams) {
     return {

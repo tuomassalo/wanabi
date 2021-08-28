@@ -49,8 +49,6 @@ socat TCP-LISTEN:13001,fork TCP:127.0.0.1:3001
 # Start the serverless-offline services: api gateway and dynamodb
 npm run localbackend
 
-# To try broadcasting a message to all listening clients
-npm run localbroadcast
 ```
 
 ### Deploy

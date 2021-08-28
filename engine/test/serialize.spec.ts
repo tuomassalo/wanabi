@@ -154,7 +154,13 @@ describe('A masked game', () => {
         {name: 'Tume6', idx: 0, id: 'ck9d5n5x4002uow5g4nnz4uur', isConnected: true},
         {name: 'Chrume6', idx: 1, id: 'REDACTED', isConnected: true},
       ],
-      gameParams: {maxHintCount: 8, maxWoundCount: 3, shufflePlayers: 'SHUFFLE_NONE'},
+      gameParams: {
+        maxHintCount: 8,
+        maxWoundCount: 3,
+        shufflePlayers: 'SHUFFLE_NONE',
+        useRainbow: true,
+        useBlack: false,
+      },
     })
     expect(JSON.parse(JSON.stringify(mg.currentTurn))).toEqual({
       _players: [

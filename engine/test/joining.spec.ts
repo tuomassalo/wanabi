@@ -97,6 +97,8 @@ describe('A randomized game', () => {
         maxHintCount: 8,
         maxWoundCount: 3,
         shufflePlayers: 'SHUFFLE_RANDOMIZE',
+        useRainbow: true,
+        useBlack: false,
       })
       const g = Game.startPendingGame(pg3)
       return g.players.map(p => p.name).join(',')
@@ -114,6 +116,8 @@ describe('An anonymized game', () => {
       maxHintCount: 8,
       maxWoundCount: 3,
       shufflePlayers: 'SHUFFLE_RANDOMIZE_AND_ANONYMIZE',
+      useRainbow: true,
+      useBlack: false,
     })
     const g = Game.startPendingGame(pg3)
     expect(g.players.map(p => p.name)).toEqual(['Player A', 'Player B'])
