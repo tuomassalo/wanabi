@@ -5,9 +5,9 @@ import {
   PossibleCard,
   TCardValueState,
   TActionability,
-  NumDistribution,
+  getNumDistribution,
 } from './card'
-import {sum, range} from 'lodash'
+import {sum, range, random} from 'lodash'
 import {Table} from './table'
 import {Pile} from './pile'
 
@@ -21,12 +21,13 @@ export function resolveActionability(myHand: MaskedCard[], table: Table, discard
 
     if (table.has(card)) return 'DISCARDABLE'
     else {
-      // Maybe the card can never be played because lower cards have been discarded.
+      // Maybe the card can never be played because all lower (black:higher) cards have been discarded.
+      const notPlayedYetNumbers = card.color === 'K' ? range(card.num + 1, 5 + 1) : range(1, card.num)
       if (
-        range(1, card.num).some(
+        notPlayedYetNumbers.some(
           num =>
             discardPile.cards.filter(c => c.color === card.color && c.num === num).length ===
-            NumDistribution.filter(n => n === num).length,
+            getNumDistribution(card.color).filter(n => n === num).length,
         )
       )
         return 'DISCARDABLE'
@@ -34,7 +35,7 @@ export function resolveActionability(myHand: MaskedCard[], table: Table, discard
       // The card has not been played yet. Maybe the card is unique, thus not discardable.
       if (
         discardPile.cards.filter(c => c.equals(card)).length ===
-        NumDistribution.filter(n => n === card.num).length - 1
+        getNumDistribution(card.color).filter(n => n === card.num).length - 1
       )
         return 'UNDISCARDABLE'
     }

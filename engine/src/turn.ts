@@ -184,6 +184,9 @@ export class Turn extends BaseTurn {
       }
       newTurn.action = actionParams
     } else if (actionParams.type === 'HINT') {
+      if (!['A', 'B', 'C', 'D', 'E', 1, 2, 3, 4, 5].includes(actionParams.is)) {
+        throw new GameError('NO_HINTS_OUTSIDE_ABCDE12345')
+      }
       if (!newTurn.hintCount) {
         throw new GameError('NO_HINTS_LEFT')
       }

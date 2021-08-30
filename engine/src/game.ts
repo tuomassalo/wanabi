@@ -1,6 +1,6 @@
 import {Pile} from './pile'
 import {Player, TPlayerId, TPlayerState} from './player'
-import {Card, TColor, TNum, TCardValueState} from './card'
+import {Card, TColor, TNum, TCardValueState, TBasicColor} from './card'
 import {Hand, THandState, TMaskedPlayerViewState, COMPAT_TMaskedOtherPlayerViewState} from './hand'
 import {Table, TTableState} from './table'
 import {GameError} from './errors'
@@ -23,7 +23,7 @@ interface TDiscardActionParams {
 interface THintActionParams {
   type: 'HINT'
   toPlayerIdx: number
-  is: TColor | TNum
+  is: TBasicColor | TNum
 }
 
 // added by the constructor

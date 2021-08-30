@@ -1,6 +1,7 @@
 import {SyntaxError} from './errors'
 import {DeckParams} from './game'
 
+export type TBasicColor = 'A' | 'B' | 'C' | 'D' | 'E'
 export type TColor = 'A' | 'B' | 'C' | 'D' | 'E' | 'X' | 'K'
 export type TNum = 1 | 2 | 3 | 4 | 5
 
@@ -41,8 +42,9 @@ export interface THintResultState extends THintState {
 // export const AllColors: TColor[] = ['A', 'B', 'C', 'D', 'E', 'X']
 export const AllNums: TNum[] = [1, 2, 3, 4, 5]
 
-export const NumDistribution: TNum[] = [1, 1, 1, 2, 2, 3, 3, 4, 4, 5]
-
+export function getNumDistribution(color: TColor): TNum[] {
+  return color === 'K' ? [1, 2, 2, 3, 3, 4, 4, 5, 5, 5] : [1, 1, 1, 2, 2, 3, 3, 4, 4, 5]
+}
 export function getAllColors({useRainbow, useBlack}: DeckParams): TColor[] {
   return ['A', 'B', 'C', 'D', 'E', ...(useRainbow ? ['X' as TColor] : []), ...(useBlack ? ['K' as TColor] : [])]
 }
@@ -80,7 +82,9 @@ export class Card extends BaseCard {
     return new Card(parseValueString(str))
   }
   static getFullDeck(deckParams: DeckParams): Card[] {
-    return getAllColors(deckParams).flatMap(color => NumDistribution.map((num: TNum) => new Card({color, num})))
+    return getAllColors(deckParams).flatMap(color =>
+      getNumDistribution(color).map((num: TNum) => new Card({color, num})),
+    )
   }
   toJSON(): TCardValueState {
     return this.color + this.num

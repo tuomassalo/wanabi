@@ -38,14 +38,15 @@ export class Table {
   }
   // returns whether the card could be successfully played
   isPlayable(card: Card) {
-    return this.table[card.color].size === card.num - 1
+    return card.color === 'K'
+      ? this.table[card.color].size === 5 - card.num
+      : this.table[card.color].size === card.num - 1
   }
   // returns new pile size if the card was successfully played,
   // and false if not
   play(card: Card): PlayResult {
     const colorPile = this.table[card.color]
-    // FIXME fix the if to support black cards
-    if (colorPile.size === card.num - 1) {
+    if (this.isPlayable(card)) {
       colorPile.add(card)
       return colorPile.size === AllNums.length ? 'SUCCESS_CLOSED' : 'SUCCESS_PENDING'
     } else {
