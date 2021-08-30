@@ -1,6 +1,6 @@
 import {Pile} from './pile'
 import {Player, TPlayerId, TPlayerState} from './player'
-import {Card, TColor, TNum, AllColors, AllNums, TCardValueState} from './card'
+import {Card, TColor, TNum, TCardValueState} from './card'
 import {Hand, THandState, TMaskedPlayerViewState, COMPAT_TMaskedOtherPlayerViewState} from './hand'
 import {Table, TTableState} from './table'
 import {GameError} from './errors'
@@ -31,12 +31,15 @@ interface TStartActionParams {
   type: 'START'
 }
 
-export interface GameParams {
+export interface DeckParams {
+  useRainbow: boolean
+  useBlack: boolean
+}
+
+export interface GameParams extends DeckParams {
   maxHintCount: number
   maxWoundCount: number
   shufflePlayers: 'SHUFFLE_NONE' | 'SHUFFLE_RANDOMIZE' | 'SHUFFLE_RANDOMIZE_AND_ANONYMIZE'
-  useRainbow: boolean
-  useBlack: boolean
 }
 
 export type TActionParams = TPlayActionParams | TDiscardActionParams | THintActionParams | TStartActionParams
@@ -193,7 +196,7 @@ export class Game {
 
   static getDefaultTurn0Properties(gameParams: GameParams) {
     return {
-      table: new Table().toJSON(),
+      table: new Table(undefined, gameParams).toJSON(),
       stock: new Pile([]).toJSON(),
       discardPile: new Pile([]).toJSON(),
       hands: [[]], // one empty hand, no hand cards yet
@@ -259,8 +262,8 @@ export class Game {
       this.gameId = params.game.gameId
       this.seed = params.game.seed
       this.players = params.game.players.map(p => new Player(p))
-      this.turns = [new Turn(params.game.turn0, params.game.players)]
       this.gameParams = {...Game.defaultGameParams, ...(params.game.gameParams || {})}
+      this.turns = [new Turn(params.game.turn0, params.game.players, this.gameParams)]
 
       // hack: turn0 hintCount is filled already in createPendingGame, but it might change later.
       this.turns[0].hintCount = this.gameParams.maxHintCount
@@ -275,7 +278,7 @@ export class Game {
       this.seed = randomBytes(20).toString('hex')
       let {playerNames, deck, discardPile, table} = params
       if (!deck) {
-        deck = new Pile(deck || Card.getFullDeck())
+        deck = new Pile(deck || Card.getFullDeck(this.gameParams))
         deck.shuffle(this.seed)
       }
 
@@ -288,7 +291,7 @@ export class Game {
         new Turn(
           {
             ...Game.getDefaultTurn0Properties(this.gameParams),
-            table: new Table(table ? table.toJSON() : undefined).toJSON(),
+            table: new Table(table ? table.toJSON() : undefined, this.gameParams).toJSON(),
             stock: deck.toJSON(),
             discardPile: (discardPile || new Pile([])).toJSON(),
             hands: playerNames.map(() => []),
@@ -301,6 +304,7 @@ export class Game {
             stockSize: deck.size,
           },
           this.players,
+          this.gameParams,
         ),
       ]
 
@@ -338,9 +342,8 @@ export class Game {
   static createPendingGame(params: WS_createGameParams, firstPlayerId: TPlayerId): Game {
     const timestamp = new Date().toISOString()
     const seed = params.seed || randomBytes(20).toString('hex')
-    const stock = new Pile(Card.getFullDeck()).shuffle(seed).toJSON()
-
     const gameParams: GameParams = this.defaultGameParams
+    const stock = new Pile(Card.getFullDeck(gameParams)).shuffle(seed).toJSON()
 
     return new Game({
       from: 'SERIALIZED_GAME',
@@ -480,7 +483,7 @@ export class Game {
       .sort()
       .join(' ')
 
-    const expectedCards = Card.getFullDeck()
+    const expectedCards = Card.getFullDeck(this.gameParams)
       .map(c => c.toString())
       .sort()
       .join(' ')

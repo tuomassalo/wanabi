@@ -1,14 +1,19 @@
-import {TCardValueState, TColor, AllColors, Card} from './card'
+import {TCardValueState, TColor, AllColors, Card, AllNums} from './card'
+import {GameParams} from './game'
 import {Pile} from './pile'
 
 export type TTable = {[key in TColor]: Pile}
 export type TTableState = {[key in TColor]: TCardValueState[]}
 
+export type PlayResult = 'SUCCESS_CLOSED' | 'SUCCESS_PENDING' | 'FAILURE'
+
 export class Table {
   table: TTable
+  gameParams: GameParams
 
-  constructor(table?: TTableState) {
+  constructor(table: TTableState | undefined, gameParams: GameParams) {
     // NB: why does fromEntries need `as`
+    this.gameParams = gameParams
     this.table = Object.fromEntries(AllColors.map(color => [color, new Pile(table ? table[color] : [])])) as TTable
   }
   getScore(): number {
@@ -32,14 +37,16 @@ export class Table {
   isPlayable(card: Card) {
     return this.table[card.color].size === card.num - 1
   }
-  // returns whether the card was successfully played
-  play(card: Card): boolean {
+  // returns new pile size if the card was successfully played,
+  // and false if not
+  play(card: Card): PlayResult {
     const colorPile = this.table[card.color]
+    // FIXME fix the if to support black cards
     if (colorPile.size === card.num - 1) {
       colorPile.add(card)
-      return true
+      return colorPile.size === AllNums.length ? 'SUCCESS_CLOSED' : 'SUCCESS_PENDING'
     } else {
-      return false
+      return 'FAILURE'
     }
   }
 }

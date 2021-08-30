@@ -8,8 +8,8 @@ import {BaseTurn, refineHand} from './turn'
 export class MaskedTurn extends BaseTurn {
   maskedPlayerViews: MaskedPlayerView[]
   stockSize: number
-  constructor(state: TMaskedTurnState, players: TPlayerState[]) {
-    super(state, players)
+  constructor(state: TMaskedTurnState, players: TPlayerState[], gameParams) {
+    super(state, players, gameParams)
     this.maskedPlayerViews = state.maskedPlayerViews.map(p => new MaskedPlayerView(p))
     this.stockSize = state.stockSize
     // refine
@@ -35,10 +35,11 @@ export class MaskedTurn extends BaseTurn {
     ret.inTurn = this.inTurn
     ret.score = this.score
     delete ret._players
+    delete ret._gameParams
     return ret
   }
   getExtraMysticalHandWithSpeculativeHint(toPlayerIdx: number, is: TNum | TColor): MaskedCard[] {
-    const turnCopy = new MaskedTurn(this.getState(), this._players)
+    const turnCopy = new MaskedTurn(this.getState(), this._players, this._gameParams)
     turnCopy.maskedPlayerViews[toPlayerIdx].hand = turnCopy.maskedPlayerViews[toPlayerIdx].hand.map(mc => {
       const c = new Card(mc as TCardState) // not my own card, so it's always known
       c.addHint({is, turnNumber: -1})

@@ -1,4 +1,5 @@
 import {SyntaxError} from './errors'
+import {DeckParams} from './game'
 
 export type TColor = 'A' | 'B' | 'C' | 'D' | 'E' | 'X'
 export type TNum = 1 | 2 | 3 | 4 | 5
@@ -74,7 +75,7 @@ export class Card extends BaseCard {
   static fromValueString(str: string): Card {
     return new Card(parseValueString(str))
   }
-  static getFullDeck(): Card[] {
+  static getFullDeck(deckParams: DeckParams): Card[] {
     return AllColors.flatMap(color => NumDistribution.map((num: TNum) => new Card({color, num})))
   }
   toJSON(): TCardValueState {

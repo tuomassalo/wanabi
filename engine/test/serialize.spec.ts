@@ -167,6 +167,13 @@ describe('A masked game', () => {
         {id: 'ck9d5n5x4002uow5g4nnz4uur', idx: 0, isConnected: true, name: 'Tume6'},
         {id: 'REDACTED', idx: 1, isConnected: true, name: 'Chrume6'},
       ],
+      _gameParams: {
+        maxHintCount: 8,
+        maxWoundCount: 3,
+        shufflePlayers: 'SHUFFLE_NONE',
+        useRainbow: true,
+        useBlack: false,
+      },
       action: {card: 'X4', cardIdx: 4, success: true, type: 'PLAY'},
       discardPile: [
         'D3',

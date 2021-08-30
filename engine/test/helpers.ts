@@ -1,7 +1,7 @@
 import {Card} from '../src/card'
 import {Pile} from '../src/pile'
 // import * as stringify from 'json-stable-stringify'
-import {Game} from '../src/game'
+import {DeckParams, Game} from '../src/game'
 import {zip} from 'lodash'
 
 // export const c = {
@@ -45,8 +45,8 @@ export function shuffle(arr: any[]) {
 }
 
 // create a deck where the top cards are specified
-export function createDeck(topValues: string): Pile {
-  const deckCards = Card.getFullDeck()
+export function createDeck(topValues: string, deckParams: DeckParams = {useRainbow: true, useBlack: false}): Pile {
+  const deckCards = Card.getFullDeck(deckParams)
 
   const topCards: Card[] = []
   for (const c of topValues
@@ -75,7 +75,7 @@ export function createDeck(topValues: string): Pile {
 
 export function cards(cardsString: string): any {
   return {
-    asymmetricMatch: function(compareTo: any[]) {
+    asymmetricMatch: function (compareTo: any[]) {
       return cardsString === '' + compareTo.map(c => c.color + c.num).join(',')
     },
 
@@ -83,7 +83,7 @@ export function cards(cardsString: string): any {
      * The jasmineToString method is used in the Jasmine pretty printer, and will
      * be seen by the user in the message when a test fails.
      */
-    jasmineToString: function() {
+    jasmineToString: function () {
       return `<cards[${cardsString}]>`
     },
   }
@@ -91,7 +91,7 @@ export function cards(cardsString: string): any {
 
 export function knownCard(): any {
   return {
-    asymmetricMatch: function(compareTo) {
+    asymmetricMatch: function (compareTo) {
       return (
         /^[ABCDEX][12345]$/.test(compareTo) || (/^[ABCDEX]$/.test(compareTo.color) && /^[1-5]$/.test(compareTo.num))
       )
@@ -101,7 +101,7 @@ export function knownCard(): any {
      * The jasmineToString method is used in the Jasmine pretty printer, and will
      * be seen by the user in the message when a test fails.
      */
-    jasmineToString: function() {
+    jasmineToString: function () {
       return '<knownCard>'
     },
   }

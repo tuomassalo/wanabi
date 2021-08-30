@@ -70,7 +70,7 @@ export class MaskedGame {
   addTurn(maskedTurn: TMaskedTurnState) {
     // if (this.turns[maskedTurn.turnNumber]) return // already added
 
-    this.turns[maskedTurn.turnNumber] = new MaskedTurn(maskedTurn, this.players)
+    this.turns[maskedTurn.turnNumber] = new MaskedTurn(maskedTurn, this.players, this.gameParams)
 
     if (
       // only fill `was` info if there are no gaps in turn history
