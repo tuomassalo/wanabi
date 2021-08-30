@@ -1,6 +1,7 @@
 import {Card, MaskedCard, TPossibleCardState, PossibleCard, TCardValueState, TNum, TColor} from './card'
 import {sum, range, uniq, times} from 'lodash'
 import {GameError} from './errors'
+import {DeckParams} from './game'
 
 interface CardWithFewSolutions {
   possibleCards: TPossibleCardState[]
@@ -34,7 +35,7 @@ const l = (cards: Card[]) => cards.map(c => c.toString()).join(',')
 
 // NB: modifies myHand entries: adds `possibleCards` and fills out `color` and `num`
 // export function demystify(myHand: MaskedCard[], table:Table, otherRevealedCards: Card[]): MaskedCard[] {
-export function demystify(myHand: MaskedCard[], revealedCards: Card[]): [MaskedCard[], Card[]] {
+export function demystify(myHand: MaskedCard[], revealedCards: Card[], deckParams: DeckParams): [MaskedCard[], Card[]] {
   const cardsRevealedWithoutPosition: Card[] = []
 
   // make a copy to prevent modifying the argument
@@ -53,7 +54,7 @@ export function demystify(myHand: MaskedCard[], revealedCards: Card[]): [MaskedC
   // )
   // const revealedCards:Card[] = [otherRevealedCards, table.]
 
-  const unrevealedCards = Card.getFullDeck()
+  const unrevealedCards = Card.getFullDeck(deckParams)
   for (const r of revealedCards) {
     unrevealedCards.splice(
       unrevealedCards.findIndex(u => u.equals(r)),

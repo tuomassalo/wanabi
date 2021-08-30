@@ -70,7 +70,13 @@ test('connect, createGame', async done => {
         turnsLeft: null,
         woundCount: 0,
       },
-      gameParams: {maxHintCount: 8, maxWoundCount: 3, shufflePlayers: 'SHUFFLE_NONE'},
+      gameParams: {
+        maxHintCount: 8,
+        maxWoundCount: 3,
+        shufflePlayers: 'SHUFFLE_NONE',
+        useRainbow: true,
+        useBlack: true,
+      },
       players: [{id: jasmine.any(String), idx: 0, isConnected: true, name: 'BOBBY_TABLES'}],
       playedActions: [{action: {type: 'START'}, timestamp: jasmine.any(String)}],
     },
@@ -81,6 +87,19 @@ test('connect, createGame', async done => {
 
   expect(gameId).toMatch(/\w/)
   // this obscure delay is needed; otherwise messages get somehow garbled
+
+  await new Promise(r => setTimeout(r, 100))
+  ws1.setGameParams({
+    gameId,
+    gameParams: {
+      maxHintCount: 8,
+      maxWoundCount: 3,
+      shufflePlayers: 'SHUFFLE_NONE',
+      useRainbow: true,
+      useBlack: false,
+    },
+  })
+  ;(await waitMsg('ws1')) as game.M_GameState
   setTimeout(done, 100)
 })
 
@@ -106,7 +125,13 @@ test('getGamesState', async done => {
           turnsLeft: null,
           woundCount: 0,
         },
-        gameParams: {maxHintCount: 8, maxWoundCount: 3, shufflePlayers: 'SHUFFLE_NONE'},
+        gameParams: {
+          maxHintCount: 8,
+          maxWoundCount: 3,
+          shufflePlayers: 'SHUFFLE_NONE',
+          useRainbow: true,
+          useBlack: false,
+        },
         playedActions: [{action: {type: 'START'}, timestamp: jasmine.any(String)}],
         players: [{id: 'REDACTED', idx: 0, isConnected: true, name: 'BOBBY_TABLES'}],
       },
@@ -140,7 +165,13 @@ test('joinGame', async done => {
         turnsLeft: null,
         woundCount: 0,
       },
-      gameParams: {maxHintCount: 8, maxWoundCount: 3, shufflePlayers: 'SHUFFLE_NONE'},
+      gameParams: {
+        maxHintCount: 8,
+        maxWoundCount: 3,
+        shufflePlayers: 'SHUFFLE_NONE',
+        useRainbow: true,
+        useBlack: false,
+      },
       playedActions: [{action: {type: 'START'}, timestamp: jasmine.any(String)}],
       players: [
         {id: 'REDACTED', idx: 0, isConnected: true, name: 'BOBBY_TABLES'},
@@ -194,7 +225,13 @@ test('startGame', async done => {
         turnsLeft: null,
         woundCount: 0,
       },
-      gameParams: {maxHintCount: 8, maxWoundCount: 3, shufflePlayers: 'SHUFFLE_NONE'},
+      gameParams: {
+        maxHintCount: 8,
+        maxWoundCount: 3,
+        shufflePlayers: 'SHUFFLE_NONE',
+        useRainbow: true,
+        useBlack: false,
+      },
       playedActions: [{action: {type: 'START'}, timestamp: jasmine.any(String)}],
       players: [
         {id: jasmine.any(String), idx: 0, isConnected: true, name: 'BOBBY_TABLES'},
@@ -243,7 +280,13 @@ test('act', async done => {
         turnsLeft: null,
         woundCount: 0,
       },
-      gameParams: {maxHintCount: 8, maxWoundCount: 3, shufflePlayers: 'SHUFFLE_NONE'},
+      gameParams: {
+        maxHintCount: 8,
+        maxWoundCount: 3,
+        shufflePlayers: 'SHUFFLE_NONE',
+        useRainbow: true,
+        useBlack: false,
+      },
       playedActions: [
         {action: {type: 'START'}, timestamp: jasmine.any(String)},
         {
@@ -298,7 +341,13 @@ test('act', async done => {
         turnsLeft: null,
         woundCount: 0,
       },
-      gameParams: {maxHintCount: 8, maxWoundCount: 3, shufflePlayers: 'SHUFFLE_NONE'},
+      gameParams: {
+        maxHintCount: 8,
+        maxWoundCount: 3,
+        shufflePlayers: 'SHUFFLE_NONE',
+        useRainbow: true,
+        useBlack: false,
+      },
       playedActions: [
         {action: {type: 'START'}, timestamp: jasmine.any(String)},
         {
@@ -344,7 +393,13 @@ test('An outsider sees the started game, but cannot see any hands', async done =
           turnsLeft: null,
           woundCount: 0,
         },
-        gameParams: {maxHintCount: 8, maxWoundCount: 3, shufflePlayers: 'SHUFFLE_NONE'},
+        gameParams: {
+          maxHintCount: 8,
+          maxWoundCount: 3,
+          shufflePlayers: 'SHUFFLE_NONE',
+          useRainbow: true,
+          useBlack: false,
+        },
         playedActions: [
           {action: {type: 'START'}, timestamp: jasmine.any(String)},
           {

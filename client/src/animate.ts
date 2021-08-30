@@ -1,41 +1,37 @@
 import * as engine from 'wanabi-engine'
-import {AllColors, TColor, Card} from 'wanabi-engine/dist/card'
-import {range, sample, random} from 'lodash'
+import {TColor, Card} from 'wanabi-engine/dist/card'
+import {sample, random} from 'lodash'
 
 async function animateFullScore() {
-  const highestNumber = parseInt((document.querySelector('.WTable > .WCard') as Element).textContent as string, 10)
-  for (const num of range(1, highestNumber + 1).reverse()) {
-    for (const pile of Array.from(document.querySelectorAll('.WTable > .WCard'))) {
-      const pileBounds = pile.getBoundingClientRect()
-      const xSpeed = (sample([-1, 1]) as number) * random(3, 9, true)
-      let ySpeed = random(-6, 0, true)
+  for (const card of Array.from(document.querySelectorAll('.WTable .WPile .WCard')).reverse()) {
+    const cardBounds = card.getBoundingClientRect()
+    const xSpeed = (sample([-1, 1]) as number) * random(3, 9, true)
+    let ySpeed = random(-6, 0, true)
 
-      let x = pileBounds.left
-      let y = pileBounds.top
+    let x = cardBounds.left
+    let y = cardBounds.top
 
-      while (x < window.innerWidth + 10 && x > -pileBounds.width - 10) {
-        const clone = pile.cloneNode(true) as HTMLDivElement
-        clone.textContent = '' + num
-        clone.style.position = 'absolute'
-        clone.style.left = x + 'px'
-        clone.style.top = y + 'px'
-        clone.style.boxShadow = 'none'
-        clone.style.zIndex = '3'
+    while (x < window.innerWidth + 10 && x > -cardBounds.width - 10) {
+      const clone = card.cloneNode(true) as HTMLDivElement
+      clone.style.position = 'absolute'
+      clone.style.left = x + 'px'
+      clone.style.top = y + 'px'
+      clone.style.boxShadow = 'none'
+      clone.style.zIndex = '3'
 
-        document.body.appendChild(clone)
+      document.body.appendChild(clone)
 
-        x += xSpeed
-        y += ySpeed
+      x += xSpeed
+      y += ySpeed
 
-        if (y >= window.innerHeight - pileBounds.height) {
-          // bounce
-          ySpeed *= -0.8
-          y = window.innerHeight - pileBounds.height
-        } else {
-          ySpeed += 0.5 // acceleration
-        }
-        await new Promise(r => setTimeout(r, 1))
+      if (y >= window.innerHeight - cardBounds.height) {
+        // bounce
+        ySpeed *= -0.8
+        y = window.innerHeight - cardBounds.height
+      } else {
+        ySpeed += 0.5 // acceleration
       }
+      await new Promise(r => requestAnimationFrame(r))
     }
   }
 }
@@ -107,9 +103,14 @@ export async function animate(action: engine.TResolvedActionState, playerIdx: nu
   }
 
   const findTablePileBounds = (color: TColor) => {
-    const pileIdx = AllColors.findIndex(c => c === color)
-    const pileEl = (document.querySelector('.WTable') as HTMLElement).childNodes[pileIdx] as HTMLElement
-    return pileEl.getBoundingClientRect()
+    const pileEl = document.querySelector(`.WTable > .WPile-${color} > div:last-child`) as HTMLElement
+    const rect = pileEl.getBoundingClientRect()
+    return {
+      width: rect.width,
+      left: rect.left,
+      // add 3px for stacking effect (but only if there are cards already), see `.WCard:nth-of-type` css rules
+      top: rect.top + (pileEl.classList.contains('WCardPlaceHolder') ? 0 : 3),
+    }
   }
 
   // move to table or discard pile
@@ -157,3 +158,5 @@ export async function animate(action: engine.TResolvedActionState, playerIdx: nu
     await animateFullScore()
   }
 }
+
+;(window as any).a = animateFullScore

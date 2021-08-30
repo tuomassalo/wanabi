@@ -1,6 +1,6 @@
 import {Pile} from './pile'
 import {Player, TPlayerId, TPlayerState} from './player'
-import {MaskedCard, Card, AllColors, AllNums} from './card'
+import {MaskedCard, Card, getAllColors, AllNums} from './card'
 import {Hand, TMaskedPlayerViewState} from './hand'
 import {
   TTurnState,
@@ -27,7 +27,7 @@ export function refineHand(turn: MaskedTurn, getMaskedHandIdx: number): MaskedCa
       turn.table.getCards(),
       // hands of other players
       turn.maskedPlayerViews.filter((_, idx) => !excludePlayerIndices.includes(idx)).flatMap(mh => mh.hand),
-    ].flat()
+    ].flat() as any // 'as any' as a tmp fix, TODO: check this later
 
   const meIdx = turn.maskedPlayerViews.findIndex(mh => mh.isMe) as number
   const {hand} = turn.maskedPlayerViews[getMaskedHandIdx]
@@ -35,6 +35,7 @@ export function refineHand(turn: MaskedTurn, getMaskedHandIdx: number): MaskedCa
   const [myDemystifiedHand, myCardsRevealedToMe] = demystify(
     turn.maskedPlayerViews[meIdx].hand.map(c => new MaskedCard({hints: c.hints})), // remove all existing derived information
     getRevealedCards(meIdx),
+    turn._gameParams,
   )
   // console.warn('mDH', ...myDemystifiedHand)
 
@@ -46,6 +47,7 @@ export function refineHand(turn: MaskedTurn, getMaskedHandIdx: number): MaskedCa
     return demystify(
       hand.map(c => new MaskedCard({hints: c.hints})),
       [...myCardsRevealedToMe, ...getRevealedCards(meIdx, getMaskedHandIdx)],
+      turn._gameParams,
     )[0]
   }
 
@@ -67,16 +69,18 @@ export abstract class BaseTurn {
   turnNumber: number
   turnsLeft: number | null // `null` means that the countdown has not started yet.
   timestamp: string // ISO string
+  _gameParams: GameParams
   _players: Player[]
 
-  constructor(t: TBaseTurnState, players: TPlayerState[]) {
+  constructor(t: TBaseTurnState, players: TPlayerState[], gameParams: GameParams) {
     this.status = t.status
     this.action = t.action
     this.discardPile = new Pile(t.discardPile.map(c => Card.fromValueString(c)))
     this.hintCount = t.hintCount
     this.woundCount = t.woundCount
-    this.table = new Table(t.table)
+    this.table = new Table(t.table, gameParams)
     this.turnNumber = t.turnNumber
+    this._gameParams = gameParams
     this.turnsLeft = typeof t.turnsLeft !== 'undefined' ? t.turnsLeft : null
     this.timestamp = t.timestamp || new Date().toISOString()
 
@@ -89,14 +93,14 @@ export abstract class BaseTurn {
 export class Turn extends BaseTurn {
   hands: Hand[]
   stock: Pile
-  constructor(t: TTurnState, players: TPlayerState[]) {
-    super(t, players)
+  constructor(t: TTurnState, players: TPlayerState[], gameParams: GameParams) {
+    super(t, players, gameParams)
     this.hands = t.hands.map(p => new Hand(p))
     this.stock = new Pile(t.stock)
   }
   clone() {
     // make a deep copy
-    return new Turn(JSON.parse(JSON.stringify(this.toJSON())), this._players)
+    return new Turn(JSON.parse(JSON.stringify(this.toJSON())), this._players, this._gameParams)
   }
   get inTurn() {
     return this.turnNumber % this._players.length
@@ -105,6 +109,7 @@ export class Turn extends BaseTurn {
     return {
       ...this,
       _players: undefined,
+      _gameParams: undefined,
       stock: this.stock.toJSON(),
       discardPile: this.discardPile.toJSON(),
       table: this.table.toJSON(),
@@ -179,6 +184,9 @@ export class Turn extends BaseTurn {
       }
       newTurn.action = actionParams
     } else if (actionParams.type === 'HINT') {
+      if (!['A', 'B', 'C', 'D', 'E', 1, 2, 3, 4, 5].includes(actionParams.is)) {
+        throw new GameError('NO_HINTS_OUTSIDE_ABCDE12345')
+      }
       if (!newTurn.hintCount) {
         throw new GameError('NO_HINTS_LEFT')
       }
@@ -204,16 +212,15 @@ export class Turn extends BaseTurn {
       const card = newTurn.hands[me.idx].take(actionParams.cardIdx, newTurn.stock)
 
       if (actionParams.type === 'PLAY') {
-        const success: boolean = newTurn.table.play(card)
-        if (success) {
-          // Successful play:
-          if (card.num === 5 && newTurn.hintCount < maxHintCount) {
+        const playResult = newTurn.table.play(card)
+        if (playResult === 'SUCCESS_CLOSED') {
+          if (newTurn.hintCount < maxHintCount) {
             newTurn.hintCount++
           }
-          if (newTurn.score === AllColors.length * AllNums.length) {
+          if (newTurn.score === getAllColors(this._gameParams).length * AllNums.length) {
             newTurn.status = 'FINISHED'
           }
-        } else {
+        } else if (playResult === 'FAILURE') {
           // fail: add wound
           newTurn.discardPile.add(card) // TODO: add metadata?
           newTurn.woundCount++
@@ -222,7 +229,7 @@ export class Turn extends BaseTurn {
             newTurn.status = 'GAMEOVER'
           }
         }
-        newTurn.action = {...actionParams, card: card.toJSON(), success}
+        newTurn.action = {...actionParams, card: card.toJSON(), success: playResult !== 'FAILURE'}
       } else if (actionParams.type === 'DISCARD') {
         if (newTurn.hintCount === maxHintCount) {
           throw new GameError('CANNOT_DISCARDS_WHEN_MAX_HINTS')

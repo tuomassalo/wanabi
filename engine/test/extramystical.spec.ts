@@ -4,11 +4,20 @@ import {createDeck} from './helpers'
 import {TCardState} from '../src/card'
 import {TMaskedPlayerViewState} from '../src/hand'
 
+const gameParams = {
+  maxHintCount: 8,
+  maxWoundCount: 3,
+  shufflePlayers: 'SHUFFLE_NONE' as any,
+  useRainbow: true,
+  useBlack: false,
+}
+
 function newGame(deck: string) {
   return new Game({
     from: 'NEW_TEST_GAME',
     playerNames: ['Cut', 'Copy', 'Paste'],
-    deck: createDeck(deck),
+    deck: createDeck(deck, gameParams),
+    gameParams,
   })
 }
 

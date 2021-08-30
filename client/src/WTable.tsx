@@ -8,27 +8,22 @@ export default class WTable extends React.Component<{table: Table; latestAction:
   render() {
     return (
       <div className="WTable">
-        {Object.entries(this.props.table.table).map(([color, pile]) => {
-          if (pile.size) {
-            return (
+        {Object.entries(this.props.table.table).map(([color, pile]) => (
+          <div key={color} className={`WPile WPile-${color}`}>
+            <div className={`WCardPlaceHolder xWCardPlaceHolder-${color} WColor-${color}`}>&nbsp;</div>
+            {pile.cards.map(card => (
               <WCard
-                key={color}
-                card={pile.top}
+                key={card.value}
+                card={card}
                 isLatestAction={
                   this.props.latestAction.type === 'PLAY' &&
                   this.props.latestAction.success &&
-                  this.props.latestAction.card === pile.top.value
+                  this.props.latestAction.card === card.value
                 }
               />
-            )
-          } else {
-            return (
-              <div key={color} className={`WCardPlaceHolder xWCardPlaceHolder-${color} WColor-${color}`}>
-                &nbsp;
-              </div>
-            )
-          }
-        })}
+            ))}
+          </div>
+        ))}
       </div>
     )
   }

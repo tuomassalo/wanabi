@@ -1,15 +1,22 @@
-import {TCardValueState, TColor, AllColors, Card} from './card'
+import {TCardValueState, TColor, getAllColors, Card, AllNums} from './card'
+import {GameParams} from './game'
 import {Pile} from './pile'
 
 export type TTable = {[key in TColor]: Pile}
 export type TTableState = {[key in TColor]: TCardValueState[]}
 
+export type PlayResult = 'SUCCESS_CLOSED' | 'SUCCESS_PENDING' | 'FAILURE'
+
 export class Table {
   table: TTable
+  gameParams: GameParams
 
-  constructor(table?: TTableState) {
+  constructor(table: TTableState | undefined, gameParams: GameParams) {
+    this.gameParams = gameParams
     // NB: why does fromEntries need `as`
-    this.table = Object.fromEntries(AllColors.map(color => [color, new Pile(table ? table[color] : [])])) as TTable
+    this.table = Object.fromEntries(
+      getAllColors(gameParams).map(color => [color, new Pile(table ? table[color] : [])]),
+    ) as TTable
   }
   getScore(): number {
     return Object.values(this.table)
@@ -26,20 +33,23 @@ export class Table {
       .flat()
   }
   has(card: Card) {
-    return this.table[card.color].size >= card.num
+    return !!this.table[card.color].cards.find(c => c.num === card.num)
   }
   // returns whether the card could be successfully played
   isPlayable(card: Card) {
-    return this.table[card.color].size === card.num - 1
+    return card.color === 'K'
+      ? this.table[card.color].size === 5 - card.num
+      : this.table[card.color].size === card.num - 1
   }
-  // returns whether the card was successfully played
-  play(card: Card): boolean {
+  // returns new pile size if the card was successfully played,
+  // and false if not
+  play(card: Card): PlayResult {
     const colorPile = this.table[card.color]
-    if (colorPile.size === card.num - 1) {
+    if (this.isPlayable(card)) {
       colorPile.add(card)
-      return true
+      return colorPile.size === AllNums.length ? 'SUCCESS_CLOSED' : 'SUCCESS_PENDING'
     } else {
-      return false
+      return 'FAILURE'
     }
   }
 }

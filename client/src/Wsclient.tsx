@@ -7,6 +7,7 @@ import {InGameState} from './Reducer'
 import {animate} from './animate'
 import {setRejoinParams, getRejoinParams} from './rejoin-storage'
 import {MaskedGame} from 'wanabi-engine/dist/masked-game'
+import {AllNums, getAllColors} from 'wanabi-engine/dist/card'
 
 // from https://stackoverflow.com/a/58189464/95357
 // function unlockAudio() {
@@ -69,7 +70,12 @@ export const Wsclient = () => {
           }
           if (currentTurn.turnNumber === state.visibleTurnNumber + 1) {
             // do some animation before changing state, but only if the player is viewing the current turn.
-            await animate(currentTurn.action, state.game.currentTurn.inTurn, currentTurn.score === 30)
+            await animate(
+              currentTurn.action,
+              state.game.currentTurn.inTurn,
+              // animate the full score?
+              currentTurn.score === getAllColors(state.game.gameParams).length * AllNums.length,
+            )
           }
 
           dispatch({type: 'ADD_TURN', turn: data.game.currentTurn})

@@ -26,7 +26,12 @@ export default class WWaiting extends React.Component<{game: MaskedGame}> {
       )
 
     const setParams = (key: string) => (evt: React.FormEvent<HTMLInputElement>) => {
-      const val = evt.currentTarget.type === 'number' ? parseInt(evt.currentTarget.value, 10) : evt.currentTarget.value
+      const val =
+        evt.currentTarget.type === 'number'
+          ? parseInt(evt.currentTarget.value, 10)
+          : evt.currentTarget.type === 'checkbox'
+          ? evt.currentTarget.checked
+          : evt.currentTarget.value
       // console.warn('setting', {key, val})
       const gameParams = {...this.props.game.gameParams, [key]: val}
       wsclient.setGameParams({gameId: this.props.game.gameId, gameParams})
@@ -40,6 +45,22 @@ export default class WWaiting extends React.Component<{game: MaskedGame}> {
         <hr />
         <h2>Parameters</h2>
         <ul>
+          <li>
+            <label>
+              <input
+                type="checkbox"
+                checked={this.props.game.gameParams.useRainbow}
+                onChange={setParams('useRainbow')}
+              />{' '}
+              Use Rainbow cards
+            </label>
+          </li>
+          <li>
+            <label>
+              <input type="checkbox" checked={this.props.game.gameParams.useBlack} onChange={setParams('useBlack')} />{' '}
+              Use Black Powder cards
+            </label>
+          </li>
           <li>
             Hints:{' '}
             <input

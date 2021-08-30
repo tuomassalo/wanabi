@@ -1,6 +1,6 @@
 import {Pile} from './pile'
 import {Player, TPlayerId, TPlayerState} from './player'
-import {Card, TColor, TNum, AllColors, AllNums, TCardValueState} from './card'
+import {Card, TColor, TNum, TCardValueState, TBasicColor} from './card'
 import {Hand, THandState, TMaskedPlayerViewState, COMPAT_TMaskedOtherPlayerViewState} from './hand'
 import {Table, TTableState} from './table'
 import {GameError} from './errors'
@@ -23,7 +23,7 @@ interface TDiscardActionParams {
 interface THintActionParams {
   type: 'HINT'
   toPlayerIdx: number
-  is: TColor | TNum
+  is: TBasicColor | TNum
 }
 
 // added by the constructor
@@ -31,7 +31,12 @@ interface TStartActionParams {
   type: 'START'
 }
 
-export interface GameParams {
+export interface DeckParams {
+  useRainbow: boolean
+  useBlack: boolean
+}
+
+export interface GameParams extends DeckParams {
   maxHintCount: number
   maxWoundCount: number
   shufflePlayers: 'SHUFFLE_NONE' | 'SHUFFLE_RANDOMIZE' | 'SHUFFLE_RANDOMIZE_AND_ANONYMIZE'
@@ -162,7 +167,7 @@ export interface TExistingGameConstructor {
 export interface TNewGameConstructor {
   from: 'NEW_TEST_GAME'
   playerNames: string[]
-  gameParams?: GameParams
+  gameParams: GameParams
   deck?: Pile
   discardPile?: Pile
   table?: Table
@@ -174,12 +179,11 @@ export class Game {
   seed: string
   players: Player[]
   playersById: {[id: string]: Player}
-  gameParams: GameParams = {maxHintCount: 8, maxWoundCount: 3, shufflePlayers: 'SHUFFLE_NONE'}
-  static defaultGameParams: GameParams = {maxHintCount: 8, maxWoundCount: 3, shufflePlayers: 'SHUFFLE_NONE'}
+  gameParams: GameParams
 
   static getDefaultTurn0Properties(gameParams: GameParams) {
     return {
-      table: new Table().toJSON(),
+      table: new Table(undefined, gameParams).toJSON(),
       stock: new Pile([]).toJSON(),
       discardPile: new Pile([]).toJSON(),
       hands: [[]], // one empty hand, no hand cards yet
@@ -240,13 +244,23 @@ export class Game {
   }
 
   constructor(params: TNewGameConstructor | TExistingGameConstructor) {
+    const initCards = (turn: TTurnState, gameParams: GameParams) => {}
+
     if (params.from === 'SERIALIZED_GAME') {
       // deserialize an ongoing game
+
+      // ... or a game that's waiting for players. Its game params may have changed,
+      // so let's re-init table and stock.
+      if (params.game.turn0.status === 'WAITING_FOR_PLAYERS') {
+        params.game.turn0.table = new Table(undefined, params.game.gameParams).toJSON()
+        params.game.turn0.stock = new Pile(Card.getFullDeck(params.game.gameParams)).shuffle(params.game.seed).toJSON()
+      }
+
       this.gameId = params.game.gameId
       this.seed = params.game.seed
       this.players = params.game.players.map(p => new Player(p))
-      this.turns = [new Turn(params.game.turn0, params.game.players)]
-      this.gameParams = {...Game.defaultGameParams, ...(params.game.gameParams || {})}
+      this.gameParams = params.game.gameParams
+      this.turns = [new Turn(params.game.turn0, params.game.players, this.gameParams)]
 
       // hack: turn0 hintCount is filled already in createPendingGame, but it might change later.
       this.turns[0].hintCount = this.gameParams.maxHintCount
@@ -259,22 +273,21 @@ export class Game {
       // USED IN TESTS
       // set up a new game
       this.seed = randomBytes(20).toString('hex')
+      this.gameParams = params.gameParams
       let {playerNames, deck, discardPile, table} = params
       if (!deck) {
-        deck = new Pile(deck || Card.getFullDeck())
+        deck = new Pile(deck || Card.getFullDeck(this.gameParams))
         deck.shuffle(this.seed)
       }
 
       this.gameId = randomBytes(20).toString('hex')
-
       this.players = playerNames.map((name, idx) => new Player({name, idx, id: `bogus_id_${name}`, isConnected: true}))
-      this.gameParams = {...Game.defaultGameParams, ...(params.gameParams || {})}
 
       this.turns = [
         new Turn(
           {
             ...Game.getDefaultTurn0Properties(this.gameParams),
-            table: new Table(table ? table.toJSON() : undefined).toJSON(),
+            table: new Table(table ? table.toJSON() : undefined, this.gameParams).toJSON(),
             stock: deck.toJSON(),
             discardPile: (discardPile || new Pile([])).toJSON(),
             hands: playerNames.map(() => []),
@@ -287,6 +300,7 @@ export class Game {
             stockSize: deck.size,
           },
           this.players,
+          this.gameParams,
         ),
       ]
 
@@ -321,12 +335,10 @@ export class Game {
     return handSize
   }
 
-  static createPendingGame(params: WS_createGameParams, firstPlayerId: TPlayerId): Game {
+  static createPendingGame(params: WS_createGameParams, firstPlayerId: TPlayerId, gameParams: GameParams): Game {
     const timestamp = new Date().toISOString()
     const seed = params.seed || randomBytes(20).toString('hex')
-    const stock = new Pile(Card.getFullDeck()).shuffle(seed).toJSON()
-
-    const gameParams: GameParams = this.defaultGameParams
+    const stock = new Pile(Card.getFullDeck(gameParams)).shuffle(seed).toJSON()
 
     return new Game({
       from: 'SERIALIZED_GAME',
@@ -462,17 +474,17 @@ export class Game {
         .map(p => p.cards)
         .flat(),
     ]
-      .map(c => c.toString())
+      .map(c => c.toJSON())
       .sort()
       .join(' ')
 
-    const expectedCards = Card.getFullDeck()
-      .map(c => c.toString())
+    const expectedCards = Card.getFullDeck(this.gameParams)
+      .map(c => c.toJSON())
       .sort()
       .join(' ')
 
     if (currentCards !== expectedCards) {
-      console.warn('INTEGRITY_ERROR:', currentCards)
+      console.warn('INTEGRITY_ERROR:', this.gameParams, {expectedCards, currentCards})
 
       throw new Error('INTEGRITY_ERROR')
     }

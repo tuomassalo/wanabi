@@ -2,11 +2,23 @@ import {Game} from '../src/game'
 
 import {createDeck, knownCard} from './helpers'
 
+const gameParams = {
+  maxHintCount: 8,
+  maxWoundCount: 3,
+  shufflePlayers: 'SHUFFLE_NONE' as any,
+  useRainbow: true,
+  useBlack: false,
+}
+
 describe('A perfect two-player game without any hints or discards', () => {
   const g = new Game({
     from: 'NEW_TEST_GAME',
     playerNames: ['Bonnie', 'Clyde'],
-    deck: createDeck(['A', 'B', 'C', 'D', 'E', 'X'].flatMap(c => [1, 2, 3, 4, 5].map(n => c + n)).join(' ')),
+    deck: createDeck(
+      ['A', 'B', 'C', 'D', 'E', 'X'].flatMap(c => [1, 2, 3, 4, 5].map(n => c + n)).join(' '),
+      gameParams,
+    ),
+    gameParams,
   })
   it('should have correct setup', () => {
     expect(g.COMPAT_getMaskedTurnState(g.players[0].id)).toEqual({

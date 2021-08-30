@@ -1,8 +1,16 @@
 import {createTightGame} from './helpers'
 import {Game} from '../src/game'
 
+const gameParams = {
+  maxHintCount: 8,
+  maxWoundCount: 3,
+  shufflePlayers: 'SHUFFLE_NONE' as any,
+  useRainbow: true,
+  useBlack: false,
+}
+
 describe('A game', () => {
-  const g = createTightGame()
+  const g = createTightGame(gameParams)
   it('should be rewindable to turn 4', () => {
     // p0 always plays the oldest card from hand, p1 always discards
 

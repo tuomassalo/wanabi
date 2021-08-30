@@ -1,6 +1,14 @@
 import {demystify} from '../src/demystifier'
 import {Card, TColor, TNum, TMaskedCardState, MaskedCard} from '../src/card'
 
+const gameParams = {
+  maxHintCount: 8,
+  maxWoundCount: 3,
+  shufflePlayers: 'SHUFFLE_NONE' as any,
+  useRainbow: true,
+  useBlack: false,
+}
+
 interface CreateHint {
   is: TColor | TNum
   result?: boolean // default true
@@ -12,7 +20,7 @@ interface CreateHandParam {
   hints?: CreateHint[]
 }
 function dem(myHand: MaskedCard[], revealedCards: Card[]): TMaskedCardState[] {
-  return JSON.parse(JSON.stringify(demystify(myHand, revealedCards)[0])) as TMaskedCardState[]
+  return JSON.parse(JSON.stringify(demystify(myHand, revealedCards, gameParams)[0])) as TMaskedCardState[]
 }
 
 function hand(...cards: CreateHandParam[]): MaskedCard[] {
@@ -34,7 +42,7 @@ function revealedCards(r: string): Card[] {
 }
 
 function fullDeckMinus(r: string): Card[] {
-  const left = Card.getFullDeck()
+  const left = Card.getFullDeck(gameParams)
 
   for (const c of r
     .split(/\s+/)

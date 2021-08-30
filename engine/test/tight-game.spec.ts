@@ -1,8 +1,16 @@
 import {createTightGame} from './helpers'
 import {TColor, TNum} from '../src/card'
 
+const gameParams = {
+  maxHintCount: 8,
+  maxWoundCount: 3,
+  shufflePlayers: 'SHUFFLE_NONE' as any,
+  useRainbow: true,
+  useBlack: false,
+}
+
 describe('A tight three-player game', () => {
-  const g = createTightGame()
+  const g = createTightGame(gameParams)
   it('should have proper state after 2*24 turns', () => {
     // p0 always plays the oldest card from hand, p1 always discards
     for (let i = 1; i <= 24; i++) {

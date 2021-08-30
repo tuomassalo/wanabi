@@ -1,4 +1,5 @@
 {
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
   "files.exclude": {
     "dist": true
   },
