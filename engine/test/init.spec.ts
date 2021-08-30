@@ -2,8 +2,16 @@ import {Game} from '../src/game'
 
 import {createDeck, knownCard} from './helpers'
 
+const gameParams = {
+  maxHintCount: 8,
+  maxWoundCount: 3,
+  shufflePlayers: 'SHUFFLE_NONE' as any,
+  useRainbow: true,
+  useBlack: false,
+}
+
 describe('A three-player game without any moves', () => {
-  const g = new Game({from: 'NEW_TEST_GAME', playerNames: ['Huey', 'Dewey', 'Louie']})
+  const g = new Game({from: 'NEW_TEST_GAME', playerNames: ['Huey', 'Dewey', 'Louie'], gameParams})
   it('should have full stock', () => {
     expect(g.currentTurn.stock.size).toEqual((3 + 2 + 2 + 2 + 1) * 6 - 3 * 5)
   })
@@ -46,7 +54,8 @@ describe('A three-player game with a custom deck', () => {
   const g = new Game({
     from: 'NEW_TEST_GAME',
     playerNames: ['Huey', 'Dewey', 'Louie'],
-    deck: createDeck('A1 A2 A3 A4 A5 B5 B4 B3 B2 B1 C1 C1 C5 D5 E3'),
+    deck: createDeck('A1 A2 A3 A4 A5 B5 B4 B3 B2 B1 C1 C1 C5 D5 E3', gameParams),
+    gameParams,
   })
   it('should have full stock', () => {
     expect(g.currentTurn.stock.size).toEqual((3 + 2 + 2 + 2 + 1) * 6 - 3 * 5)
@@ -103,6 +112,7 @@ describe('A game with a given seed', () => {
     const pg = Game.createPendingGame(
       {firstPlayerName: 'Fortuna', seed: 'ecfad89689ec6780d9838e0a22d731f82d25a3b4'},
       'bogus_id_fortuna',
+      gameParams,
     )
     expect(pg.currentTurn.stock.toJSON().join(',')).toEqual(
       'X5,X4,C4,E2,A3,B1,D1,A1,C2,A1,X3,B2,B3,D4,C1,X3,A4,C1,C3,X1,D4,E1,X1,C2,E5,A4,B4,C4,X2,C3,A5,A3,X1,A2,E3,E1,D2,E4,E3,B1,A2,D2,E1,B3,E2,D1,E4,B4,X4,B5,D3,B1,D3,C1,A1,C5,D5,B2,X2,D1',

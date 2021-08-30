@@ -4,6 +4,14 @@ import {createDeck, knownCard} from './helpers'
 import {MaskedTurn} from '../src/masked-turn'
 import {MaskedGame} from '../src/masked-game'
 
+const gameParams = {
+  maxHintCount: 8,
+  maxWoundCount: 3,
+  shufflePlayers: 'SHUFFLE_NONE' as any,
+  useRainbow: true,
+  useBlack: false,
+}
+
 const cards = [
   // p0
   'A1 B1 A5 A2 C3'.split(' '),
@@ -39,7 +47,9 @@ describe('A three-player game', () => {
         cards[1][4],
         cards[2][4],
       ].join(' '),
+      gameParams,
     ),
+    gameParams,
   })
 
   // play some cards
@@ -66,7 +76,7 @@ describe('A three-player game', () => {
 
     for (const maskedTurn of new Game({game: JSON.parse(JSON.stringify(g)), from: 'SERIALIZED_GAME'})
       .getPreviousTurns(g.players[playerIdx].id)
-      .map(t => new MaskedTurn(t, g.players).getState())) {
+      .map(t => new MaskedTurn(t, g.players, gameParams).getState())) {
       ret.addTurn(maskedTurn)
     }
     return ret

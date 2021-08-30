@@ -1,6 +1,6 @@
 import {Pile} from './pile'
 import {Player, TPlayerId, TPlayerState} from './player'
-import {MaskedCard, Card, AllColors, AllNums} from './card'
+import {MaskedCard, Card, getAllColors, AllNums} from './card'
 import {Hand, TMaskedPlayerViewState} from './hand'
 import {
   TTurnState,
@@ -35,6 +35,7 @@ export function refineHand(turn: MaskedTurn, getMaskedHandIdx: number): MaskedCa
   const [myDemystifiedHand, myCardsRevealedToMe] = demystify(
     turn.maskedPlayerViews[meIdx].hand.map(c => new MaskedCard({hints: c.hints})), // remove all existing derived information
     getRevealedCards(meIdx),
+    turn._gameParams,
   )
   // console.warn('mDH', ...myDemystifiedHand)
 
@@ -46,6 +47,7 @@ export function refineHand(turn: MaskedTurn, getMaskedHandIdx: number): MaskedCa
     return demystify(
       hand.map(c => new MaskedCard({hints: c.hints})),
       [...myCardsRevealedToMe, ...getRevealedCards(meIdx, getMaskedHandIdx)],
+      turn._gameParams,
     )[0]
   }
 
@@ -212,7 +214,7 @@ export class Turn extends BaseTurn {
           if (newTurn.hintCount < maxHintCount) {
             newTurn.hintCount++
           }
-          if (newTurn.score === AllColors.length * AllNums.length) {
+          if (newTurn.score === getAllColors(this._gameParams).length * AllNums.length) {
             newTurn.status = 'FINISHED'
           }
         } else if (playResult === 'FAILURE') {

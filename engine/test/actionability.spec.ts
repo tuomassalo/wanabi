@@ -1,6 +1,14 @@
 import {createDeck} from './helpers'
 import {Game} from '../src/game'
 
+const gameParams = {
+  maxHintCount: 8,
+  maxWoundCount: 3,
+  shufflePlayers: 'SHUFFLE_NONE' as any,
+  useRainbow: true,
+  useBlack: false,
+}
+
 function createTestGame() {
   const g = new Game({
     from: 'NEW_TEST_GAME',
@@ -13,7 +21,9 @@ function createTestGame() {
          A4 B1 E1
          A4 C1 E1
          A5 C1 E1`,
+      gameParams,
     ),
+    gameParams,
   })
   return g
 }

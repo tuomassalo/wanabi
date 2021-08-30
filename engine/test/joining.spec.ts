@@ -3,10 +3,18 @@ import {Game} from '../src/game'
 import {knownCard} from './helpers'
 import {range} from 'lodash'
 
+const gameParams = {
+  maxHintCount: 8,
+  maxWoundCount: 3,
+  shufflePlayers: 'SHUFFLE_NONE' as any,
+  useRainbow: true,
+  useBlack: false,
+}
+
 describe('A new empty game', () => {
   let pg: Game, pg2: Game
   it('should look emptyish with only one player', () => {
-    pg = Game.createPendingGame({firstPlayerName: 'Athos'}, 'bogus_id_athos')
+    pg = Game.createPendingGame({firstPlayerName: 'Athos'}, 'bogus_id_athos', gameParams)
     expect(pg.COMPAT_getMaskedTurnState(pg.players[0].id)).toEqual({
       action: {
         type: 'START',
@@ -91,7 +99,7 @@ describe('A new empty game', () => {
 describe('A randomized game', () => {
   it('should look random', () => {
     const playerNameOrders = range(0, 100).map(() => {
-      const pg = Game.createPendingGame({firstPlayerName: 'First'}, 'bogus_id_first')
+      const pg = Game.createPendingGame({firstPlayerName: 'First'}, 'bogus_id_first', gameParams)
       const pg2 = Game.joinPendingGame(pg, 'Second', 'bogus_id_second')
       const pg3 = Game.setPendingGameParams(pg2, {
         maxHintCount: 8,
@@ -110,7 +118,7 @@ describe('A randomized game', () => {
 })
 describe('An anonymized game', () => {
   it('should look anonymized', () => {
-    const pg = Game.createPendingGame({firstPlayerName: 'First'}, 'bogus_id_first')
+    const pg = Game.createPendingGame({firstPlayerName: 'First'}, 'bogus_id_first', gameParams)
     const pg2 = Game.joinPendingGame(pg, 'Second', 'bogus_id_second')
     const pg3 = Game.setPendingGameParams(pg2, {
       maxHintCount: 8,

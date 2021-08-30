@@ -2,6 +2,14 @@ import {createDeck} from './helpers'
 import {Game} from '../src/game'
 import {MaskedTurn} from '../src/masked-turn'
 
+const gameParams = {
+  maxHintCount: 8,
+  maxWoundCount: 3,
+  shufflePlayers: 'SHUFFLE_NONE' as any,
+  useRainbow: true,
+  useBlack: false,
+}
+
 function createTestGame() {
   const g = new Game({
     from: 'NEW_TEST_GAME',
@@ -17,7 +25,9 @@ function createTestGame() {
            B3 B2
            D4 D4
            X1 X2`,
+      gameParams,
     ),
+    gameParams,
   })
   // turn 1: p0 hints p1
   g.act(g.players[0].id, {type: 'HINT', is: 1, toPlayerIdx: 1})
@@ -33,11 +43,11 @@ function createTestGame() {
 describe('History', () => {
   it('should show previous turns correctly for p0', () => {
     const g = createTestGame()
-    const turns1 = g.getPreviousTurns(g.players[0].id).map(t => new MaskedTurn(t, g.players).getState())
+    const turns1 = g.getPreviousTurns(g.players[0].id).map(t => new MaskedTurn(t, g.players, g.gameParams).getState())
 
     const turns2 = new Game({game: JSON.parse(JSON.stringify(g)), from: 'SERIALIZED_GAME'})
       .getPreviousTurns(g.players[0].id)
-      .map(t => new MaskedTurn(t, g.players).getState())
+      .map(t => new MaskedTurn(t, g.players, g.gameParams).getState())
 
     for (const turns of [turns1, turns2]) {
       expect(turns[0]).toEqual({
@@ -200,7 +210,7 @@ describe('History', () => {
 
   it('should show previous turns correctly for p1', () => {
     const g = createTestGame()
-    const turns = g.getPreviousTurns(g.players[1].id).map(t => new MaskedTurn(t, g.players).getState())
+    const turns = g.getPreviousTurns(g.players[1].id).map(t => new MaskedTurn(t, g.players, g.gameParams).getState())
 
     expect(turns[0]).toEqual({
       action: {type: 'START'},

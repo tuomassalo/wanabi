@@ -1,4 +1,4 @@
-import {TCardValueState, TColor, AllColors, Card, AllNums} from './card'
+import {TCardValueState, TColor, getAllColors, Card, AllNums} from './card'
 import {GameParams} from './game'
 import {Pile} from './pile'
 
@@ -12,9 +12,12 @@ export class Table {
   gameParams: GameParams
 
   constructor(table: TTableState | undefined, gameParams: GameParams) {
-    // NB: why does fromEntries need `as`
     this.gameParams = gameParams
-    this.table = Object.fromEntries(AllColors.map(color => [color, new Pile(table ? table[color] : [])])) as TTable
+    // NB: why does fromEntries need `as`
+    // FIXME: black
+    this.table = Object.fromEntries(
+      getAllColors(gameParams).map(color => [color, new Pile(table ? table[color] : [])]),
+    ) as TTable
   }
   getScore(): number {
     return Object.values(this.table)

@@ -167,7 +167,7 @@ export interface TExistingGameConstructor {
 export interface TNewGameConstructor {
   from: 'NEW_TEST_GAME'
   playerNames: string[]
-  gameParams?: GameParams
+  gameParams: GameParams
   deck?: Pile
   discardPile?: Pile
   table?: Table
@@ -179,20 +179,7 @@ export class Game {
   seed: string
   players: Player[]
   playersById: {[id: string]: Player}
-  gameParams: GameParams = {
-    maxHintCount: 8,
-    maxWoundCount: 3,
-    shufflePlayers: 'SHUFFLE_NONE',
-    useRainbow: true,
-    useBlack: true,
-  }
-  static defaultGameParams: GameParams = {
-    maxHintCount: 8,
-    maxWoundCount: 3,
-    shufflePlayers: 'SHUFFLE_NONE',
-    useRainbow: true,
-    useBlack: true,
-  }
+  gameParams: GameParams
 
   static getDefaultTurn0Properties(gameParams: GameParams) {
     return {
@@ -262,7 +249,7 @@ export class Game {
       this.gameId = params.game.gameId
       this.seed = params.game.seed
       this.players = params.game.players.map(p => new Player(p))
-      this.gameParams = {...Game.defaultGameParams, ...(params.game.gameParams || {})}
+      this.gameParams = params.game.gameParams
       this.turns = [new Turn(params.game.turn0, params.game.players, this.gameParams)]
 
       // hack: turn0 hintCount is filled already in createPendingGame, but it might change later.
@@ -276,6 +263,7 @@ export class Game {
       // USED IN TESTS
       // set up a new game
       this.seed = randomBytes(20).toString('hex')
+      this.gameParams = params.gameParams
       let {playerNames, deck, discardPile, table} = params
       if (!deck) {
         deck = new Pile(deck || Card.getFullDeck(this.gameParams))
@@ -283,9 +271,7 @@ export class Game {
       }
 
       this.gameId = randomBytes(20).toString('hex')
-
       this.players = playerNames.map((name, idx) => new Player({name, idx, id: `bogus_id_${name}`, isConnected: true}))
-      this.gameParams = {...Game.defaultGameParams, ...(params.gameParams || {})}
 
       this.turns = [
         new Turn(
@@ -339,10 +325,9 @@ export class Game {
     return handSize
   }
 
-  static createPendingGame(params: WS_createGameParams, firstPlayerId: TPlayerId): Game {
+  static createPendingGame(params: WS_createGameParams, firstPlayerId: TPlayerId, gameParams: GameParams): Game {
     const timestamp = new Date().toISOString()
     const seed = params.seed || randomBytes(20).toString('hex')
-    const gameParams: GameParams = this.defaultGameParams
     const stock = new Pile(Card.getFullDeck(gameParams)).shuffle(seed).toJSON()
 
     return new Game({
@@ -479,17 +464,17 @@ export class Game {
         .map(p => p.cards)
         .flat(),
     ]
-      .map(c => c.toString())
+      .map(c => c.toJSON())
       .sort()
       .join(' ')
 
     const expectedCards = Card.getFullDeck(this.gameParams)
-      .map(c => c.toString())
+      .map(c => c.toJSON())
       .sort()
       .join(' ')
 
     if (currentCards !== expectedCards) {
-      console.warn('INTEGRITY_ERROR:', currentCards)
+      console.warn('INTEGRITY_ERROR:', this.gameParams, {expectedCards, currentCards})
 
       throw new Error('INTEGRITY_ERROR')
     }

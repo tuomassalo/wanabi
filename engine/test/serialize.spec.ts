@@ -2,8 +2,16 @@ import {createTightGame} from './helpers'
 import {Game} from '../src/game'
 import {MaskedGame} from '../src/masked-game'
 
+const gameParams = {
+  maxHintCount: 8,
+  maxWoundCount: 3,
+  shufflePlayers: 'SHUFFLE_NONE' as any,
+  useRainbow: true,
+  useBlack: false,
+}
+
 describe('A game', () => {
-  const g = createTightGame()
+  const g = createTightGame(gameParams)
   it('should maintain its state after serialization and deserialization', () => {
     // p0 always plays the oldest card from hand, p1 always discards
 
@@ -75,6 +83,7 @@ describe('A masked game', () => {
           D: ['D1', 'D2', 'D3', 'D4', 'D5'],
           E: ['E1', 'E2', 'E3', 'E4', 'E5'],
           X: ['X1', 'X2', 'X3', 'X4'],
+          K: [],
         },
         turnNumber: 51,
         turnsLeft: 1,

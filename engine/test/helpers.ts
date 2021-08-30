@@ -1,7 +1,7 @@
 import {Card} from '../src/card'
 import {Pile} from '../src/pile'
 // import * as stringify from 'json-stable-stringify'
-import {DeckParams, Game} from '../src/game'
+import {DeckParams, Game, GameParams} from '../src/game'
 import {zip} from 'lodash'
 
 // export const c = {
@@ -45,7 +45,7 @@ export function shuffle(arr: any[]) {
 }
 
 // create a deck where the top cards are specified
-export function createDeck(topValues: string, deckParams: DeckParams = {useRainbow: true, useBlack: false}): Pile {
+export function createDeck(topValues: string, deckParams: DeckParams): Pile {
   const deckCards = Card.getFullDeck(deckParams)
 
   const topCards: Card[] = []
@@ -121,7 +121,7 @@ export function knownCard(): any {
 //   }
 // }
 
-export function createTightGame() {
+export function createTightGame(gameParams: GameParams) {
   // First player always plays their first card, second player discards.
   // After 2*25 turns we have:
   // * 25 points
@@ -140,6 +140,8 @@ export function createTightGame() {
       )
         .flat()
         .join(' '),
+      gameParams,
     ),
+    gameParams,
   })
 }

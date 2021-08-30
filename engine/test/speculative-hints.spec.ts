@@ -3,6 +3,14 @@ import {Game} from '../src/game'
 import {COMPAT_TMaskedOtherPlayerViewState} from '../src/hand'
 import {MaskedGame} from '../src/masked-game'
 
+const gameParams = {
+  maxHintCount: 8,
+  maxWoundCount: 3,
+  shufflePlayers: 'SHUFFLE_NONE' as any,
+  useRainbow: true,
+  useBlack: false,
+}
+
 function createTestGame() {
   const g = new Game({
     from: 'NEW_TEST_GAME',
@@ -18,7 +26,9 @@ function createTestGame() {
            B3 B2
            D4 D4
            X1 X2`,
+      gameParams,
     ),
+    gameParams,
   })
   return g
 }
