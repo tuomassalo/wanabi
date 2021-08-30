@@ -244,8 +244,18 @@ export class Game {
   }
 
   constructor(params: TNewGameConstructor | TExistingGameConstructor) {
+    const initCards = (turn: TTurnState, gameParams: GameParams) => {}
+
     if (params.from === 'SERIALIZED_GAME') {
       // deserialize an ongoing game
+
+      // ... or a game that's waiting for players. Its game params may have changed,
+      // so let's re-init table and stock.
+      if (params.game.turn0.status === 'WAITING_FOR_PLAYERS') {
+        params.game.turn0.table = new Table(undefined, params.game.gameParams).toJSON()
+        params.game.turn0.stock = new Pile(Card.getFullDeck(params.game.gameParams)).shuffle(params.game.seed).toJSON()
+      }
+
       this.gameId = params.game.gameId
       this.seed = params.game.seed
       this.players = params.game.players.map(p => new Player(p))

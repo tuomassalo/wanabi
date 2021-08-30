@@ -3,8 +3,17 @@ import {DocumentClient} from 'aws-sdk/lib/dynamodb/document_client'
 import * as dynamodbClient from 'serverless-dynamodb-client'
 import * as engine from 'wanabi-engine'
 import pako from 'pako'
+import {GameParams} from 'wanabi-engine'
 
 type TConnectionId = string
+
+const defaultGameParams: GameParams = {
+  maxHintCount: 8,
+  maxWoundCount: 3,
+  shufflePlayers: 'SHUFFLE_NONE' as any,
+  useRainbow: true,
+  useBlack: false,
+}
 
 const apig = new AWS.ApiGatewayManagementApi({
   endpoint: process.env.APIG_ENDPOINT,
@@ -51,7 +60,15 @@ async function scanGames(scanParams = {}): Promise<engine.Game[]> {
         ? -1
         : 1,
     )
-    .map(game => new engine.Game({from: 'SERIALIZED_GAME', game}))
+    .flatMap(game => {
+      try {
+        game.gameParams = {...defaultGameParams, ...(game.gameParams || {})}
+        return new engine.Game({from: 'SERIALIZED_GAME', game})
+      } catch (e) {
+        console.warn('IGNORING GAME', game, e)
+        return []
+      }
+    })
 
   const allConnections = new Set(await getAllConnections())
 
@@ -197,7 +214,7 @@ export async function getGamesState({}: engine.WS_getGamesStateParams, connectio
 }
 
 export async function createGame(params: engine.WS_createGameParams, connectionId: string) {
-  const turn0 = engine.Game.createPendingGame(params, connectionId)
+  const turn0 = engine.Game.createPendingGame(params, connectionId, defaultGameParams)
 
   if (params.firstPlayerName === 'BOBBY_TABLES' && process.env.IS_OFFLINE) {
     console.warn('Wiping dev tables.')

@@ -2,7 +2,7 @@ import {SyntaxError} from './errors'
 import {DeckParams} from './game'
 
 export type TBasicColor = 'A' | 'B' | 'C' | 'D' | 'E'
-export type TColor = 'A' | 'B' | 'C' | 'D' | 'E' | 'X' | 'K'
+export type TColor = TBasicColor | 'X' | 'K'
 export type TNum = 1 | 2 | 3 | 4 | 5
 
 export type TActionability = 'PLAYABLE' | 'UNPLAYABLE' | 'DISCARDABLE' | 'UNDISCARDABLE'
@@ -39,7 +39,7 @@ export interface THintResultState extends THintState {
   result: boolean
 }
 
-// export const AllColors: TColor[] = ['A', 'B', 'C', 'D', 'E', 'X']
+export const BasicColors: TBasicColor[] = ['A', 'B', 'C', 'D', 'E']
 export const AllNums: TNum[] = [1, 2, 3, 4, 5]
 
 export function getNumDistribution(color: TColor): TNum[] {

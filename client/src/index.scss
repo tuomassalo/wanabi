@@ -121,6 +121,11 @@ div.WCard {
 .WColor-X {
   background: linear-gradient(45deg, orange, yellow, rgb(0, 185, 0), cyan, rgb(93, 93, 255), violet);
 }
+.WColor-K {
+  // background-color: $colorK;
+  background: linear-gradient(45deg, #000, #333, #000, #333, #000, #333);
+  color: #eee;
+}
 .WColor-undefined {
   background: #ccc;
 }
@@ -317,7 +322,7 @@ div.WTable {
   > div {
     display: inline-block;
     vertical-align: top;
-    margin: 0 $cardWidth / 16 $cardWidth / 16 0;
+    margin: 0 $cardWidth / 16 $cardWidth / 16 + 8px 0;
   }
 }
 
@@ -329,6 +334,29 @@ div.WTable {
   border-color: darkgreen;
   border-radius: 4px;
   opacity: 0.5;
+}
+
+.WPile {
+  width: $cardWidth;
+  height: $cardHeight;
+  position: relative;
+  > .WCard,
+  > .WCardPlaceHolder {
+    position: absolute;
+  }
+  // 3px steps, see findTablePileBounds in animate.ts!
+  .WCard:nth-of-type(3) {
+    top: 3px;
+  }
+  .WCard:nth-of-type(4) {
+    top: 6px;
+  }
+  .WCard:nth-of-type(5) {
+    top: 9px;
+  }
+  .WCard:nth-of-type(6) {
+    top: 12px;
+  }
 }
 
 .WDiscardPile {

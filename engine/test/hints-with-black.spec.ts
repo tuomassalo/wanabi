@@ -29,7 +29,7 @@ function createTestGame() {
            D4 D4
            X1 X2` +
         // add black cards
-        `  K4 K3 K2`,
+        `  K4 K3 K2 K5`,
       gameParams,
     ),
     gameParams,
@@ -334,7 +334,20 @@ describe('An ongoing game', () => {
     const getHand = (playerIdx: number) => JSON.parse(JSON.stringify(g.currentTurn.hands[playerIdx].cards)).join(',')
 
     expect(getHand(0)).toEqual('A1,K1,B3,D4,X1')
-    expect(getHand(1)).toEqual('X2,K4,K3,K2,A2')
+    expect(getHand(1)).toEqual('X2,K4,K3,K2,K5')
+
+    // check black card actionability
+    expect(
+      g
+        .COMPAT_getMaskedTurnState(g.players[0].id)
+        .maskedPlayerViews[1].hand.map(c => [`${c.color}${c.num}`, c.actionability]),
+    ).toEqual([
+      ['X2', 'UNPLAYABLE'],
+      ['K4', 'PLAYABLE'],
+      ['K3', 'UNPLAYABLE'],
+      ['K2', 'UNPLAYABLE'],
+      ['K5', 'DISCARDABLE'],
+    ])
 
     g.act(g.players[0].id, {type: 'DISCARD', cardIdx: 4})
     g.act(g.players[1].id, {type: 'PLAY', cardIdx: 1}) // K4

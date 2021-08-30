@@ -3,7 +3,7 @@ import React, {useContext, Dispatch} from 'react'
 
 import {WebSocketClient} from './websocketclient'
 import {TGameId} from 'wanabi-engine'
-import {TColor, TNum, AllColors} from 'wanabi-engine/dist/card'
+import {TColor, TNum, BasicColors, TBasicColor} from 'wanabi-engine/dist/card'
 import {Context} from './Store'
 import {InGameState, Action} from './Reducer'
 
@@ -19,7 +19,7 @@ export default function WOtherHandActionButtons({
 }) {
   const {state, dispatch} = useContext(Context) as {state: InGameState; dispatch: Dispatch<Action>}
 
-  const giveHint = (is: TColor | TNum) => {
+  const giveHint = (is: TBasicColor | TNum) => {
     wsclient.act({gameId, actionParams: {type: 'HINT', toPlayerIdx: playerIdx, is}})
   }
 
@@ -40,7 +40,7 @@ export default function WOtherHandActionButtons({
     <div className="WHintButtons">
       <div>Give Hint:&nbsp;</div>
       <div>
-        {AllColors.filter(c => c !== 'X').map(is => (
+        {BasicColors.map(is => (
           <input
             key={is}
             type="button"

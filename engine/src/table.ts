@@ -14,7 +14,6 @@ export class Table {
   constructor(table: TTableState | undefined, gameParams: GameParams) {
     this.gameParams = gameParams
     // NB: why does fromEntries need `as`
-    // FIXME: black
     this.table = Object.fromEntries(
       getAllColors(gameParams).map(color => [color, new Pile(table ? table[color] : [])]),
     ) as TTable
@@ -34,7 +33,7 @@ export class Table {
       .flat()
   }
   has(card: Card) {
-    return this.table[card.color].size >= card.num
+    return !!this.table[card.color].cards.find(c => c.num === card.num)
   }
   // returns whether the card could be successfully played
   isPlayable(card: Card) {
