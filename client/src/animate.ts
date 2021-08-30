@@ -31,7 +31,7 @@ async function animateFullScore() {
       } else {
         ySpeed += 0.5 // acceleration
       }
-      await new Promise(r => setTimeout(r, 1))
+      await new Promise(r => requestAnimationFrame(r))
     }
   }
 }
@@ -105,7 +105,12 @@ export async function animate(action: engine.TResolvedActionState, playerIdx: nu
   const findTablePileBounds = (color: TColor) => {
     const pileEl = document.querySelector(`.WTable > .WPile-${color} > div:last-child`) as HTMLElement
     const rect = pileEl.getBoundingClientRect()
-    return {width: rect.width, left: rect.left, top: rect.top + 3} // +3px, see `.WCard:nth-of-type` css rules
+    return {
+      width: rect.width,
+      left: rect.left,
+      // add 3px for stacking effect (but only if there are cards already), see `.WCard:nth-of-type` css rules
+      top: rect.top + (pileEl.classList.contains('WCardPlaceHolder') ? 0 : 3),
+    }
   }
 
   // move to table or discard pile
