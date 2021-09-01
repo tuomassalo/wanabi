@@ -24,6 +24,9 @@ import {AllNums, getAllColors} from 'wanabi-engine/dist/card'
 // document.body.addEventListener('touchstart', unlockAudio)
 
 const notify = (msg: string, showWhenForeground: boolean = false) => {
+  // ipad workaround
+  if (!window.Notification) return
+
   console.warn('Notify: ' + msg)
   if (showWhenForeground || document.hidden) new Notification('Wanabi', {body: msg})
 }

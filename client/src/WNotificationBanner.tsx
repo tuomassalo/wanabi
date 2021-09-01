@@ -5,6 +5,9 @@ import {Context} from './Store'
 export const WNotificationBanner = () => {
   const {state, dispatch} = useContext(Context) // as [AppState, Dispatch<Action>];
   const requestNotificationPermission = async () => {
+    // ipad workaround
+    if (!window.Notification) return
+
     const handleResult = (result: string) =>
       dispatch({type: 'SET_SETTING', key: 'hasNotificationPermission', value: result === 'granted'})
 
@@ -32,7 +35,7 @@ export const WNotificationBanner = () => {
     // return <div>
     //   <button onClick={test}>test</button>
     // </div>
-  } else {
+  } else if (window.Notification) {
     return (
       <div className="WNotificationBanner">
         <button onClick={requestNotificationPermission}>Enable notifications</button>

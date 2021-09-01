@@ -8,7 +8,7 @@ const initialState: AppState = {
     sound: localStorage.getItem('sound') === '1',
     showStats: false,
     showMysteryView: false,
-    hasNotificationPermission: Notification.permission === 'granted',
+    hasNotificationPermission: window.Notification && Notification.permission === 'granted',
   },
   // connectionStatus: 'opening',
   // idleSince: +Date.now(),
