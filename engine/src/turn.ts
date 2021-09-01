@@ -247,8 +247,10 @@ export class Turn extends BaseTurn {
     newTurn.turnNumber++
     if (newTurn.turnsLeft !== null) newTurn.turnsLeft--
     if (newTurn.turnsLeft === 0) {
-      // TODO: check if off-by-one
-      newTurn.status = 'FINISHED'
+      // NB: don't change a GAMEOVER (on the last possible turn) to FINISHED
+      if (newTurn.status === 'RUNNING') {
+        newTurn.status = 'FINISHED'
+      }
     } else if (!newTurn.stock.size && newTurn.turnsLeft === null) {
       // countdown should start now
       newTurn.turnsLeft = newTurn._players.length
