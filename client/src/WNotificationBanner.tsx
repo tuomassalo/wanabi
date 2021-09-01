@@ -25,17 +25,11 @@ export const WNotificationBanner = () => {
     else Notification.requestPermission(handleResult) // safari
   }
 
-  if (state.settings.hasNotificationPermission) {
+  if (state.settings.hasNotificationPermission || !window.Notification) {
+    // permission has granted, or there is no support for notifications
+    // => show nothing.
     return <span />
-    // const test = () => {
-    //   setTimeout(() => {
-    //     if (document.hidden) new Notification('To do list', {body: 'Foo'})
-    //   }, 3000)
-    // }
-    // return <div>
-    //   <button onClick={test}>test</button>
-    // </div>
-  } else if (window.Notification) {
+  } else {
     return (
       <div className="WNotificationBanner">
         <button onClick={requestNotificationPermission}>Enable notifications</button>
